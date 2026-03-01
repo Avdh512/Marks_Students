@@ -76,7 +76,6 @@
 
 * { margin:0; padding:0; box-sizing:border-box; }
 
-/* override transition reset for canvas elements */
 canvas { transition: none !important; }
 
 body {
@@ -87,6 +86,11 @@ body {
   overflow: hidden;
   display: flex;
 }
+
+/* ── FIX 1: lock scroll during tutorial ── */
+body.tut-active { overflow: hidden !important; }
+body.tut-active #content { overflow: hidden !important; pointer-events: none; }
+body.tut-active #sidebar .student-list-wrap { overflow: hidden !important; }
 
 /* SCROLLBAR */
 ::-webkit-scrollbar { width: 4px; }
@@ -355,7 +359,6 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
-/* Full-width compare chart */
 .compare-chart-box {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -382,10 +385,8 @@ body {
 }
 .chart-h { height: 220px; position: relative; }
 .chart-h-sm { height: 180px; position: relative; }
-/* All-students chart needs more height */
 .chart-h-all { height: 320px; position: relative; }
 
-/* Performance table on welcome */
 .perf-table {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -486,13 +487,11 @@ body {
 .det-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
 .det-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
 
-/* Section A/B bars */
 .section-bar-row { margin-bottom: 14px; }
 .section-bar-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink2); font-weight: 500; margin-bottom: 6px; }
 .bar-track { height: 6px; background: var(--surface3); border-radius: 10px; overflow: hidden; }
 .bar-fill { height: 100%; border-radius: 10px; transition: width 0.8s ease; }
 
-/* Remark card */
 .remark-card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -521,7 +520,6 @@ body {
 .strategy-text { font-size: 12px; color: var(--ink2); line-height: 1.5; }
 .strategy-text strong { color: var(--ink); font-weight: 600; display: block; margin-bottom: 2px; }
 
-/* Focus chips */
 .chips-wrap { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
 .chip {
   font-size: 11px;
@@ -535,7 +533,6 @@ body {
 .chip-amber { color: var(--amber); border-color: rgba(232,152,74,0.3); background: rgba(232,152,74,0.08); }
 .chip-red { color: var(--red); border-color: rgba(224,90,75,0.3); background: var(--red-soft); }
 
-/* Board readiness */
 .board-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
 .board-card {
   border-radius: 12px;
@@ -546,11 +543,9 @@ body {
 .board-card-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; color: var(--ink3); }
 .board-card-val { font-size: 13px; color: var(--ink2); line-height: 1.5; }
 
-/* Performance indicator */
 .perf-indicator { display: flex; align-items: center; gap: 6px; }
 .pi-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
-/* section group colors */
 .sa { background: rgba(91,142,224,0.15); color: var(--blue); }
 .sb { background: rgba(76,175,122,0.15); color: var(--green); }
 .sc { background: rgba(212,168,83,0.15); color: var(--gold); }
@@ -559,8 +554,6 @@ body {
 .sh { background: rgba(180,140,220,0.15); color: #B48CDC; }
 
 /* ── ANIMATIONS ── */
-
-/* Page load stagger */
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -572,10 +565,6 @@ body {
 @keyframes scaleIn {
   from { opacity: 0; transform: scale(0.94); }
   to   { opacity: 1; transform: scale(1); }
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes pulseGold {
   0%,100% { box-shadow: 0 0 0 0 rgba(212,168,83,0); }
@@ -598,7 +587,6 @@ body {
   50%      { transform: translateY(-4px); }
 }
 
-/* Staggered welcome view */
 #view-welcome .ov-card:nth-child(1) { animation: slideUp 0.4s ease 0.05s both; }
 #view-welcome .ov-card:nth-child(2) { animation: slideUp 0.4s ease 0.12s both; }
 #view-welcome .ov-card:nth-child(3) { animation: slideUp 0.4s ease 0.19s both; }
@@ -607,7 +595,6 @@ body {
 .charts-grid        { animation: slideUp 0.45s ease 0.4s both; }
 .charts-grid-2      { animation: slideUp 0.45s ease 0.5s both; }
 
-/* Card hover lift */
 .ov-card {
   transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
 }
@@ -624,7 +611,6 @@ body {
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 
-/* Sidebar student items */
 .student-item {
   animation: slideIn 0.25s ease both;
 }
@@ -648,20 +634,15 @@ body {
 .student-item:nth-child(18) { animation-delay: 0.36s; }
 .student-item:nth-child(19) { animation-delay: 0.38s; }
 
-/* Active student pulse */
 .student-item.active { animation: borderPulse 2s ease infinite; }
-
-/* Logo dot float */
 .logo-dot { animation: floatDot 3s ease infinite; }
 
-/* Detail view stagger */
 #view-detail .det-header       { animation: slideUp 0.3s ease 0.0s both; }
 #view-detail .score-cards      { animation: slideUp 0.35s ease 0.08s both; }
 #view-detail .det-grid:nth-of-type(1) { animation: slideUp 0.35s ease 0.16s both; }
 #view-detail .det-grid:nth-of-type(2) { animation: slideUp 0.35s ease 0.24s both; }
 #view-detail .chart-box:last-child    { animation: slideUp 0.35s ease 0.30s both; }
 
-/* Score cards pulse on load */
 .sc-card { animation: scaleIn 0.3s ease both; }
 .sc-card:nth-child(1) { animation-delay: 0.08s; }
 .sc-card:nth-child(2) { animation-delay: 0.14s; }
@@ -673,7 +654,6 @@ body {
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
-/* Rankings table row animation */
 .perf-table tbody tr {
   animation: slideIn 0.3s ease both;
 }
@@ -697,17 +677,14 @@ body {
 .perf-table tbody tr:nth-child(18) { animation-delay: 0.55s; }
 .perf-table tbody tr:nth-child(19) { animation-delay: 0.58s; }
 
-/* Chips animate in */
 .chip { animation: scaleIn 0.2s ease both; }
 
-/* Gold shimmer on exceptional badge */
 .badge-exceptional-shimmer {
   background: linear-gradient(90deg, var(--gold-soft) 0%, rgba(212,168,83,0.25) 50%, var(--gold-soft) 100%);
   background-size: 200% auto;
   animation: shimmer 2.5s linear infinite;
 }
 
-/* Sec overview cards */
 .sec-ov-card { animation: scaleIn 0.3s ease both; }
 .sec-ov-card:nth-child(1) { animation-delay: 0.05s; }
 .sec-ov-card:nth-child(2) { animation-delay: 0.10s; }
@@ -720,10 +697,8 @@ body {
   box-shadow: 0 6px 20px rgba(0,0,0,0.15);
 }
 
-/* Theme toggle spin */
 .theme-toggle:active { transform: rotate(20deg) scale(0.9); }
 
-/* Nav tab underline slide */
 .nav-tab { position: relative; overflow: hidden; }
 .nav-tab::after {
   content: '';
@@ -736,10 +711,8 @@ body {
 }
 .nav-tab.active::after { left: 12px; right: 12px; }
 
-/* Stat counter animation via JS class */
 .count-animate { animation: countUp 0.5s ease both; }
 
-/* welcome header */
 .welcome-header h2 { animation: slideUp 0.5s ease 0s both; }
 .welcome-header p  { animation: slideUp 0.5s ease 0.08s both; }
 
@@ -755,11 +728,9 @@ body {
 }
 .rank-sub { font-size: 12px; color: var(--ink3); margin-bottom: 28px; }
 
-/* Improvement delta */
 .delta-pos { color: var(--green); font-weight: 700; }
 .delta-neg { color: var(--red); font-weight: 700; }
 
-/* Section overview cards row */
 .section-ov {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -947,13 +918,10 @@ body {
       </div>
 
       <div class="det-grid">
-        <!-- Progression Chart -->
         <div class="chart-box">
           <div class="chart-box-title">Score Progression</div>
           <div style="height:200px;position:relative"><canvas id="detProgChart"></canvas></div>
         </div>
-
-        <!-- Section A/B -->
         <div class="chart-box">
           <div class="chart-box-title">PT4 Theory Section Breakdown</div>
           <div id="secBreakdown" style="padding-top:8px"></div>
@@ -962,13 +930,10 @@ body {
       </div>
 
       <div class="det-grid">
-        <!-- Radar -->
         <div class="chart-box">
           <div class="chart-box-title">Core Competency Radar</div>
           <div style="height:220px;position:relative"><canvas id="detRadar"></canvas></div>
         </div>
-
-        <!-- Remark -->
         <div class="remark-card">
           <div class="remark-card-title">✦ Teacher's Assessment</div>
           <p class="remark-text" id="detRemark">—</p>
@@ -983,7 +948,6 @@ body {
         </div>
       </div>
 
-      <!-- Board Readiness -->
       <div class="chart-box" style="margin-bottom:32px">
         <div class="chart-box-title" style="margin-bottom:16px">Board Exam Readiness</div>
         <div class="board-grid">
@@ -1007,9 +971,7 @@ body {
     <div id="view-rankings">
       <div class="rank-title">PT4 Rankings</div>
       <div class="rank-sub">Sorted by PT4 total — click a row to view student detail</div>
-
       <div class="section-ov" id="sectionOvCards"></div>
-
       <div class="perf-table" id="rankTable"></div>
     </div>
 
@@ -1163,7 +1125,6 @@ const SECTION_CLASS = { '11th A':'sa', '11th B':'sb', '11th C':'sc', '11th F':'s
 const PERF_COLORS = { exceptional:'var(--green)', good:'var(--blue)', average:'var(--amber)', needswork:'var(--red)' };
 const PERF_LABELS = { exceptional:'Exceptional', good:'Good', average:'Average', needswork:'Needs Work' };
 
-// ── Helpers ──
 function scoreColor(s) {
   if(s>=90) return 'var(--green)';
   if(s>=80) return 'var(--gold)';
@@ -1174,13 +1135,11 @@ function getInitial(name) { return name.charAt(0); }
 function computeStats(list) {
   const avg = (list.reduce((a,b)=>a+b.pt4,0)/list.length).toFixed(1);
   const top = list.reduce((a,b)=>b.pt4>a.pt4?b:a);
-  // Scale PT3 to /100 before comparing improvement
   const improved = list.reduce((a,b)=>(b.pt4-(b.pt3*2))>(a.pt4-(a.pt3*2))?b:a);
   const excep = list.filter(s=>s.pt4>=90).length;
   return { avg, top, improved, excep };
 }
 
-// ── Sidebar & Filtering ──
 function setSection(el, sec) {
   document.querySelectorAll('.sec-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
@@ -1202,14 +1161,9 @@ function applyFilters() {
 function renderSidebar(list) {
   const el = document.getElementById('studentList');
   if(!list.length) { el.innerHTML='<div style="padding:16px 12px;font-size:12px;color:var(--ink3)">No students found</div>'; return; }
-  
-  // Group by section, sort students within each section alphabetically
   const groups = {};
   list.forEach(s=>{ if(!groups[s.class]) groups[s.class]=[]; groups[s.class].push(s); });
-  Object.keys(groups).forEach(sec => {
-    groups[sec].sort((a,b) => a.name.localeCompare(b.name));
-  });
-  
+  Object.keys(groups).forEach(sec => { groups[sec].sort((a,b) => a.name.localeCompare(b.name)); });
   let html = '';
   Object.keys(groups).sort().forEach(sec=>{
     if(activeSection==='All') html += `<div class="list-section-header">${sec}</div>`;
@@ -1239,20 +1193,16 @@ function updateSidebarStats(list) {
   document.getElementById('sideCount').textContent = list.length;
 }
 
-// ── View switching ──
 function showView(viewName, tabEl) {
-  // hide all views
   document.querySelectorAll('#view-welcome,#view-detail,#view-rankings').forEach(v=>{
     v.style.display='none';
     v.classList.remove('visible');
   });
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   if(tabEl) tabEl.classList.add('active');
-
   const target = document.getElementById('view-'+viewName);
   target.style.display='block';
   target.classList.add('visible');
-
   if(viewName==='rankings') renderRankings();
   if(viewName==='welcome') buildOverviewCharts();
 }
@@ -1263,40 +1213,33 @@ function goBack() {
   showView('welcome', document.querySelector('.nav-tab'));
 }
 
-// ── Open student ──
 function openStudent(name) {
   const s = STUDENTS.find(st=>st.name===name);
   if(!s) return;
   selectedStudent = s;
   renderSidebar(STUDENTS.filter(st=>activeSection==='All'||st.class===activeSection));
-  
-  // switch to detail view (not changing nav tabs)
   document.querySelectorAll('#view-welcome,#view-rankings').forEach(v=>v.style.display='none');
   document.getElementById('view-detail').style.display='block';
   document.getElementById('content').scrollTop=0;
-
   populateDetail(s);
 }
 
 function populateDetail(s) {
   const cls = SECTION_CLASS[s.class]||'';
   const perfColor = PERF_COLORS[s.perf]||'var(--ink2)';
-  
   document.getElementById('detAvatar').className = `det-avatar ${cls}`;
   document.getElementById('detAvatar').textContent = getInitial(s.name);
   document.getElementById('detName').textContent = s.name;
   document.getElementById('detClass').textContent = s.class;
   document.getElementById('detClass').style.background = `rgba(${s.class==='11th A'?'91,142,224':s.class==='11th B'?'76,175,122':s.class==='11th C'?'212,168,83':s.class==='11th F'?'232,152,74':s.class==='11th G'?'224,90,75':'180,140,220'},.15)`;
   document.getElementById('detClass').style.color = SECTION_COLORS[s.class]||'var(--ink2)';
-
   document.getElementById('detBadge').textContent = PERF_LABELS[s.perf];
   document.getElementById('detBadge').style.background = `rgba(${s.perf==='exceptional'?'76,175,122':s.perf==='good'?'91,142,224':s.perf==='average'?'232,152,74':'224,90,75'},.12)`;
   document.getElementById('detBadge').style.color = perfColor;
 
-  // Score cards — PT3 is /50, PT4 is /100
-  const pt3pct = (s.pt3 / 50) * 100;   // scale PT3 to % for bar
-  const pt4pct = s.pt4;                  // PT4 already /100
-  const delta = s.pt4 - (s.pt3 * 2);    // compare on same 100-point scale
+  const pt3pct = (s.pt3 / 50) * 100;
+  const pt4pct = s.pt4;
+  const delta = s.pt4 - (s.pt3 * 2);
   document.getElementById('scPT3').textContent = s.pt3;
   document.getElementById('scPT4').textContent = s.pt4;
   document.getElementById('scDelta').textContent = (delta>=0?'+':'')+delta.toFixed(1);
@@ -1304,7 +1247,6 @@ function populateDetail(s) {
   document.getElementById('barPT3').style.width = pt3pct+'%';
   document.getElementById('barPT4').style.width = pt4pct+'%';
 
-  // Section bars
   const secBreak = document.getElementById('secBreakdown');
   secBreak.innerHTML = `
     <div class="section-bar-row">
@@ -1321,35 +1263,24 @@ function populateDetail(s) {
     </div>
   `;
 
-  // Remark
   document.getElementById('detRemark').textContent = s.remark;
   document.getElementById('detStrategy').textContent = s.strategy;
-
-  // Board readiness
   document.getElementById('bdFocus').textContent = s.boardFocus;
   document.getElementById('bdMaterial').textContent = s.material;
   document.getElementById('bdRisk').textContent = s.boardRisk;
   document.getElementById('bdRisk').style.color = s.boardRisk==='Zero'?'var(--green)':s.boardRisk.includes('High')?'var(--red)':'var(--amber)';
 
-  // Chips
   const chipsEl = document.getElementById('detChips');
   let ch = '';
   s.strengths.forEach(x=>ch+=`<span class="chip chip-green">✓ ${x}</span>`);
   s.improve.forEach(x=>ch+=`<span class="chip chip-amber">↑ ${x}</span>`);
   if(s.perf==='needswork') s.improve.forEach((x,i)=>{ if(i<2) ch=ch.replace(`chip-amber">↑ ${x}`,`chip-red">⚠ ${x}`); });
   chipsEl.innerHTML = ch;
-
-  // Charts
   setTimeout(()=>buildDetailCharts(s),50);
 }
 
 function buildDetailCharts(s) {
-  const chartConf = (id) => {
-    const c = charts[id];
-    if(c) c.destroy();
-  };
-
-  // Progression
+  const chartConf = (id) => { const c = charts[id]; if(c) c.destroy(); };
   chartConf('detProg');
   charts.detProg = new Chart(document.getElementById('detProgChart').getContext('2d'),{
     type:'bar',
@@ -1359,8 +1290,7 @@ function buildDetailCharts(s) {
         data:[s.pt3, s.pt4Theory*2, s.pt4Prac*2, s.pt4],
         backgroundColor:['rgba(168,164,158,0.3)','rgba(91,142,224,0.5)','rgba(76,175,122,0.5)','rgba(212,168,83,0.7)'],
         borderColor:['rgba(168,164,158,0.8)','var(--blue)','var(--green)','var(--gold)'],
-        borderWidth:1,
-        borderRadius:6,
+        borderWidth:1, borderRadius:6,
       }]
     },
     options:{
@@ -1372,16 +1302,12 @@ function buildDetailCharts(s) {
       }
     }
   });
-
-  // Bar chart (sec A, B breakdown for pt4)
   chartConf('detBar');
   charts.detBar = new Chart(document.getElementById('detBarChart').getContext('2d'),{
     type:'bar',
     data:{
       labels:['Sec A /24','Sec B /26'],
-      datasets:[
-        {data:[s.pt4A, s.pt4B], backgroundColor:['rgba(232,152,74,0.6)','rgba(91,142,224,0.6)'], borderRadius:6, borderWidth:0}
-      ]
+      datasets:[{ data:[s.pt4A, s.pt4B], backgroundColor:['rgba(232,152,74,0.6)','rgba(91,142,224,0.6)'], borderRadius:6, borderWidth:0 }]
     },
     options:{
       responsive:true, maintainAspectRatio:false, indexAxis:'y',
@@ -1392,8 +1318,6 @@ function buildDetailCharts(s) {
       }
     }
   });
-
-  // Radar
   chartConf('detRad');
   charts.detRad = new Chart(document.getElementById('detRadar').getContext('2d'),{
     type:'radar',
@@ -1423,7 +1347,6 @@ function buildDetailCharts(s) {
   });
 }
 
-// ── OVERVIEW CHARTS ──
 function buildOverviewCharts() {
   const isDarkMode = !document.documentElement.classList.contains('light');
   const gridCol = isDarkMode ? 'rgba(42,45,49,0.8)' : 'rgba(200,194,182,0.6)';
@@ -1434,16 +1357,14 @@ function buildOverviewCharts() {
   const tooltipTitle = isDarkMode ? '#F0EDE8' : '#1A1814';
   const tooltipBody  = isDarkMode ? '#A8A49E' : '#5A5650';
 
-  // Sort all 19 students section-wise then alphabetically (matches sidebar)
   const sorted = [...STUDENTS].sort((a,b)=>{
     if(a.class !== b.class) return a.class.localeCompare(b.class);
     return a.name.localeCompare(b.name);
   });
   const names  = sorted.map(s => s.name.split(' ')[0]);
-  const pt3s   = sorted.map(s => +(s.pt3 * 2).toFixed(1));  // scale PT3 /50 → /100
+  const pt3s   = sorted.map(s => +(s.pt3 * 2).toFixed(1));
   const pt4s   = sorted.map(s => s.pt4);
 
-  // ── Compare all 19 students — full width ──
   if(charts.compare) charts.compare.destroy();
   charts.compare = new Chart(document.getElementById('compareChart').getContext('2d'), {
     type: 'bar',
@@ -1508,7 +1429,6 @@ function buildOverviewCharts() {
     }
   });
 
-  // ── Distribution donut ──
   const brackets = ['< 70','70 – 79','80 – 89','90+'];
   const counts = [
     STUDENTS.filter(s=>s.pt4<70).length,
@@ -1528,7 +1448,6 @@ function buildOverviewCharts() {
     }
   });
 
-  // ── Section avg ──
   const sections=['11th A','11th B','11th C','11th F','11th G','11th H'];
   const secAvgs = sections.map(sec=>{ const ss=STUDENTS.filter(s=>s.class===sec); return ss.length?(ss.reduce((a,b)=>a+b.pt4,0)/ss.length).toFixed(1):0; });
   if(charts.section) charts.section.destroy();
@@ -1542,7 +1461,6 @@ function buildOverviewCharts() {
     }
   });
 
-  // ── Scatter theory vs practical ──
   if(charts.scatter) charts.scatter.destroy();
   charts.scatter = new Chart(document.getElementById('scatterChart').getContext('2d'), {
     type:'scatter',
@@ -1557,7 +1475,6 @@ function buildOverviewCharts() {
     }
   });
 
-  // ── Improvement chart (PT4 - PT3×2 on same 100-pt scale) ──
   const impSorted = [...STUDENTS].sort((a,b)=>(b.pt4-(b.pt3*2))-(a.pt4-(a.pt3*2)));
   const impVals   = impSorted.map(s=>+(s.pt4-(s.pt3*2)).toFixed(1));
   if(charts.improve) charts.improve.destroy();
@@ -1574,7 +1491,6 @@ function buildOverviewCharts() {
     }
   });
 
-  // Animated counting stats
   animateCount('ovAvg',   0, parseFloat(computeStats(STUDENTS).avg), 1, 800);
   animateCount('ovExcep', 0, computeStats(STUDENTS).excep,           0, 600);
   const st = computeStats(STUDENTS);
@@ -1598,9 +1514,7 @@ function animateCount(elId, from, to, decimals, duration) {
   requestAnimationFrame(step);
 }
 
-// ── RANKINGS VIEW ──
 function renderRankings() {
-  // Section overview
   const sections=['11th A','11th B','11th C','11th F','11th G','11th H'];
   const secEl = document.getElementById('sectionOvCards');
   secEl.innerHTML = sections.map(sec=>{
@@ -1614,7 +1528,6 @@ function renderRankings() {
     </div>`;
   }).join('');
 
-  // Table
   const sorted = [...STUDENTS].sort((a,b)=>b.pt4-a.pt4);
   const html = `<table>
     <thead><tr>
@@ -1622,7 +1535,7 @@ function renderRankings() {
       <th>Theory/50</th><th>Practical/50</th><th>PT3 /50</th><th>Δ Change</th><th>Status</th>
     </tr></thead>
     <tbody>${sorted.map((s,i)=>{
-      const delta = s.pt4 - (s.pt3*2);   // PT3 scaled ×2 for fair comparison
+      const delta = s.pt4 - (s.pt3*2);
       const rankColor=i===0?'var(--gold)':i===1?'var(--ink3)':i===2?'var(--amber)':'var(--ink3)';
       const cls=SECTION_CLASS[s.class]||'';
       return `<tr style="cursor:pointer" onclick="openStudent('${s.name}')">
@@ -1643,7 +1556,6 @@ function renderRankings() {
   document.getElementById('rankTable').innerHTML = html;
 }
 
-// ── THEME TOGGLE ──
 let isDark = false;
 function toggleTheme() {
   isDark = !isDark;
@@ -1658,7 +1570,6 @@ function toggleTheme() {
     btn.textContent = '☀️';
     btn.title = 'Switch to dark mode';
   }
-  // Rebuild charts so colors update
   if(document.getElementById('view-welcome').style.display !== 'none') {
     setTimeout(buildOverviewCharts, 50);
   }
@@ -1667,17 +1578,396 @@ function toggleTheme() {
   }
 }
 
-// ── INIT ──
 window.onload = function() {
   applyFilters();
   updateSidebarStats(STUDENTS);
   buildOverviewCharts();
-
-  // ensure overview is visible
   document.getElementById('view-welcome').style.display='block';
   document.getElementById('view-detail').style.display='none';
   document.getElementById('view-rankings').style.display='none';
+  addHelpBtn();
+  setTimeout(startTutorial, 600);
 };
+</script>
+
+<!-- ═══ TUTORIAL OVERLAY ═══ -->
+<div id="tutorialOverlay" style="display:none">
+  <div id="tutBackdrop"></div>
+  <div id="tutCard">
+    <div id="tutStep"></div>
+    <div id="tutTitle"></div>
+    <div id="tutDesc"></div>
+    <div id="tutNav">
+      <div id="tutDots"></div>
+      <div id="tutBtns">
+        <button id="tutSkip" onclick="endTutorial()">Skip</button>
+        <button id="tutNext" onclick="nextStep()">Next →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ── TUTORIAL ── */
+#tutorialOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+#tutBackdrop {
+  position: absolute;
+  inset: 0;
+  transition: all 0.4s ease;
+}
+#tutSpotlight {
+  position: absolute;
+  border-radius: 12px;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.45);
+  border: 2.5px solid var(--gold);
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+  pointer-events: none;
+  animation: spotPulse 2s ease infinite;
+}
+@keyframes spotPulse {
+  0%,100% { box-shadow: 0 0 0 9999px rgba(0,0,0,0.45), 0 0 0 0 rgba(212,168,83,0.4); }
+  50%      { box-shadow: 0 0 0 9999px rgba(0,0,0,0.45), 0 0 20px 8px rgba(212,168,83,0.25); }
+}
+
+#tutCard {
+  position: absolute;
+  background: var(--surface, #FDFCFA);
+  border: 1px solid var(--gold, #B8860B);
+  border-radius: 16px;
+  padding: 22px 24px 18px;
+  width: 300px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  pointer-events: all;
+  animation: tutCardIn 0.35s cubic-bezier(0.4,0,0.2,1);
+  transition: top 0.4s cubic-bezier(0.4,0,0.2,1), left 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+@keyframes tutCardIn {
+  from { opacity:0; transform: scale(0.9) translateY(8px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
+#tutCard::before {
+  content: '';
+  position: absolute;
+  width: 12px; height: 12px;
+  background: var(--surface, #FDFCFA);
+  border-left: 1px solid var(--gold, #B8860B);
+  border-top: 1px solid var(--gold, #B8860B);
+  transform: rotate(45deg);
+  transition: all 0.4s ease;
+}
+#tutCard.arrow-top::before    { top:-7px; left:28px; }
+#tutCard.arrow-bottom::before { bottom:-7px; left:28px; transform:rotate(225deg); }
+#tutCard.arrow-left::before   { left:-7px; top:28px; transform:rotate(-45deg); }
+#tutCard.arrow-right::before  { right:-7px; top:28px; transform:rotate(135deg); }
+#tutCard.arrow-none::before   { display:none; }
+
+#tutStep {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold, #B8860B);
+  margin-bottom: 6px;
+}
+#tutTitle {
+  font-family: 'Fraunces', serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--ink, #1A1814);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+#tutDesc {
+  font-size: 13px;
+  color: var(--ink2, #5A5650);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+#tutNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#tutDots { display:flex; gap:5px; }
+.tut-dot {
+  width:7px; height:7px;
+  border-radius:50%;
+  background: var(--border2, #C8C2B6);
+  transition: background 0.2s, transform 0.2s;
+}
+.tut-dot.active {
+  background: var(--gold, #B8860B);
+  transform: scale(1.3);
+}
+#tutBtns { display:flex; gap:8px; }
+#tutSkip {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border2, #C8C2B6);
+  background: transparent;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink3, #9A9590);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+#tutSkip:hover { color: var(--red, #C0392B); border-color: var(--red, #C0392B); }
+
+/* ── FIX 2: Brighter, more vivid Next button ── */
+#tutNext {
+  padding: 7px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #E8A020;
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 10px rgba(232,160,32,0.45);
+}
+#tutNext:hover {
+  background: #F0AD24;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(240,173,36,0.55);
+}
+#tutNext:active { transform: translateY(0); }
+
+.tut-highlight {
+  outline: 2.5px solid var(--gold) !important;
+  outline-offset: 4px !important;
+  border-radius: 10px !important;
+  transition: outline 0.3s ease !important;
+}
+</style>
+
+<script>
+const TUT_KEY = 'ai_tracker_tut_done_v1';
+
+const STEPS = [
+  {
+    title: "Welcome to AI Tracker! 👋",
+    desc: "This is your Grade 11 Artificial Intelligence performance dashboard. Let's take a quick 30-second tour so you know exactly how to use it.",
+    target: null,
+    arrow: "arrow-none",
+    cardPos: { center: true }
+  },
+  {
+    title: "Section Filter Tabs",
+    desc: "Click A, B, C, F, G, or H to filter students by their section. The sidebar list updates instantly.",
+    target: ".section-tabs",
+    arrow: "arrow-left",
+    cardPos: { side: "right" }
+  },
+  {
+    title: "Search a Student",
+    desc: "Type any student's name here to find them quickly — works across all sections.",
+    target: ".search-wrap",
+    arrow: "arrow-left",
+    cardPos: { side: "right" }
+  },
+  {
+    title: "Student List",
+    desc: "All students are listed here, sorted A→Z within each section. Click any name to open their full performance profile.",
+    target: ".student-list-wrap",
+    arrow: "arrow-left",
+    cardPos: { side: "right" }
+  },
+  {
+    title: "Overview & Rankings",
+    desc: "Use these tabs to switch between the batch Overview (charts & stats) and the PT4 Rankings table.",
+    target: ".nav-tabs",
+    arrow: "arrow-top",
+    cardPos: { side: "bottom" }
+  },
+  {
+    title: "PT3 vs PT4 Chart",
+    desc: "This full-width chart shows all 19 students side by side. PT3 bars are scaled ×2 to /100 for fair comparison. Hover any bar for details.",
+    target: ".compare-chart-box",
+    arrow: "arrow-top",
+    cardPos: { side: "bottom" }
+  },
+  {
+    title: "Day / Night Mode ☀️🌙",
+    desc: "Click this button anytime to switch between light and dark mode.",
+    target: "#themeToggle",
+    arrow: "arrow-top",
+    cardPos: { side: "bottom" }
+  },
+  {
+    title: "Sidebar Stats",
+    desc: "These 4 cards at the bottom always show live stats for the currently filtered list — batch average, top score, exceptional count, and total students.",
+    target: ".sidebar-stats",
+    arrow: "arrow-left",
+    cardPos: { side: "right" }
+  },
+  {
+    title: "You're all set! 🎉",
+    desc: "Click any student in the sidebar to see their full profile — scores, radar chart, teacher remarks, board strategy, and more.",
+    target: null,
+    arrow: "arrow-none",
+    cardPos: { center: true }
+  }
+];
+
+let tutStep = 0;
+
+function startTutorial() {
+  if(localStorage.getItem(TUT_KEY)) return;
+  tutStep = 0;
+  // FIX 1: Lock all scrolling
+  document.body.classList.add('tut-active');
+  document.getElementById('tutorialOverlay').style.display = 'block';
+  document.getElementById('tutorialOverlay').style.pointerEvents = 'all';
+  renderStep();
+}
+
+function renderStep() {
+  const s = STEPS[tutStep];
+  const overlay = document.getElementById('tutorialOverlay');
+  const card = document.getElementById('tutCard');
+
+  document.querySelectorAll('.tut-highlight').forEach(el=>el.classList.remove('tut-highlight'));
+  const oldSpot = document.getElementById('tutSpotlight');
+  if(oldSpot) oldSpot.remove();
+
+  document.getElementById('tutStep').textContent = `Step ${tutStep+1} of ${STEPS.length}`;
+  document.getElementById('tutTitle').textContent = s.title;
+  document.getElementById('tutDesc').textContent = s.desc;
+
+  let dots = '';
+  STEPS.forEach((_,i) => dots += `<div class="tut-dot${i===tutStep?' active':''}"></div>`);
+  document.getElementById('tutDots').innerHTML = dots;
+
+  document.getElementById('tutNext').textContent = tutStep === STEPS.length-1 ? 'Finish ✓' : 'Next →';
+  card.className = s.arrow;
+
+  if(s.target) {
+    const target = document.querySelector(s.target);
+    if(target) {
+      target.classList.add('tut-highlight');
+      const rect = target.getBoundingClientRect();
+
+      const spot = document.createElement('div');
+      spot.id = 'tutSpotlight';
+      const pad = 6;
+      spot.style.cssText = `left:${rect.left-pad}px;top:${rect.top-pad}px;width:${rect.width+pad*2}px;height:${rect.height+pad*2}px`;
+      overlay.appendChild(spot);
+
+      // FIX 3: Smart card positioning — always stays in viewport
+      positionCard(card, rect, s.cardPos, s.arrow);
+    }
+  } else {
+    const spot = document.createElement('div');
+    spot.id = 'tutSpotlight';
+    const pw = 420, ph = 260;
+    const cx = (window.innerWidth - pw) / 2;
+    const cy = (window.innerHeight - ph) / 2;
+    spot.style.cssText = `left:${cx}px;top:${cy}px;width:${pw}px;height:${ph}px;border-radius:20px`;
+    overlay.appendChild(spot);
+    card.style.top = '50%';
+    card.style.left = '50%';
+    card.style.transform = 'translate(-50%,-50%)';
+  }
+}
+
+function positionCard(card, rect, pos, arrow) {
+  card.style.transform = '';
+  const cw = 320;
+  const ch = 210; // generous estimate of card height
+  const margin = 14;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  let top, left;
+
+  if(pos.side === 'right') {
+    left = rect.right + margin;
+    top  = rect.top;
+    // If card goes off right edge, flip to left of target
+    if(left + cw > vw - margin) left = rect.left - cw - margin;
+  } else if(pos.side === 'bottom') {
+    top  = rect.bottom + margin;
+    left = rect.left;
+    // If card goes off bottom, position above target instead
+    if(top + ch > vh - margin) top = rect.top - ch - margin;
+  } else if(pos.side === 'left') {
+    left = rect.left - cw - margin;
+    top  = rect.top;
+    if(left < margin) left = rect.right + margin;
+  } else if(pos.side === 'top') {
+    top  = rect.top - ch - margin;
+    left = rect.left;
+    if(top < margin) top = rect.bottom + margin;
+  }
+
+  // Clamp to always stay within viewport
+  top  = Math.max(margin, Math.min(top,  vh - ch  - margin));
+  left = Math.max(margin, Math.min(left, vw - cw  - margin));
+
+  card.style.top  = top  + 'px';
+  card.style.left = left + 'px';
+}
+
+function nextStep() {
+  if(tutStep >= STEPS.length - 1) {
+    endTutorial();
+    return;
+  }
+  tutStep++;
+  renderStep();
+}
+
+function endTutorial() {
+  localStorage.setItem(TUT_KEY, '1');
+  // FIX 1: Restore scrolling
+  document.body.classList.remove('tut-active');
+  const overlay = document.getElementById('tutorialOverlay');
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity 0.3s ease';
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    overlay.style.opacity = '1';
+    overlay.style.pointerEvents = 'none';
+  }, 300);
+  document.querySelectorAll('.tut-highlight').forEach(el=>el.classList.remove('tut-highlight'));
+  const spot = document.getElementById('tutSpotlight');
+  if(spot) spot.remove();
+}
+
+function addHelpBtn() {
+  const btn = document.createElement('button');
+  btn.id = 'helpBtn';
+  btn.title = 'Show tutorial again';
+  btn.textContent = '?';
+  btn.onclick = () => {
+    localStorage.removeItem(TUT_KEY);
+    tutStep = 0;
+    document.body.classList.add('tut-active');
+    document.getElementById('tutorialOverlay').style.display = 'block';
+    document.getElementById('tutorialOverlay').style.pointerEvents = 'all';
+    renderStep();
+  };
+  btn.style.cssText = `
+    position:fixed; bottom:24px; right:24px; z-index:999;
+    width:40px; height:40px; border-radius:50%;
+    background:#E8A020; color:#fff;
+    border:none; font-family:'Fraunces',serif; font-size:1.1rem; font-weight:600;
+    cursor:pointer; box-shadow:0 4px 16px rgba(232,160,32,0.4);
+    transition:transform 0.2s,box-shadow 0.2s;
+  `;
+  btn.onmouseenter = () => { btn.style.transform='scale(1.1)'; btn.style.boxShadow='0 6px 24px rgba(232,160,32,0.5)'; };
+  btn.onmouseleave = () => { btn.style.transform='scale(1)'; btn.style.boxShadow='0 4px 16px rgba(232,160,32,0.4)'; };
+  document.body.appendChild(btn);
+}
 </script>
 </body>
 </html>
