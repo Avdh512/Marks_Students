@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="day">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 2 — Data Science Methodology | Class XII AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── THEMES ─────────────────────────────── */
+:root{--tr:1.2s cubic-bezier(.4,0,.2,1);}
+[data-theme="day"]{
+  --sky-top:#74b9d8;--sky-mid:#b8dcf0;--sky-bot:#fde8c8;
+  --bg:#fdf6ec;--surface:#fffbf5;--surface2:#fef3e2;
+  --border:#e8d5b7;--text:#2c1810;--text-muted:#7a5c42;
+  --accent:#d97b34;--accent2:#2d8a4e;--accent3:#c94f27;
+  --accent4:#8b5cf6;--code-bg:#1a1410;--code-text:#f0e0c8;
+  --nav-bg:rgba(253,246,236,0.94);--sun-bg:#fff176;
+  --sun-shadow:rgba(255,200,50,.7);--star-op:0;--cloud-op:1;
+}
+[data-theme="night"]{
+  --sky-top:#020818;--sky-mid:#0a1628;--sky-bot:#1a2a4a;
+  --bg:#080e1f;--surface:#0e1828;--surface2:#141f35;
+  --border:#1e2d4a;--text:#e8edf8;--text-muted:#7a90b8;
+  --accent:#5b8cff;--accent2:#00d4aa;--accent3:#ff6b9d;
+  --accent4:#a78bfa;--code-bg:#030810;--code-text:#c9d8f0;
+  --nav-bg:rgba(8,14,31,0.95);--sun-bg:#e8eeff;
+  --sun-shadow:rgba(180,200,255,.55);--star-op:1;--cloud-op:0;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.78;transition:background var(--tr),color var(--tr);overflow-x:hidden;}
+
+/* ── SKY ──────────────────────────────── */
+.sky{position:fixed;inset:0;z-index:-2;pointer-events:none;}
+.sky-grad{position:absolute;inset:0;background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 55%,var(--sky-bot) 100%);opacity:.16;transition:background var(--tr),opacity var(--tr);}
+[data-theme="night"] .sky-grad{opacity:.38;}
+.celestial{position:absolute;top:55px;right:130px;width:66px;height:66px;border-radius:50%;background:var(--sun-bg);box-shadow:0 0 40px var(--sun-shadow),0 0 90px var(--sun-shadow);transition:all var(--tr);}
+[data-theme="night"] .celestial{width:54px;height:54px;top:75px;right:105px;}
+.crater{position:absolute;border-radius:50%;background:rgba(0,0,0,.08);opacity:0;transition:opacity var(--tr);}
+[data-theme="night"] .crater{opacity:1;}
+.cr1{width:13px;height:13px;top:17px;left:15px;}.cr2{width:8px;height:8px;top:31px;left:33px;}.cr3{width:10px;height:10px;top:11px;left:35px;}
+.stars-wrap{position:absolute;inset:0;opacity:var(--star-op);transition:opacity var(--tr);}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite var(--dl,0s);}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}
+.clouds{position:absolute;inset:0;opacity:var(--cloud-op);transition:opacity var(--tr);pointer-events:none;}
+.cloud{position:absolute;border-radius:60px;background:rgba(255,255,255,.82);}
+.cloud::before,.cloud::after{content:'';position:absolute;background:inherit;border-radius:50%;}
+.cl1{width:110px;height:34px;top:110px;left:7%;animation:drift 30s linear infinite;}
+.cl1::before{width:55px;height:46px;top:-20px;left:14px;}.cl1::after{width:42px;height:36px;top:-14px;left:50px;}
+.cl2{width:85px;height:28px;top:170px;left:54%;animation:drift 42s linear infinite 6s;}
+.cl2::before{width:46px;height:38px;top:-16px;left:11px;}.cl2::after{width:32px;height:26px;top:-10px;left:36px;}
+.cl3{width:65px;height:22px;top:85px;left:34%;animation:drift 55s linear infinite 14s;}
+.cl3::before{width:34px;height:28px;top:-12px;left:9px;}
+@keyframes drift{from{transform:translateX(-250px)}to{transform:translateX(110vw)}}
+
+/* ── TOGGLE ───────────────────────────── */
+.toggle-wrap{display:flex;align-items:center;gap:9px;flex-shrink:0;margin-left:auto;}
+.tlabel{font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);transition:color var(--tr);user-select:none;}
+.tbtn{width:62px;height:30px;background:var(--surface2);border:2px solid var(--border);border-radius:99px;cursor:pointer;position:relative;transition:background var(--tr),border-color var(--tr);flex-shrink:0;}
+.tbtn::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--sun-bg);box-shadow:0 0 8px var(--sun-shadow);transition:transform .5s cubic-bezier(.4,0,.2,1),background .5s;}
+[data-theme="night"] .tbtn::after{transform:translateX(32px);}
+
+/* ── NAV TOP BAR ─────────────────────── */
+.nav-top{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--nav-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.4rem;height:50px;gap:.8rem;transition:background var(--tr),border-color var(--tr);}
+.nav-logo{font-family:'Playfair Display',serif;font-weight:900;font-size:1rem;color:var(--accent);white-space:nowrap;flex-shrink:0;transition:color var(--tr);}
+.back-btn{display:flex;align-items:center;gap:.4rem;text-decoration:none;color:var(--text-muted);font-size:.72rem;font-weight:700;letter-spacing:.5px;flex-shrink:0;transition:all .2s;border:1.5px solid var(--border);border-radius:20px;padding:.22rem .8rem;white-space:nowrap;}
+.back-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+/* ── SCROLLABLE NAV STRIP ─────────────── */
+nav{position:fixed;top:50px;left:0;right:0;z-index:199;background:var(--nav-bg);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.2rem;height:36px;transition:background var(--tr),border-color var(--tr);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+.nav-links{display:flex;gap:.25rem;flex-shrink:0;align-items:center;}
+.nav-links a{font-size:.65rem;padding:.2rem .72rem;border-radius:20px;color:var(--text-muted);text-decoration:none;font-weight:600;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.nav-links a:hover,.nav-links a.active{background:var(--accent);color:#fff;}
+
+/* ── HERO ─────────────────────────────── */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:8rem 2rem 5rem;text-align:center;}
+.hero-inner{max-width:720px;}
+.badge{display:inline-block;background:color-mix(in srgb,var(--accent) 13%,transparent);border:1px solid color-mix(in srgb,var(--accent) 38%,transparent);color:var(--accent);font-size:.68rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:.38rem 1.3rem;border-radius:30px;margin-bottom:1.4rem;transition:all var(--tr);}
+.hero h1{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2.4rem,6.5vw,5rem);letter-spacing:-1.5px;line-height:1.05;margin-bottom:1rem;color:var(--text);transition:color var(--tr);}
+.hero h1 span{color:var(--accent);}
+.hero p{font-size:1rem;color:var(--text-muted);max-width:580px;margin:0 auto 2.2rem;transition:color var(--tr);}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:.55rem;}
+.chip{background:var(--surface);border:1.5px solid var(--border);border-radius:9px;padding:.4rem 1rem;font-size:.76rem;font-weight:600;color:var(--text-muted);text-decoration:none;transition:all .22s;}
+.chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-3px);box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 18%,transparent);}
+
+/* ── LAYOUT ───────────────────────────── */
+.container{max-width:1080px;margin:0 auto;padding:0 2rem;}
+section.topic{padding:5rem 0;border-top:1px solid var(--border);transition:border-color var(--tr);}
+.s-tag{font-size:.68rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:.45rem;transition:color var(--tr);}
+.s-title{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(1.7rem,3.8vw,2.5rem);line-height:1.08;margin-bottom:1.1rem;color:var(--text);transition:color var(--tr);}
+.s-intro{color:var(--text-muted);font-size:.96rem;max-width:820px;border-left:3px solid var(--accent);padding:.95rem 1.4rem;background:var(--surface);border-radius:0 12px 12px 0;margin-bottom:2.2rem;line-height:1.86;transition:all var(--tr);}
+.s-intro strong{color:var(--text);}
+h3.sh{font-family:'Playfair Display',serif;font-weight:700;font-size:1.12rem;color:var(--accent2);margin:2rem 0 .8rem;display:flex;align-items:center;gap:.6rem;transition:color var(--tr);}
+h3.sh::before{content:'';width:22px;height:3px;background:var(--accent2);border-radius:2px;flex-shrink:0;transition:background var(--tr);}
+h4.ssh{font-family:'Outfit',sans-serif;font-weight:700;font-size:.95rem;color:var(--accent4);margin:1.5rem 0 .6rem;transition:color var(--tr);}
+p.bd{color:var(--text-muted);font-size:.94rem;margin-bottom:.85rem;transition:color var(--tr);}
+p.bd strong{color:var(--text);}
+
+/* ── CARDS ────────────────────────────── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin:1.4rem 0 2.2rem;}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1.3rem;transition:all .25s;}
+.card:hover{transform:translateY(-5px);border-color:var(--accent);box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 16%,transparent);}
+.card .icon{font-size:1.75rem;margin-bottom:.7rem;}
+.card h4{font-family:'Playfair Display',serif;font-weight:700;font-size:.97rem;margin-bottom:.4rem;color:var(--text);transition:color var(--tr);}
+.card p{font-size:.84rem;color:var(--text-muted);line-height:1.62;transition:color var(--tr);}
+
+/* ── HIGHLIGHT BOXES ──────────────────── */
+.hl{background:color-mix(in srgb,var(--accent2) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent2) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);line-height:1.82;transition:all var(--tr);}
+.hl strong{color:var(--accent2);}
+.warn{background:color-mix(in srgb,var(--accent3) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent3) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);transition:all var(--tr);}
+.warn strong{color:var(--accent3);}
+.note{background:color-mix(in srgb,var(--accent4) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent4) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);transition:all var(--tr);}
+.note strong{color:var(--accent4);}
+
+/* ── TABLE ────────────────────────────── */
+.tw{overflow-x:auto;margin:1.4rem 0;border-radius:12px;border:1px solid var(--border);transition:border-color var(--tr);}
+table{width:100%;border-collapse:collapse;font-size:.86rem;}
+th{background:var(--surface2);color:var(--accent);font-weight:700;padding:.8rem 1.1rem;text-align:left;border-bottom:2px solid var(--border);font-family:'Playfair Display',serif;transition:all var(--tr);}
+td{padding:.72rem 1.1rem;border-bottom:1px solid var(--border);color:var(--text-muted);transition:all var(--tr);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface2);color:var(--text);}
+
+/* ── CODE BLOCKS ──────────────────────── */
+.cb{background:var(--code-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:1.4rem 0;box-shadow:0 4px 22px rgba(0,0,0,.18);transition:border-color var(--tr);}
+.cb-head{background:color-mix(in srgb,var(--code-bg) 85%,white 6%);padding:.6rem 1.1rem;display:flex;align-items:center;gap:.45rem;border-bottom:1px solid rgba(255,255,255,.05);}
+.cb-head .fn{font-size:.72rem;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace;margin-left:auto;}
+.d{width:10px;height:10px;border-radius:50%;}
+.d.r{background:#ff5f56;}.d.y{background:#ffbd2e;}.d.g{background:#27c93f;}
+pre{font-family:'DM Mono',monospace;font-size:.81rem;line-height:1.82;padding:1.4rem;overflow-x:auto;color:var(--code-text);}
+.kw{color:#ff9d6c;}.fn2{color:#82aaff;}.st{color:#c3e88d;}.cm{color:#4a5568;font-style:italic;}.nm{color:#f78c6c;}.cl{color:#ffcb6b;}
+
+/* ── INFO GRID ────────────────────────── */
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1.4rem 0;}
+.ic{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.4rem;transition:all var(--tr);}
+.ic h4{font-size:.72rem;color:var(--accent2);margin-bottom:.65rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;}
+.ic ul{list-style:none;}
+.ic ul li{font-size:.86rem;color:var(--text-muted);padding:.2rem 0 .2rem 1.2rem;position:relative;transition:color var(--tr);}
+.ic ul li::before{content:'▸';position:absolute;left:0;color:var(--accent2);font-size:.76rem;}
+
+/* ── FLOWCHART (SVG-BASED) ────────────── */
+.flowchart-wrap{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:2rem;margin:1.5rem 0;overflow-x:auto;transition:all var(--tr);}
+.flowchart-wrap h4{font-family:'Playfair Display',serif;font-weight:700;font-size:1.05rem;color:var(--accent);text-align:center;margin-bottom:1.5rem;}
+svg text{font-family:'Outfit',sans-serif;}
+
+/* ── METHODOLOGY PIPELINE ─────────────── */
+.pipeline{display:flex;flex-wrap:wrap;gap:0;margin:2rem 0;align-items:stretch;justify-content:center;}
+.pipe-module{flex:1;min-width:160px;max-width:220px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1.2rem 1rem;text-align:center;position:relative;transition:all .28s;margin:.3rem;}
+.pipe-module:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 10px 28px color-mix(in srgb,var(--accent) 18%,transparent);}
+.pipe-num{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;font-weight:900;font-size:.85rem;display:flex;align-items:center;justify-content:center;margin:0 auto .7rem;font-family:'Playfair Display',serif;transition:background var(--tr);}
+.pipe-title{font-family:'Playfair Display',serif;font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:.35rem;transition:color var(--tr);}
+.pipe-steps{font-size:.77rem;color:var(--text-muted);line-height:1.55;transition:color var(--tr);}
+.pipe-arrow{display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:1.3rem;flex-shrink:0;padding:0 .2rem;align-self:center;}
+
+/* ── ANALYTICS TYPE CARDS ─────────────── */
+.analytics-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1.5rem 0;}
+.a-card{border-radius:14px;padding:1.4rem;border:1.5px solid;transition:all .25s;}
+.a-card:hover{transform:translateY(-4px);}
+.a-card .a-icon{font-size:2rem;margin-bottom:.7rem;}
+.a-card .a-label{font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:.3rem;}
+.a-card h4{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;margin-bottom:.5rem;}
+.a-card p{font-size:.84rem;line-height:1.62;}
+.a-card .a-eg{font-size:.78rem;margin-top:.6rem;font-style:italic;opacity:.85;}
+.desc-card{background:color-mix(in srgb,#3b82f6 8%,var(--surface));border-color:color-mix(in srgb,#3b82f6 35%,var(--border));color:var(--text);}
+.desc-card .a-label{color:#3b82f6;}.desc-card h4{color:#3b82f6;}
+.diag-card{background:color-mix(in srgb,#10b981 8%,var(--surface));border-color:color-mix(in srgb,#10b981 35%,var(--border));color:var(--text);}
+.diag-card .a-label{color:#10b981;}.diag-card h4{color:#10b981;}
+.pred-card{background:color-mix(in srgb,#f59e0b 8%,var(--surface));border-color:color-mix(in srgb,#f59e0b 35%,var(--border));color:var(--text);}
+.pred-card .a-label{color:#f59e0b;}.pred-card h4{color:#f59e0b;}
+.pres-card{background:color-mix(in srgb,#8b5cf6 8%,var(--surface));border-color:color-mix(in srgb,#8b5cf6 35%,var(--border));color:var(--text);}
+.pres-card .a-label{color:#8b5cf6;}.pres-card h4{color:#8b5cf6;}
+
+/* ── CONFUSION MATRIX ─────────────────── */
+.cm-wrap{display:flex;flex-direction:column;align-items:center;gap:1.2rem;margin:1.5rem 0;}
+.cm-table-wrap{overflow-x:auto;}
+.cm-table{border-collapse:collapse;}
+.cm-table th,.cm-table td{width:110px;height:70px;text-align:center;font-size:.88rem;font-weight:600;border:2px solid var(--border);transition:all var(--tr);}
+.cm-table th{background:var(--surface2);color:var(--text-muted);font-size:.75rem;letter-spacing:1px;}
+.tp-cell{background:color-mix(in srgb,#22c55e 18%,var(--surface));color:#16a34a;font-size:1rem;font-weight:700;}
+.tn-cell{background:color-mix(in srgb,#3b82f6 18%,var(--surface));color:#1d4ed8;font-size:1rem;font-weight:700;}
+.fp-cell{background:color-mix(in srgb,#f97316 18%,var(--surface));color:#c2410c;font-size:1rem;font-weight:700;}
+.fn-cell{background:color-mix(in srgb,#ef4444 18%,var(--surface));color:#dc2626;font-size:1rem;font-weight:700;}
+.cm-legend{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;}
+.cm-legend-item{display:flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--text-muted);}
+.cm-dot{width:12px;height:12px;border-radius:3px;}
+
+/* ── KFOLD DIAGRAM ────────────────────── */
+.kfold-wrap{margin:1.5rem 0;}
+.kfold-row{display:flex;gap:.4rem;margin-bottom:.45rem;align-items:center;}
+.kfold-label{font-size:.76rem;font-weight:600;color:var(--text-muted);width:100px;text-align:right;flex-shrink:0;}
+.kfold-folds{display:flex;gap:.3rem;flex:1;}
+.fold{flex:1;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;transition:all var(--tr);}
+.fold.train{background:color-mix(in srgb,var(--accent2) 18%,transparent);border:1.5px solid color-mix(in srgb,var(--accent2) 40%,transparent);color:var(--accent2);}
+.fold.test{background:color-mix(in srgb,var(--accent3) 22%,transparent);border:1.5px solid color-mix(in srgb,var(--accent3) 50%,transparent);color:var(--accent3);}
+
+/* ── TRAIN TEST SPLIT VISUAL ──────────── */
+.split-visual{display:flex;height:52px;border-radius:12px;overflow:hidden;margin:1.2rem 0;border:2px solid var(--border);transition:border-color var(--tr);}
+.split-train{display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:#fff;transition:all var(--tr);}
+.split-test{display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:#fff;transition:all var(--tr);}
+
+/* ── STEP BOXES ───────────────────────── */
+.steps{display:flex;flex-direction:column;gap:.7rem;margin:1.2rem 0;}
+.step{display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:1rem 1.3rem;transition:all var(--tr);}
+.step-num{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;font-family:'Playfair Display',serif;}
+.step-body h5{font-weight:600;font-size:.92rem;margin-bottom:.25rem;color:var(--text);transition:color var(--tr);}
+.step-body p{font-size:.85rem;color:var(--text-muted);transition:color var(--tr);}
+
+/* ── DATA TYPE CARDS ──────────────────── */
+.dtype-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1.4rem 0;}
+.dtype-card{padding:1.2rem;border-radius:12px;border:1.5px solid;text-align:center;transition:all .25s;}
+.dtype-card:hover{transform:translateY(-4px);}
+.dtype-card .dt-icon{font-size:2rem;margin-bottom:.7rem;}
+.dtype-card h4{font-family:'Playfair Display',serif;font-weight:700;font-size:.95rem;margin-bottom:.4rem;}
+.dtype-card p{font-size:.82rem;line-height:1.6;}
+.struct{background:color-mix(in srgb,#06b6d4 8%,var(--surface));border-color:color-mix(in srgb,#06b6d4 30%,var(--border));}
+.struct h4{color:#0891b2;}
+.unstruct{background:color-mix(in srgb,#8b5cf6 8%,var(--surface));border-color:color-mix(in srgb,#8b5cf6 30%,var(--border));}
+.unstruct h4{color:#7c3aed;}
+.semistruct{background:color-mix(in srgb,#f59e0b 8%,var(--surface));border-color:color-mix(in srgb,#f59e0b 30%,var(--border));}
+.semistruct h4{color:#d97706;}
+
+/* ── METRIC FORMULA BOX ───────────────── */
+.formula-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin:1.4rem 0;}
+.formula-box{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:1.2rem 1.4rem;text-align:center;transition:all var(--tr);}
+.formula-box:hover{border-color:var(--accent);transform:translateY(-3px);}
+.formula-label{font-size:.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;}
+.formula-name{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;margin-bottom:.6rem;color:var(--text);transition:color var(--tr);}
+.formula-eq{font-family:'DM Mono',monospace;font-size:.88rem;background:var(--code-bg);color:var(--code-text);padding:.55rem 1rem;border-radius:8px;margin-bottom:.55rem;}
+.formula-desc{font-size:.82rem;color:var(--text-muted);line-height:1.6;transition:color var(--tr);}
+
+/* ── PRACTICAL TABLE ──────────────────── */
+.practical-table{background:var(--surface);border-radius:14px;overflow:hidden;border:1.5px solid var(--border);margin:1.4rem 0;transition:all var(--tr);}
+.practical-table table{font-size:.84rem;}
+.practical-table th{background:color-mix(in srgb,var(--accent) 15%,var(--surface2));color:var(--accent);}
+.total-row td{font-weight:700;color:var(--accent2) !important;background:color-mix(in srgb,var(--accent2) 8%,transparent);}
+.result-row td{font-weight:700;color:var(--accent3) !important;font-size:.9rem;}
+
+/* ── ACTIVITY BOX ─────────────────────── */
+.activity{background:color-mix(in srgb,var(--accent4) 7%,var(--surface));border:1.5px solid color-mix(in srgb,var(--accent4) 30%,var(--border));border-radius:14px;padding:1.4rem 1.6rem;margin:1.5rem 0;transition:all var(--tr);}
+.activity-hdr{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;}
+.activity-badge{background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:.28rem .75rem;border-radius:20px;}
+.activity-hdr span{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;color:var(--text);transition:color var(--tr);}
+.activity ol{padding-left:1.2rem;}
+.activity ol li{font-size:.88rem;color:var(--text-muted);padding:.35rem 0;transition:color var(--tr);}
+.activity ol li strong{color:var(--text);}
+
+/* ── ASSESSMENT ───────────────────────── */
+#assessment{padding:5rem 0 4rem;border-top:1px solid var(--border);}
+.aw{background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--accent) 7%,var(--surface)));border:1.5px solid color-mix(in srgb,var(--accent) 28%,var(--border));border-radius:22px;padding:2.8rem;transition:all var(--tr);}
+.a-title{font-family:'Playfair Display',serif;font-weight:900;font-size:2.1rem;letter-spacing:-.5px;margin-bottom:.35rem;color:var(--text);transition:color var(--tr);}
+.a-sub{color:var(--text-muted);font-size:.88rem;margin-bottom:2.2rem;}
+.qlabel{font-weight:700;font-size:.67rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent2);padding-bottom:.55rem;border-bottom:1px solid var(--border);margin:2.2rem 0 1.3rem;transition:all var(--tr);}
+.mcq{margin-bottom:1.8rem;}
+.mcq-q{font-size:.95rem;font-weight:500;margin-bottom:.85rem;color:var(--text);transition:color var(--tr);}
+.mcq-q em{color:var(--accent);font-style:normal;font-weight:700;font-family:'Playfair Display',serif;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;}
+.opt{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:.6rem .95rem;cursor:pointer;transition:all .2s;font-size:.86rem;color:var(--text-muted);display:flex;align-items:center;gap:.65rem;user-select:none;}
+.opt:hover{border-color:var(--accent);color:var(--text);}
+.opt.correct{background:color-mix(in srgb,var(--accent2) 12%,transparent);border-color:var(--accent2);color:var(--accent2);}
+.opt.wrong{background:color-mix(in srgb,var(--accent3) 9%,transparent);border-color:var(--accent3);color:var(--accent3);}
+.opt .ltr{width:21px;height:21px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;}
+.qa{margin-bottom:1.4rem;}
+.qa-q{font-size:.94rem;margin-bottom:.45rem;color:var(--text);transition:color var(--tr);}
+.qa-q em{color:var(--accent);font-style:normal;font-weight:700;font-family:'Playfair Display',serif;}
+.ans{background:var(--code-bg);border-left:3px solid var(--accent2);border-radius:0 9px 9px 0;padding:.95rem 1.2rem;font-size:.87rem;color:var(--code-text);line-height:1.82;display:none;margin-top:.45rem;transition:all var(--tr);}
+.ans.show{display:block;}
+.rbtn{background:transparent;border:1.5px solid var(--border);border-radius:7px;padding:.3rem .9rem;font-size:.74rem;color:var(--text-muted);cursor:pointer;font-weight:600;transition:all .2s;margin-top:.38rem;}
+.rbtn:hover{border-color:var(--accent2);color:var(--accent2);}
+.spanel{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:1.3rem 1.7rem;display:flex;align-items:center;justify-content:space-between;margin-top:1.8rem;flex-wrap:wrap;gap:1rem;transition:all var(--tr);}
+.snum{font-family:'Playfair Display',serif;font-weight:900;font-size:2.4rem;color:var(--accent);transition:color var(--tr);}
+.sbtn{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 68%,var(--accent2)));border:none;border-radius:11px;padding:.85rem 2.4rem;font-weight:700;font-size:.88rem;color:#fff;cursor:pointer;transition:all .22s;font-family:'Outfit',sans-serif;margin-top:1.4rem;}
+.sbtn:hover{transform:translateY(-3px);box-shadow:0 12px 28px color-mix(in srgb,var(--accent) 38%,transparent);}
+
+footer{text-align:center;padding:3rem 2rem;color:var(--text-muted);font-size:.82rem;border-top:1px solid var(--border);transition:all var(--tr);}
+footer span{color:var(--accent);}
+
+@media(max-width:640px){
+  .opts,.analytics-grid,.formula-grid{grid-template-columns:1fr;}
+  .nav-links{display:none;}
+  .aw{padding:1.4rem;}
+  .tlabel{display:none;} /* mobile */
+  .pipeline{flex-direction:column;}
+  .pipe-arrow{transform:rotate(90deg);}
+}
+</style>
+</head>
+<body>
+
+<!-- SKY -->
+<div class="sky">
+  <div class="sky-grad"></div>
+  <div class="celestial"><div class="crater cr1"></div><div class="crater cr2"></div><div class="crater cr3"></div></div>
+  <div class="stars-wrap" id="stars"></div>
+  <div class="clouds"><div class="cloud cl1"></div><div class="cloud cl2"></div><div class="cloud cl3"></div></div>
+</div>
+
+<!-- TOP BAR: logo + back + toggle -->
+<div class="nav-top">
+  <a href="index.html" class="back-btn">← Home</a>
+  <div class="nav-logo">Unit 2 · DS Methodology</div>
+  <div class="toggle-wrap">
+    <span class="tlabel" id="tlbl">Day</span>
+    <div class="tbtn" onclick="toggleTheme()"></div>
+    <span id="tico">☀️</span>
+  </div>
+</div>
+
+<!-- SCROLLABLE NAV STRIP -->
+<nav>
+  <div class="nav-links">
+    <a href="#overview">Overview</a>
+    <a href="#problem">Problem→Approach</a>
+    <a href="#requirements">Requirements→Collection</a>
+    <a href="#understanding">Understanding→Prep</a>
+    <a href="#modelling">Modelling→Eval</a>
+    <a href="#deployment">Deployment→Feedback</a>
+    <a href="#validation">Model Validation</a>
+    <a href="#metrics">Eval Metrics</a>
+    <a href="#practical">Practical</a>
+    <a href="#exercises">Exercises</a>
+    <a href="#assessment">Assessment</a>
+  </div>
+</nav>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="badge">Unit 02 · Class XII AI · Subject Code 843</div>
+    <h1>Data Science<br><span>Methodology</span></h1>
+    <p>An Analytic Approach to Capstone Project — the IBM 10-step framework by John B. Rollins, from Business Understanding all the way to Feedback.</p>
+    <div class="chips">
+      <a href="#overview" class="chip">📋 Overview</a>
+      <a href="#problem" class="chip">🎯 Problem→Approach</a>
+      <a href="#requirements" class="chip">📊 Data Requirements</a>
+      <a href="#understanding" class="chip">🔍 Data Understanding</a>
+      <a href="#modelling" class="chip">🧠 Modelling</a>
+      <a href="#deployment" class="chip">🚀 Deployment</a>
+      <a href="#validation" class="chip">✅ Model Validation</a>
+      <a href="#metrics" class="chip">📈 Eval Metrics</a>
+      <a href="#practical" class="chip">💻 Practical</a>
+      <a href="#exercises" class="chip">📝 Exercises</a>
+      <a href="#assessment" class="chip">🏆 Assessment</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION: OVERVIEW
+════════════════════════════════════════ -->
+<section class="topic" id="overview">
+<div class="container">
+  <div class="s-tag">Unit 2 — Overview</div>
+  <div class="s-title">Chapter Summary & Learning Objectives</div>
+  <div class="s-intro">
+    The Data Science Methodology put forward by <strong>John B. Rollins</strong>, a Data Scientist in IBM Analytics, is discussed here. The major steps involved in practising Data Science — from forming a concrete business or research problem, to collecting and analysing data, to building a model, and understanding the feedback after model deployment — are detailed here. <strong>Students can develop their Capstone Project based on this methodology.</strong>
+  </div>
+
+  <div class="ig">
+    <div class="ic"><h4>Learning Objectives</h4><ul>
+      <li>Understand the major steps involved in tackling a Data Science problem</li>
+      <li>Define Data Science methodology and articulate its importance</li>
+      <li>Demonstrate the steps of Data Science Methodology</li>
+    </ul></div>
+    <div class="ic"><h4>Key Concepts</h4><ul>
+      <li>Introduction to Data Science Methodology</li>
+      <li>Steps for Data Science Methodology (10 steps)</li>
+      <li>Model Validation Techniques</li>
+      <li>Model Performance — Evaluation Metrics</li>
+    </ul></div>
+    <div class="ic"><h4>Learning Outcomes</h4><ul>
+      <li>Integrate DS Methodology steps into the Capstone Project</li>
+      <li>Identify the best way to represent a solution to a problem</li>
+      <li>Understand the importance of validating machine learning models</li>
+      <li>Use key evaluation metrics for various ML tasks</li>
+    </ul></div>
+    <div class="ic"><h4>Approach & Prerequisites</h4><ul>
+      <li>Hands-on and team discussion</li>
+      <li>Web search and case studies</li>
+      <li>Prerequisite: AI concepts from Class XI</li>
+      <li>Familiarity with Capstone Project objectives</li>
+    </ul></div>
+  </div>
+
+  <!-- THE 10-STEP PIPELINE VISUAL -->
+  <h3 class="sh">The IBM Data Science Methodology — 10 Steps, 5 Modules</h3>
+  <p class="bd">Data Science Methodology is a process with a <strong>prescribed sequence of iterative steps</strong> that data scientists follow to approach a problem and find a solution. It consists of <strong>5 modules, each covering 2 stages</strong>:</p>
+
+  <div class="pipeline">
+    <div class="pipe-module" style="--card-accent:var(--accent)">
+      <div class="pipe-num">1</div>
+      <div class="pipe-title">Problem → Approach</div>
+      <div class="pipe-steps">Business Understanding<br>Analytic Approach</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-module">
+      <div class="pipe-num">2</div>
+      <div class="pipe-title">Requirements → Collection</div>
+      <div class="pipe-steps">Data Requirements<br>Data Collection</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-module">
+      <div class="pipe-num">3</div>
+      <div class="pipe-title">Understanding → Preparation</div>
+      <div class="pipe-steps">Data Understanding<br>Data Preparation</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-module">
+      <div class="pipe-num">4</div>
+      <div class="pipe-title">Modelling → Evaluation</div>
+      <div class="pipe-steps">AI Modelling<br>Evaluation</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-module">
+      <div class="pipe-num">5</div>
+      <div class="pipe-title">Deployment → Feedback</div>
+      <div class="pipe-steps">Deployment<br>Feedback</div>
+    </div>
+  </div>
+
+  <!-- FULL 10-STEP FLOWCHART -->
+  <div class="flowchart-wrap">
+    <h4>📊 Complete DS Methodology Flowchart</h4>
+    <svg viewBox="0 0 760 640" width="100%" style="max-width:760px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#d97b34"/>
+        </marker>
+        <marker id="arrn" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#7a5c42"/>
+        </marker>
+      </defs>
+      <!-- Step boxes -->
+      <!-- Row 1 -->
+      <rect x="290" y="10" width="180" height="44" rx="10" fill="#d97b34" opacity="0.18" stroke="#d97b34" stroke-width="1.5"/>
+      <text x="380" y="37" text-anchor="middle" font-size="13" font-weight="700" fill="#d97b34">Business Understanding</text>
+      <!-- arrow -->
+      <line x1="380" y1="54" x2="380" y2="80" stroke="#d97b34" stroke-width="2" marker-end="url(#arr)"/>
+      <!-- Row 2 -->
+      <rect x="290" y="82" width="180" height="44" rx="10" fill="#d97b34" opacity="0.18" stroke="#d97b34" stroke-width="1.5"/>
+      <text x="380" y="109" text-anchor="middle" font-size="13" font-weight="700" fill="#d97b34">Analytic Approach</text>
+      <line x1="380" y1="126" x2="380" y2="152" stroke="#d97b34" stroke-width="2" marker-end="url(#arr)"/>
+      <!-- Row 3 -->
+      <rect x="290" y="154" width="180" height="44" rx="10" fill="#2d8a4e" opacity="0.15" stroke="#2d8a4e" stroke-width="1.5"/>
+      <text x="380" y="181" text-anchor="middle" font-size="13" font-weight="700" fill="#2d8a4e">Data Requirements</text>
+      <line x1="380" y1="198" x2="380" y2="224" stroke="#2d8a4e" stroke-width="2" marker-end="url(#arr)"/>
+      <!-- Row 4 -->
+      <rect x="290" y="226" width="180" height="44" rx="10" fill="#2d8a4e" opacity="0.15" stroke="#2d8a4e" stroke-width="1.5"/>
+      <text x="380" y="253" text-anchor="middle" font-size="13" font-weight="700" fill="#2d8a4e">Data Collection</text>
+      <line x1="380" y1="270" x2="380" y2="296" stroke="#2d8a4e" stroke-width="2" marker-end="url(#arr)"/>
+      <!-- Row 5 -->
+      <rect x="290" y="298" width="180" height="44" rx="10" fill="#8b5cf6" opacity="0.15" stroke="#8b5cf6" stroke-width="1.5"/>
+      <text x="380" y="325" text-anchor="middle" font-size="13" font-weight="700" fill="#8b5cf6">Data Understanding</text>
+      <line x1="380" y1="342" x2="380" y2="368" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arr)"/>
+      <!-- Row 6 -->
+      <rect x="290" y="370" width="180" height="44" rx="10" fill="#8b5cf6" opacity="0.15" stroke="#8b5cf6" stroke-width="1.5"/>
+      <text x="380" y="397" text-anchor="middle" font-size="13" font-weight="700" fill="#8b5cf6">Data Preparation</text>
+      <line x1="380" y1="414" x2="380" y2="440" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arr)"/>
+      <!-- Row 7 -->
+      <rect x="290" y="442" width="180" height="44" rx="10" fill="#c94f27" opacity="0.15" stroke="#c94f27" stroke-width="1.5"/>
+      <text x="380" y="469" text-anchor="middle" font-size="13" font-weight="700" fill="#c94f27">AI Modelling</text>
+      <line x1="380" y1="486" x2="380" y2="512" stroke="#c94f27" stroke-width="2" marker-end="url(#arr)"/>
+      <!-- Row 8 -->
+      <rect x="290" y="514" width="180" height="44" rx="10" fill="#c94f27" opacity="0.15" stroke="#c94f27" stroke-width="1.5"/>
+      <text x="380" y="541" text-anchor="middle" font-size="13" font-weight="700" fill="#c94f27">Evaluation</text>
+      <line x1="380" y1="558" x2="380" y2="584" stroke="#c94f27" stroke-width="2" marker-end="url(#arr)"/>
+      <!-- Row 9 -->
+      <rect x="155" y="586" width="180" height="44" rx="10" fill="#3b82f6" opacity="0.15" stroke="#3b82f6" stroke-width="1.5"/>
+      <text x="245" y="613" text-anchor="middle" font-size="13" font-weight="700" fill="#3b82f6">Deployment</text>
+      <!-- arrow between 9 and 10 -->
+      <line x1="335" y1="608" x2="420" y2="608" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr)"/>
+      <!-- Row 10 -->
+      <rect x="422" y="586" width="180" height="44" rx="10" fill="#3b82f6" opacity="0.15" stroke="#3b82f6" stroke-width="1.5"/>
+      <text x="512" y="613" text-anchor="middle" font-size="13" font-weight="700" fill="#3b82f6">Feedback</text>
+      <!-- split arrow from row 8 -->
+      <line x1="380" y1="586" x2="245" y2="586" stroke="#3b82f6" stroke-width="2"/>
+      <line x1="380" y1="586" x2="512" y2="586" stroke="#3b82f6" stroke-width="2"/>
+      <!-- iterative arrow back -->
+      <path d="M 600 608 Q 680 608 680 380 Q 680 154 470 154" stroke="#7a5c42" stroke-width="1.5" fill="none" stroke-dasharray="5,4" marker-end="url(#arrn)"/>
+      <text x="700" y="390" font-size="10" fill="#7a5c42" transform="rotate(90,700,390)">Iterative</text>
+      <!-- Module labels -->
+      <text x="15" y="40" font-size="10" font-weight="700" fill="#d97b34" opacity="0.8">Module 1</text>
+      <text x="15" y="108" font-size="10" font-weight="700" fill="#d97b34" opacity="0.8">Module 1</text>
+      <text x="15" y="180" font-size="10" font-weight="700" fill="#2d8a4e" opacity="0.8">Module 2</text>
+      <text x="15" y="253" font-size="10" font-weight="700" fill="#2d8a4e" opacity="0.8">Module 2</text>
+      <text x="15" y="325" font-size="10" font-weight="700" fill="#8b5cf6" opacity="0.8">Module 3</text>
+      <text x="15" y="397" font-size="10" font-weight="700" fill="#8b5cf6" opacity="0.8">Module 3</text>
+      <text x="15" y="469" font-size="10" font-weight="700" fill="#c94f27" opacity="0.8">Module 4</text>
+      <text x="15" y="541" font-size="10" font-weight="700" fill="#c94f27" opacity="0.8">Module 4</text>
+      <text x="15" y="613" font-size="10" font-weight="700" fill="#3b82f6" opacity="0.8">Module 5</text>
+    </svg>
+  </div>
+
+  <div class="hl"><strong>📌 Why Methodology?</strong> A Methodology gives the Data Scientist a framework for designing an AI Project. The framework helps the team decide on the methods, processes, and strategies employed to obtain the correct output. It is the best way to organise the entire project and finish it systematically without losing time and cost. The methodology is <strong>cyclical and iterative</strong> — each step refines the previous one.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION 2.1 — MODULE 1: PROBLEM → APPROACH
+════════════════════════════════════════ -->
+<section class="topic" id="problem">
+<div class="container">
+  <div class="s-tag">Module 1 — Steps 1 & 2</div>
+  <div class="s-title">From Problem to Approach</div>
+  <div class="s-intro">
+    The first module establishes the <strong>foundation of the entire project</strong>. Without a clear problem definition and the right analytical approach, all subsequent work is misdirected. This module answers two critical questions: <em>What is the problem?</em> and <em>How will we use data to solve it?</em>
+  </div>
+
+  <!-- 2.1.1 BUSINESS UNDERSTANDING -->
+  <h3 class="sh">2.1.1 — Business Understanding</h3>
+  <p class="bd"><strong>Question: What is the problem that you are trying to solve?</strong></p>
+  <p class="bd">In this stage, we first understand the problem of the customer by asking questions and trying to comprehend what is exactly required. This is also known as <strong>Problem Scoping and Defining</strong>. With this understanding we can figure out the objectives that support the customer's goal.</p>
+
+  <div class="cards">
+    <div class="card"><div class="icon">🎯</div><h4>5W1H Problem Canvas</h4><p>Use the 5W1H framework (Who, What, Where, When, Why, How) to deeply understand the issue at every stage — especially Business Understanding and Data Requirements.</p></div>
+    <div class="card"><div class="icon">🤝</div><h4>Stakeholder Engagement</h4><p>Ask relevant questions and engage in discussions with <strong>all stakeholders</strong> to identify specific requirements and create a comprehensive list of business needs.</p></div>
+    <div class="card"><div class="icon">🎨</div><h4>Design Thinking</h4><p>This stage also involves using the <strong>DT (Design Thinking) Framework</strong> to empathise with users and reframe problems in human-centric ways.</p></div>
+    <div class="card"><div class="icon">📋</div><h4>Output</h4><p>A clear, written problem statement that defines what success looks like — the compass for the entire project team.</p></div>
+  </div>
+
+  <div class="activity">
+    <div class="activity-hdr"><span class="activity-badge">Activity 1</span><span>Pavan Sankar at a Food Festival</span></div>
+    <p style="font-size:.88rem;color:var(--text-muted);margin-bottom:.8rem;">Mr. Pavan Sankar visited a food festival and wants to sample various cuisines. Due to health concerns, he must avoid certain dishes. Since dishes were not categorised by cuisine, he found it challenging and wished for assistance.</p>
+    <ol>
+      <li><strong>Q1.</strong> Are you ready to help Pavan Sankar?</li>
+      <li><strong>Q2.</strong> What is the actual problem of Pavan? <em>(Hint: He cannot identify dish cuisines)</em></li>
+      <li><strong>Q3.</strong> Can we predict the cuisine of a dish using its name only?</li>
+      <li><strong>Q4.</strong> Identify cuisines: Bubble and Squeak / Phan Pyat / Jadoh</li>
+      <li><strong>Q5.</strong> Is it possible to determine cuisine and dish name by analysing an image?</li>
+      <li><strong>Q6.</strong> Can you determine the cuisine of a dish based on its ingredients?</li>
+      <li><strong>Q7.</strong> What dish can be made from: flour, yeast, water, salt, olive oil, tomato sauce, mozzarella? <em>(Answer: Pizza — Italian cuisine)</em></li>
+    </ol>
+  </div>
+
+  <!-- 2.1.2 ANALYTIC APPROACH -->
+  <h3 class="sh">2.1.2 — Analytic Approach</h3>
+  <p class="bd"><strong>Question: How can you use the data to answer the question?</strong></p>
+  <p class="bd">When the business problem has been established clearly, the data scientist defines the <strong>analytical approach</strong> to solve the problem. This involves seeking clarification from stakeholders to pick the most appropriate path. The team asks key questions:</p>
+
+  <div class="cards">
+    <div class="card"><div class="icon">📊</div><h4>Regression</h4><p>Do I need to find <strong>how much or how many?</strong> Use regression when the target is a continuous number (price, temperature, sales).</p></div>
+    <div class="card"><div class="icon">🏷️</div><h4>Classification</h4><p>Which <strong>category</strong> does the data belong to? Use classification when predicting a class label (spam/not spam, disease/no disease).</p></div>
+    <div class="card"><div class="icon">🔵</div><h4>Clustering</h4><p>Can the data be <strong>grouped</strong>? Use clustering for unsupervised grouping of similar items (customer segments).</p></div>
+    <div class="card"><div class="icon">🚨</div><h4>Anomaly Detection</h4><p>Is there any <strong>unusual pattern</strong> in the data? Detect fraud, network intrusions, or equipment faults.</p></div>
+  </div>
+
+  <!-- 4 ANALYTICS TYPES -->
+  <h3 class="sh">The Four Types of Data Analytics</h3>
+  <p class="bd">To solve a particular problem, there are four main types of data analytics:</p>
+  <div class="analytics-grid">
+    <div class="a-card desc-card">
+      <div class="a-icon">📈</div>
+      <div class="a-label">Step 1</div>
+      <h4>Descriptive Analytics</h4>
+      <p>Summarises <strong>past data</strong> to understand what has happened. Uses graphs, charts, mean, median, mode, variance and standard deviation.</p>
+      <div class="a-eg">📌 Example: Average marks of students in an exam; analysing last year's sales data.</div>
+    </div>
+    <div class="a-card diag-card">
+      <div class="a-icon">🔍</div>
+      <div class="a-label">Step 2</div>
+      <h4>Diagnostic Analytics</h4>
+      <p>Understands <strong>why things happened</strong> using root cause analysis, hypothesis testing, and correlation analysis.</p>
+      <div class="a-eg">📌 Example: Why did company sales drop? Was it poor customer service or low product quality?</div>
+    </div>
+    <div class="a-card pred-card">
+      <div class="a-icon">🔮</div>
+      <div class="a-label">Step 3</div>
+      <h4>Predictive Analytics</h4>
+      <p>Uses past data to make <strong>predictions about future events</strong> using regression, classification, and clustering.</p>
+      <div class="a-eg">📌 Example: Forecast sales, demand, inventory, customer purchase patterns based on previous data.</div>
+    </div>
+    <div class="a-card pres-card">
+      <div class="a-icon">💡</div>
+      <div class="a-label">Step 4</div>
+      <h4>Prescriptive Analytics</h4>
+      <p>Recommends the <strong>best action to take</strong> to achieve the desired outcome using optimisation and decision analysis.</p>
+      <div class="a-eg">📌 Example: Design the right strategy to increase festival-season sales by optimising pricing and marketing.</div>
+    </div>
+  </div>
+
+  <!-- ANALYTICS COMPARISON TABLE -->
+  <div class="tw">
+    <table>
+      <tr><th></th><th>Descriptive</th><th>Diagnostic</th><th>Predictive</th><th>Prescriptive</th></tr>
+      <tr><td><strong>Focus</strong></td><td>Summarising historical data patterns</td><td>Understanding why certain events occurred</td><td>Predicting future outcomes based on historical data</td><td>Determining the best course of action</td></tr>
+      <tr><td><strong>Purpose</strong></td><td>Identify patterns, trends and anomalies in past data</td><td>Uncover root causes and contributing factors</td><td>Forecast future events or behaviours</td><td>Recommend specific actions based on predictive insights</td></tr>
+      <tr><td><strong>Techniques</strong></td><td>Mean, median, charts, histograms</td><td>Root cause analysis, correlation</td><td>Regression, classification, clustering</td><td>Optimisation, simulation, decision analysis</td></tr>
+    </table>
+  </div>
+
+  <!-- ANALYTIC APPROACH FLOWCHART -->
+  <div class="flowchart-wrap" style="margin-top:1.5rem;">
+    <h4>🔄 Activity 2 — Pavan's Classification Flowchart (Cuisine Identification)</h4>
+    <svg viewBox="0 0 600 300" width="100%" style="max-width:600px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="fa" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#f59e0b"/>
+        </marker>
+      </defs>
+      <rect x="210" y="10" width="180" height="44" rx="22" fill="#f59e0b" opacity="0.2" stroke="#f59e0b" stroke-width="2"/>
+      <text x="300" y="37" text-anchor="middle" font-size="12" font-weight="700" fill="#f59e0b">Input: Ingredients</text>
+      <line x1="300" y1="54" x2="300" y2="80" stroke="#f59e0b" stroke-width="2" marker-end="url(#fa)"/>
+      <rect x="180" y="82" width="240" height="44" rx="10" fill="#8b5cf6" opacity="0.15" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="300" y="109" text-anchor="middle" font-size="12" font-weight="700" fill="#8b5cf6">Classification Algorithm</text>
+      <text x="300" y="122" text-anchor="middle" font-size="10" fill="#8b5cf6">(Decision Tree)</text>
+      <line x1="300" y1="126" x2="300" y2="152" stroke="#8b5cf6" stroke-width="2" marker-end="url(#fa)"/>
+      <!-- diamond -->
+      <polygon points="300,154 400,200 300,246 200,200" fill="#2d8a4e" opacity="0.12" stroke="#2d8a4e" stroke-width="2"/>
+      <text x="300" y="196" text-anchor="middle" font-size="11" font-weight="700" fill="#2d8a4e">Classify</text>
+      <text x="300" y="210" text-anchor="middle" font-size="10" fill="#2d8a4e">Cuisine?</text>
+      <!-- outputs -->
+      <line x1="200" y1="200" x2="90" y2="200" stroke="#2d8a4e" stroke-width="2" marker-end="url(#fa)"/>
+      <rect x="10" y="178" width="80" height="44" rx="10" fill="#2d8a4e" opacity="0.15" stroke="#2d8a4e" stroke-width="1.5"/>
+      <text x="50" y="200" text-anchor="middle" font-size="11" font-weight="700" fill="#2d8a4e">Indian</text>
+      <text x="50" y="212" text-anchor="middle" font-size="9" fill="#2d8a4e">Cuisine</text>
+      <line x1="400" y1="200" x2="510" y2="200" stroke="#2d8a4e" stroke-width="2" marker-end="url(#fa)"/>
+      <rect x="510" y="178" width="80" height="44" rx="10" fill="#2d8a4e" opacity="0.15" stroke="#2d8a4e" stroke-width="1.5"/>
+      <text x="550" y="200" text-anchor="middle" font-size="11" font-weight="700" fill="#2d8a4e">Japanese</text>
+      <text x="550" y="212" text-anchor="middle" font-size="9" fill="#2d8a4e">Cuisine</text>
+      <line x1="300" y1="246" x2="300" y2="272" stroke="#2d8a4e" stroke-width="2" marker-end="url(#fa)"/>
+      <rect x="210" y="272" width="180" height="26" rx="13" fill="#d97b34" opacity="0.18" stroke="#d97b34" stroke-width="1.5"/>
+      <text x="300" y="289" text-anchor="middle" font-size="11" font-weight="700" fill="#d97b34">Output: Dish + Cuisine</text>
+      <!-- labels -->
+      <text x="145" y="196" text-anchor="middle" font-size="10" fill="#2d8a4e">Predictive</text>
+      <text x="455" y="196" text-anchor="middle" font-size="10" fill="#2d8a4e">Analytics</text>
+    </svg>
+    <div class="note" style="margin-top:1rem;"><strong>📌 Answers:</strong> Q1 → C) Predictive Analytics &nbsp;|&nbsp; Q2 → Classification approach &nbsp;|&nbsp; Q3 → Decision Tree algorithm</div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION — MODULE 2: REQUIREMENTS → COLLECTION
+════════════════════════════════════════ -->
+<section class="topic" id="requirements">
+<div class="container">
+  <div class="s-tag">Module 2 — Steps 3 & 4</div>
+  <div class="s-title">From Requirements to Collection</div>
+  <div class="s-intro">
+    Once the analytic approach is defined, the next question is: <strong>what data do we need, and where do we get it?</strong> This module covers identifying data requirements and systematically collecting the right data from the right sources.
+  </div>
+
+  <!-- 2.1.3 DATA REQUIREMENTS -->
+  <h3 class="sh">2.1.3 — Data Requirements</h3>
+  <p class="bd"><strong>Question: What are the data requirements?</strong></p>
+  <p class="bd">The requirements of data are determined by the <strong>analytic approach chosen</strong> in the previous stage. The 5W1H questioning method can be employed here too. It is necessary to identify the data content, formats, and sources for initial data collection.</p>
+
+  <div class="cards">
+    <div class="card"><div class="icon">📌</div><h4>Type of Data</h4><p>Identify the types of data required — numbers (quantitative), words (qualitative), or images (visual/unstructured).</p></div>
+    <div class="card"><div class="icon">🗂️</div><h4>Data Structure</h4><p>Consider the structure: a table (structured), a text file, a database, or an unstructured format like images and audio.</p></div>
+    <div class="card"><div class="icon">🌐</div><h4>Data Sources</h4><p>Identify the sources from which data can be collected — primary sources (surveys, IoT) or secondary sources (Kaggle, WHO).</p></div>
+    <div class="card"><div class="icon">🧹</div><h4>Preprocessing</h4><p>Define any necessary cleaning or organisation steps required before analysis can begin — handling NaN, format conversion.</p></div>
+  </div>
+
+  <h3 class="sh">Three Types of Data</h3>
+  <div class="dtype-grid">
+    <div class="dtype-card struct">
+      <div class="dt-icon">📋</div>
+      <h4>Structured Data</h4>
+      <p>Organised in tables with rows and columns. Has a predefined schema.</p>
+      <div style="font-size:.78rem;color:var(--text-muted);margin-top:.5rem;">📌 Examples: Customer databases, Excel sheets, SQL tables, CSV files</div>
+    </div>
+    <div class="dtype-card unstruct">
+      <div class="dt-icon">🖼️</div>
+      <h4>Unstructured Data</h4>
+      <p>Has no predefined structure. Difficult to analyse without preprocessing.</p>
+      <div style="font-size:.78rem;color:var(--text-muted);margin-top:.5rem;">📌 Examples: Social media posts, images, videos, audio, emails</div>
+    </div>
+    <div class="dtype-card semistruct">
+      <div class="dt-icon">📧</div>
+      <h4>Semi-Structured Data</h4>
+      <p>Has some organisational properties but is not fully structured in a table.</p>
+      <div style="font-size:.78rem;color:var(--text-muted);margin-top:.5rem;">📌 Examples: Emails, XML files, JSON, HTML pages</div>
+    </div>
+  </div>
+
+  <!-- 2.1.4 DATA COLLECTION -->
+  <h3 class="sh">2.1.4 — Data Collection</h3>
+  <p class="bd"><strong>Question: What occurs during data collection?</strong></p>
+  <p class="bd">Data collection is a systematic process of gathering observations or measurements. In this phase, data requirements are revised and decisions are made as to whether more or less data is needed. Today's high-performance database analytics enable data scientists to utilise large datasets.</p>
+
+  <div class="cards">
+    <div class="card"><div class="icon">🔬</div><h4>Primary Data Source</h4><p>Original, firsthand data collected via <strong>direct observation, surveys, interviews, IoT sensors, or experiments</strong>. Raw, unprocessed, and unbiased.<br><br><em>Examples: Marketing campaigns, feedback forms, IoT sensor data</em></p></div>
+    <div class="card"><div class="icon">📚</div><h4>Secondary Data Source</h4><p>Data already stored and ready for use. Collected from books, journals, websites, databases, and online repositories.<br><br><em>Examples: Kaggle, WHO, World Bank, data.gov, UNICEF, Google</em></p></div>
+  </div>
+
+  <div class="hl"><strong>💡 Revision of Data Collection:</strong> The Data Collection stage may be revisited after the Data Understanding stage, where gaps in the data are identified and strategies are developed to either collect additional data or make substitutions to ensure data completeness. DBAs and programmers often work together to extract data from both primary and secondary sources.</div>
+
+  <h3 class="sh">Methods of Secondary Data Collection</h3>
+  <div class="ig">
+    <div class="ic"><h4>Online Methods</h4><ul>
+      <li>Social media data tracking</li>
+      <li>Web scraping</li>
+      <li>Satellite data tracking</li>
+      <li>Smart forms (online surveys)</li>
+    </ul></div>
+    <div class="ic"><h4>Online Data Repositories</h4><ul>
+      <li>data.gov (US Government data)</li>
+      <li>World Bank Open Data</li>
+      <li>UNICEF data portal</li>
+      <li>Kaggle datasets</li>
+      <li>WHO (World Health Organization)</li>
+      <li>Google Dataset Search</li>
+    </ul></div>
+    <div class="ic"><h4>Activity 4 — Pavan's Data Collection</h4><ul>
+      <li>American cuisine names → Search food databases online</li>
+      <li>Healthy Indian recipes → Recipe websites, YouTube, cookbooks, surveys</li>
+      <li>Large dataset → Kaggle, web scraping, IoT sensors; stored in cloud databases or CSV/JSON</li>
+    </ul></div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION — MODULE 3: UNDERSTANDING → PREPARATION
+════════════════════════════════════════ -->
+<section class="topic" id="understanding">
+<div class="container">
+  <div class="s-tag">Module 3 — Steps 5 & 6</div>
+  <div class="s-title">From Understanding to Preparation</div>
+  <div class="s-intro">
+    This is the most <strong>time-consuming module</strong> in Data Science. Data is rarely clean when first collected — it contains errors, missing values, duplicates, and irrelevant fields. This module covers evaluating data quality and transforming it into a usable form.
+  </div>
+
+  <!-- 2.1.5 DATA UNDERSTANDING -->
+  <h3 class="sh">2.1.5 — Data Understanding</h3>
+  <p class="bd"><strong>Question: Is the data collected representative of the problem to be solved?</strong></p>
+  <p class="bd">Data Understanding encompasses all activities related to constructing the dataset. We check whether the data collected represents the problem to be solved. The relevance, comprehensiveness, and suitability of the data are evaluated using descriptive statistics and visualisation.</p>
+
+  <div class="cards">
+    <div class="card"><div class="icon">📊</div><h4>Univariate Analysis</h4><p>Analyse each feature individually — mean, median, mode, range, variance, standard deviation, percentiles.</p></div>
+    <div class="card"><div class="icon">🔗</div><h4>Pairwise Correlation</h4><p>Assess how pairs of variables relate to each other. Helps identify which features are most predictive of the target.</p></div>
+    <div class="card"><div class="icon">📉</div><h4>Visualisation</h4><p>Apply histograms, scatter plots, box plots and bar charts to understand distribution, outliers, and patterns in the data.</p></div>
+    <div class="card"><div class="icon">🔎</div><h4>Quality Check</h4><p>Identify invalid values, incorrect data types, missing entries, and duplicates before moving to preparation.</p></div>
+  </div>
+
+  <!-- SAMPLE DATA TABLE FROM TEXTBOOK -->
+  <h4 class="ssh">Activity 5 — Sample Dish Ingredients Data (Table 2.2)</h4>
+  <div class="tw">
+    <table>
+      <tr><th>Dish</th><th>Country</th><th>Salt</th><th>Chilli</th><th>Onion</th><th>Oil</th><th>Rice</th><th>Fish</th><th>Chicken</th><th>Potato</th><th>Milk</th><th>Sugar</th><th>Veg</th><th>Soy Sauce</th><th>Wasabi</th></tr>
+      <tr><td>Chicken Biriyani</td><td>Indian</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>Kheer</td><td>Indian</td><td>0</td><td>0</td><td>0</td><td><strong style="color:var(--accent3)">N</strong></td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>Pulao</td><td><strong style="color:var(--accent3)">Indiana</strong></td><td>1</td><td>1</td><td>1</td><td>1</td><td><strong style="color:var(--accent3)">One</strong></td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><td>Sushi</td><td>Japanese</td><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td><strong style="color:var(--accent3)">N</strong></td><td>0</td><td>1</td><td>0</td><td>—</td></tr>
+      <tr><td>Fried Rice</td><td>Chinese</td><td><strong style="color:var(--accent3)">Y</strong></td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td><td>0</td><td>1</td><td>—</td></tr>
+    </table>
+  </div>
+  <div class="warn"><strong>⚠️ Data Issues Found in Table 2.2:</strong> Country "Indiana" should be "Indian" (textual error) · Rice column has "One" instead of 1 · Milk/Science columns have "N" instead of 0 or NaN · Salt column has "Y" instead of 1 · First column name "Dish" could be more descriptive · Pulao and Fried Rice rows have missing data (—) for Wasabi/Soy Sauce columns · Chicken Biriyani has value "2" in Fish column (should be 0 or 1).</div>
+
+  <!-- 2.1.6 DATA PREPARATION -->
+  <h3 class="sh">2.1.6 — Data Preparation</h3>
+  <p class="bd"><strong>Question: What additional work is required to manipulate and work with the data?</strong></p>
+  <p class="bd">This stage covers all activities to build the dataset for the modelling step. Data is transformed into a state where it is easier to work with. <strong>Data preparation is the most time-consuming step</strong> among all Data Science stages.</p>
+
+  <div class="cards">
+    <div class="card"><div class="icon">🧹</div><h4>Data Cleaning</h4><p>Deal with invalid or missing values (NaN, typos, wrong formats), remove duplicate entries, and assign correct data types.</p></div>
+    <div class="card"><div class="icon">🔗</div><h4>Combine Data</h4><p>Merge data from multiple sources — archives, tables, and platforms — into a single unified dataset for modelling.</p></div>
+    <div class="card"><div class="icon">⚙️</div><h4>Transform Data</h4><p>Convert data into meaningful input variables — encoding categorical data, normalisation, and scaling.</p></div>
+    <div class="card"><div class="icon">🛠️</div><h4>Feature Engineering</h4><p>Select, modify, or create new features from raw data to improve model performance. Example: Age of house = Current year − Year built.</p></div>
+  </div>
+
+  <h4 class="ssh">Feature Engineering — House Price Example</h4>
+  <div class="ig">
+    <div class="ic"><h4>Raw Data Available</h4><ul>
+      <li>Area of the house (in sq.ft)</li>
+      <li>Number of bedrooms</li>
+      <li>Year the house was built</li>
+    </ul></div>
+    <div class="ic"><h4>New Engineered Features</h4><ul>
+      <li><strong>Age of house</strong> = Current year − Year built</li>
+      <li><strong>Price per sq.ft</strong> = Price of house ÷ Area</li>
+      <li><strong>Rooms per bedroom</strong> = Total rooms ÷ Bedrooms</li>
+    </ul></div>
+    <div class="ic"><h4>Why Feature Engineering?</h4><ul>
+      <li>Helps the model make more accurate predictions</li>
+      <li>Removes irrelevant or redundant features</li>
+      <li>Captures domain knowledge in variables</li>
+      <li>Improves both accuracy and training speed</li>
+    </ul></div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION — MODULE 4: MODELLING → EVALUATION
+════════════════════════════════════════ -->
+<section class="topic" id="modelling">
+<div class="container">
+  <div class="s-tag">Module 4 — Steps 7 & 8</div>
+  <div class="s-title">From Modelling to Evaluation</div>
+  <div class="s-intro">
+    With clean, prepared data in hand, the data scientist now builds and refines models. The modelling process is <strong>usually iterative</strong> — leading to adjustments in data preparation. Multiple algorithms are tested to find the best model for the Capstone Project.
+  </div>
+
+  <!-- 2.1.7 AI MODELLING -->
+  <h3 class="sh">2.1.7 — AI Modelling</h3>
+  <p class="bd"><strong>Question: In what way can the data be visualised to get to the required answer?</strong></p>
+  <p class="bd">Data Modelling focuses on developing models that are either <strong>Descriptive</strong> or <strong>Predictive</strong>. Data scientists can test multiple algorithms to identify the most suitable model for the Capstone Project.</p>
+
+  <div class="cards">
+    <div class="card"><div class="icon">📊</div><h4>Descriptive Modelling</h4><p>Summarises and understands the <strong>characteristics of a dataset without making predictions</strong>. Goal: describe data, not predict or decide.</p></div>
+    <div class="card"><div class="icon">🔮</div><h4>Predictive Modelling</h4><p>Uses statistical algorithms to identify patterns and predict <strong>future outcomes or values</strong> from historical data using regression, classification, etc.</p></div>
+    <div class="card"><div class="icon">🎯</div><h4>Training Set</h4><p>The data scientist uses a <strong>training set</strong> — historical data where outcomes are already known — to train and calibrate the model.</p></div>
+    <div class="card"><div class="icon">🔄</div><h4>Iterative</h4><p>The modelling process leads to adjustments back in Data Preparation. Multiple algorithms are tried until the best one is identified.</p></div>
+  </div>
+
+  <h4 class="ssh">Descriptive Modelling — Techniques</h4>
+  <div class="ig">
+    <div class="ic"><h4>Summary Statistics</h4><ul>
+      <li>Mean, Median, Mode</li>
+      <li>Standard Deviation, Variance</li>
+      <li>Range (highest − lowest)</li>
+      <li>Percentiles (quartiles Q1, Q2, Q3)</li>
+    </ul></div>
+    <div class="ic"><h4>Visualisations</h4><ul>
+      <li>Bar charts — compare categories</li>
+      <li>Histograms — frequency distribution</li>
+      <li>Pie charts — proportion of parts</li>
+      <li>Box plots — spread and outliers</li>
+      <li>Scatter plots — two-variable relationships</li>
+    </ul></div>
+  </div>
+
+  <h4 class="ssh">Predictive Modelling — Techniques</h4>
+  <div class="cards">
+    <div class="card"><div class="icon">📏</div><h4>Regression</h4><p>Predicts a continuous target value. Example: house price, exam score, temperature next week.</p></div>
+    <div class="card"><div class="icon">🏷️</div><h4>Classification</h4><p>Predicts which category/class something belongs to. Example: spam/not spam, disease type, cuisine type.</p></div>
+    <div class="card"><div class="icon">🔵</div><h4>Time-Series Forecasting</h4><p>Predicts values at future time points based on historical time-ordered data. Example: stock prices, weather.</p></div>
+    <div class="card"><div class="icon">🌳</div><h4>Decision Tree</h4><p>A tree-like model used for both classification and regression. Implemented in Python using scikit-learn. Libraries: pandas, numpy, sklearn.</p></div>
+  </div>
+
+  <!-- 2.1.8 EVALUATION -->
+  <h3 class="sh">2.1.8 — Evaluation</h3>
+  <p class="bd"><strong>Question: Does the model used really answer the initial question, or does it need to be adjusted?</strong></p>
+  <p class="bd">Evaluation is the process of assessing how well a model performs after training. It involves using <strong>test data</strong> to measure metrics like accuracy, precision, recall, or F1 score. This helps determine if the model is reliable before deployment.</p>
+
+  <div class="cards">
+    <div class="card"><div class="icon">🔬</div><h4>Phase 1: Diagnostic Measures</h4><p>Ensures the model is working as intended. For a predictive model, a <strong>decision tree</strong> can evaluate whether output aligns with initial design or needs adjustment.</p></div>
+    <div class="card"><div class="icon">📐</div><h4>Phase 2: Statistical Significance</h4><p>Applied to verify the model accurately processes and interprets data. Designed to avoid unnecessary second-guessing when the answer is revealed.</p></div>
+    <div class="card"><div class="icon">🧪</div><h4>Testing Set</h4><p>For a descriptive model, a testing set with <strong>known outcomes</strong> is applied, and the model is refined as needed based on results.</p></div>
+    <div class="card"><div class="icon">🔁</div><h4>Goes Back to Modelling</h4><p>If evaluation reveals issues, the team returns to the Modelling stage to adjust algorithms, parameters, or feature selection.</p></div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION — MODULE 5: DEPLOYMENT → FEEDBACK
+════════════════════════════════════════ -->
+<section class="topic" id="deployment">
+<div class="container">
+  <div class="s-tag">Module 5 — Steps 9 & 10</div>
+  <div class="s-title">From Deployment to Feedback</div>
+  <div class="s-intro">
+    The final module brings the model to real users and collects feedback to continuously improve it. The methodology is <strong>cyclical</strong> — feedback from real-world use feeds back into every earlier stage, making the entire process iterative and self-improving.
+  </div>
+
+  <!-- 2.1.9 DEPLOYMENT -->
+  <h3 class="sh">2.1.9 — Deployment</h3>
+  <p class="bd"><strong>Question: How does the solution reach the hands of the user?</strong></p>
+  <p class="bd">Deployment refers to the stage where the trained AI model is made available to users in real-world applications. Data scientists must make stakeholders familiar with the tool produced in different scenarios. Once the model is evaluated and the data scientist is confident it will work, it is deployed.</p>
+
+  <div class="cards">
+    <div class="card"><div class="icon">🌐</div><h4>Web Application</h4><p>Embed the model as a REST API (Flask/FastAPI in Python) and integrate it into a website so users can submit data and get predictions.</p></div>
+    <div class="card"><div class="icon">📱</div><h4>Mobile App</h4><p>Deploy using TensorFlow Lite or ONNX to run models directly on smartphones. E.g., a cuisine-identification app.</p></div>
+    <div class="card"><div class="icon">🧪</div><h4>Limited Rollout</h4><p>The model may first be rolled out to a <strong>limited group of users</strong> or in a test environment to build confidence before full deployment.</p></div>
+    <div class="card"><div class="icon">👥</div><h4>Team Collaboration</h4><p>Deploying into a live business process frequently requires additional <strong>internal teams, skills, and technology</strong> beyond the data scientist alone.</p></div>
+  </div>
+
+  <!-- 2.1.10 FEEDBACK -->
+  <h3 class="sh">2.1.10 — Feedback</h3>
+  <p class="bd"><strong>Question: Is the problem solved? Has the question been satisfactorily answered?</strong></p>
+  <p class="bd">The last stage in the methodology is feedback. This includes results collected from deployment, feedback on the model's performance from users and clients, and observations from the deployed environment. This process continues until the model provides satisfactory results.</p>
+
+  <div class="cards">
+    <div class="card"><div class="icon">📋</div><h4>User Feedback</h4><p>Feedback from users helps refine the model and assess it for performance and impact. Collected via app ratings, surveys, and usage analytics.</p></div>
+    <div class="card"><div class="icon">🤖</div><h4>Automated Refresh</h4><p>Data Scientists may automate any or all of the feedback so that the <strong>model refresh process speeds up</strong> and can get quick improved results.</p></div>
+    <div class="card"><div class="icon">🔄</div><h4>Cyclical Process</h4><p>The process from modelling to feedback is <strong>highly iterative</strong>. Throughout the DS Methodology, each step sets the stage for the next.</p></div>
+    <div class="card"><div class="icon">✅</div><h4>Success Criteria</h4><p>The cycle continues until: the problem is solved, the business question is satisfactorily answered, and the stakeholders are satisfied.</p></div>
+  </div>
+
+  <!-- FULL ITERATIVE CYCLE VISUAL -->
+  <div class="flowchart-wrap">
+    <h4>🔁 The Cyclical Nature of Data Science Methodology</h4>
+    <svg viewBox="0 0 700 200" width="100%" style="max-width:700px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="ca" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#d97b34"/>
+        </marker>
+      </defs>
+      <!-- boxes -->
+      <rect x="10" y="75" width="110" height="50" rx="10" fill="#d97b34" opacity="0.18" stroke="#d97b34" stroke-width="1.5"/>
+      <text x="65" y="98" text-anchor="middle" font-size="11" font-weight="700" fill="#d97b34">Business</text>
+      <text x="65" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#d97b34">Understanding</text>
+      <line x1="120" y1="100" x2="148" y2="100" stroke="#d97b34" stroke-width="2" marker-end="url(#ca)"/>
+      <rect x="150" y="75" width="100" height="50" rx="10" fill="#2d8a4e" opacity="0.15" stroke="#2d8a4e" stroke-width="1.5"/>
+      <text x="200" y="98" text-anchor="middle" font-size="11" font-weight="700" fill="#2d8a4e">Data</text>
+      <text x="200" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#2d8a4e">Collection</text>
+      <line x1="250" y1="100" x2="278" y2="100" stroke="#2d8a4e" stroke-width="2" marker-end="url(#ca)"/>
+      <rect x="280" y="75" width="100" height="50" rx="10" fill="#8b5cf6" opacity="0.15" stroke="#8b5cf6" stroke-width="1.5"/>
+      <text x="330" y="98" text-anchor="middle" font-size="11" font-weight="700" fill="#8b5cf6">Data</text>
+      <text x="330" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#8b5cf6">Preparation</text>
+      <line x1="380" y1="100" x2="408" y2="100" stroke="#8b5cf6" stroke-width="2" marker-end="url(#ca)"/>
+      <rect x="410" y="75" width="100" height="50" rx="10" fill="#c94f27" opacity="0.15" stroke="#c94f27" stroke-width="1.5"/>
+      <text x="460" y="98" text-anchor="middle" font-size="11" font-weight="700" fill="#c94f27">Modelling &</text>
+      <text x="460" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#c94f27">Evaluation</text>
+      <line x1="510" y1="100" x2="538" y2="100" stroke="#c94f27" stroke-width="2" marker-end="url(#ca)"/>
+      <rect x="540" y="75" width="100" height="50" rx="10" fill="#3b82f6" opacity="0.15" stroke="#3b82f6" stroke-width="1.5"/>
+      <text x="590" y="98" text-anchor="middle" font-size="11" font-weight="700" fill="#3b82f6">Deployment</text>
+      <text x="590" y="112" text-anchor="middle" font-size="11" font-weight="700" fill="#3b82f6">& Feedback</text>
+      <!-- curved arrow back -->
+      <path d="M 590 75 Q 590 25 330 25 Q 70 25 65 75" stroke="#7a5c42" stroke-width="1.5" fill="none" stroke-dasharray="5,4" marker-end="url(#ca)"/>
+      <text x="330" y="18" text-anchor="middle" font-size="10" fill="#7a5c42">Iterative — Feedback loops back to any earlier stage</text>
+    </svg>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION 2.2 — MODEL VALIDATION
+════════════════════════════════════════ -->
+<section class="topic" id="validation">
+<div class="container">
+  <div class="s-tag">Section 2.2</div>
+  <div class="s-title">Model Validation</div>
+  <div class="s-intro">
+    Evaluating the performance of a trained machine learning model is essential. Model Validation offers a systematic approach to measure its accuracy and reliability, providing insights into how well it <strong>generalises to new, unseen data</strong>. It is conducted post-Model Training using a testing dataset.
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="icon">⭐</div><h4>Enhances Model Quality</h4><p>Systematic evaluation reveals weaknesses in the model, allowing targeted improvements before production deployment.</p></div>
+    <div class="card"><div class="icon">🛡️</div><h4>Reduces Risk of Errors</h4><p>Catches poor-performing models before they affect real business decisions or user-facing applications.</p></div>
+    <div class="card"><div class="icon">⚖️</div><h4>Prevents Overfitting</h4><p>A model that memorises training data performs poorly on new data. Validation ensures generalisation, not memorisation.</p></div>
+    <div class="card"><div class="icon">📉</div><h4>Prevents Underfitting</h4><p>Validation also catches models that are too simple to capture the underlying patterns — underfitting gives poor results everywhere.</p></div>
+  </div>
+
+  <!-- 2.2.1 TRAIN TEST SPLIT -->
+  <h3 class="sh">2.2.1 — Train-Test Split</h3>
+  <p class="bd">The train-test split is a technique for evaluating the performance of a machine learning algorithm. It can be used for classification or regression problems and any supervised learning algorithm. The procedure involves taking a dataset and dividing it into <strong>two subsets</strong>.</p>
+
+  <div class="cards">
+    <div class="card"><div class="icon">🏋️</div><h4>Training Dataset</h4><p>Used to <strong>fit/train</strong> the machine learning model. The model learns patterns and relationships from this data.</p></div>
+    <div class="card"><div class="icon">🧪</div><h4>Test Dataset</h4><p>Used to <strong>evaluate the fit</strong> machine learning model. Predictions are made and compared to expected values.</p></div>
+  </div>
+
+  <!-- SPLIT VISUAL -->
+  <h4 class="ssh">Common Train-Test Split Configurations</h4>
+  <div style="display:flex;flex-direction:column;gap:.8rem;margin:1.2rem 0;">
+    <div>
+      <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.3rem;font-weight:600;">80% / 20% Split (Most Common)</div>
+      <div class="split-visual">
+        <div class="split-train" style="width:80%;background:linear-gradient(90deg,#2d8a4e,#3da85f);">Train — 80%</div>
+        <div class="split-test" style="width:20%;background:linear-gradient(90deg,#c94f27,#e06040);">Test 20%</div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.3rem;font-weight:600;">70% / 30% Split</div>
+      <div class="split-visual">
+        <div class="split-train" style="width:70%;background:linear-gradient(90deg,#5b8cff,#7aa8ff);">Train — 70%</div>
+        <div class="split-test" style="width:30%;background:linear-gradient(90deg,#8b5cf6,#a78bfa);">Test — 30%</div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:.78rem;color:var(--text-muted);margin-bottom:.3rem;font-weight:600;">67% / 33% Split</div>
+      <div class="split-visual">
+        <div class="split-train" style="width:67%;background:linear-gradient(90deg,#f59e0b,#fbbf24);">Train — 67%</div>
+        <div class="split-test" style="width:33%;background:linear-gradient(90deg,#d97b34,#e8975a);">Test — 33%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note"><strong>📌 No Optimal Split:</strong> There is no single optimal split percentage. Choose based on: computational cost of training and evaluation, how well the training set represents the full population, and how well the test set represents unseen data. The train-test procedure is appropriate when there is a <strong>sufficiently large dataset</strong> available.</div>
+
+  <!-- 2.2.2 K-FOLD CROSS VALIDATION -->
+  <h3 class="sh">2.2.2 — K-Fold Cross Validation</h3>
+  <p class="bd">Cross Validation is a technique used to evaluate a model's performance. It splits the data into multiple parts called <strong>folds</strong>. It trains on some folds and tests on others, repeating for all folds. In k-fold cross validation, we work with <strong>k subsets</strong> of the dataset.</p>
+
+  <p class="bd">For example, if we divide the data into <strong>5 folds</strong>, each being 20% of the full dataset, then <strong>k=5</strong>:</p>
+
+  <!-- K-FOLD VISUAL DIAGRAM -->
+  <div class="kfold-wrap">
+    <div class="kfold-row">
+      <span class="kfold-label">Experiment 1</span>
+      <div class="kfold-folds">
+        <div class="fold test">Test</div>
+        <div class="fold train">Train</div>
+        <div class="fold train">Train</div>
+        <div class="fold train">Train</div>
+        <div class="fold train">Train</div>
+      </div>
+    </div>
+    <div class="kfold-row">
+      <span class="kfold-label">Experiment 2</span>
+      <div class="kfold-folds">
+        <div class="fold train">Train</div>
+        <div class="fold test">Test</div>
+        <div class="fold train">Train</div>
+        <div class="fold train">Train</div>
+        <div class="fold train">Train</div>
+      </div>
+    </div>
+    <div class="kfold-row">
+      <span class="kfold-label">Experiment 3</span>
+      <div class="kfold-folds">
+        <div class="fold train">Train</div>
+        <div class="fold train">Train</div>
+        <div class="fold test">Test</div>
+        <div class="fold train">Train</div>
+        <div class="fold train">Train</div>
+      </div>
+    </div>
+    <div class="kfold-row">
+      <span class="kfold-label">Experiment 4</span>
+      <div class="kfold-folds">
+        <div class="fold train">Train</div>
+        <div class="fold train">Train</div>
+        <div class="fold train">Train</div>
+        <div class="fold test">Test</div>
+        <div class="fold train">Train</div>
+      </div>
+    </div>
+    <div class="kfold-row">
+      <span class="kfold-label">Experiment 5</span>
+      <div class="kfold-folds">
+        <div class="fold train">Train</div>
+        <div class="fold train">Train</div>
+        <div class="fold train">Train</div>
+        <div class="fold train">Train</div>
+        <div class="fold test">Test</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:1rem;margin-top:1rem;font-size:.78rem;">
+      <span style="display:flex;align-items:center;gap:.4rem;color:var(--accent3);font-weight:700;">🟥 Test (Holdout) Fold</span>
+      <span style="display:flex;align-items:center;gap:.4rem;color:var(--accent2);font-weight:700;">🟩 Training Folds</span>
+      <span style="color:var(--text-muted);">→ 100% of data used as holdout at some point</span>
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <h3 class="sh">Train-Test Split vs. K-Fold Cross Validation</h3>
+  <div class="tw">
+    <table>
+      <tr><th>Feature</th><th>Train-Test Split</th><th>K-Fold Cross Validation</th></tr>
+      <tr><td><strong>Dataset Size</strong></td><td>Normally applied on <strong>large</strong> datasets</td><td>Normally applied on <strong>small</strong> datasets</td></tr>
+      <tr><td><strong>How it divides</strong></td><td>Divides data into one training set and one testing set</td><td>Divides into k subsets (folds), trains on some, evaluates on rest</td></tr>
+      <tr><td><strong>Data boundaries</strong></td><td>Clear demarcation — training and testing data are separate</td><td>Every data point at some stage is in either testing or training set</td></tr>
+      <tr><td><strong>Time to run</strong></td><td>Fast — one model trained</td><td>Slower — model trained k times (once per fold)</td></tr>
+      <tr><td><strong>Accuracy of estimate</strong></td><td>Single estimate — may vary</td><td>More accurate — averages k estimates</td></tr>
+      <tr><td><strong>Use when</strong></td><td>Large dataset, computational cost is a concern</td><td>Small dataset, reliable model quality estimate needed</td></tr>
+    </table>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION 2.3 — EVALUATION METRICS
+════════════════════════════════════════ -->
+<section class="topic" id="metrics">
+<div class="container">
+  <div class="s-tag">Section 2.3</div>
+  <div class="s-title">Model Performance — Evaluation Metrics</div>
+  <div class="s-intro">
+    Evaluation metrics help assess the performance of a trained model on a test dataset, providing insights into its strengths and weaknesses. These metrics enable comparison of different models to select the best-performing one for a specific task. <strong>Classification and Regression problems use different metrics.</strong>
+  </div>
+
+  <!-- METRICS OVERVIEW VISUAL -->
+  <div class="flowchart-wrap">
+    <h4>📊 Evaluation Metrics — Classification vs Regression</h4>
+    <svg viewBox="0 0 600 200" width="100%" style="max-width:600px;display:block;margin:0 auto;">
+      <rect x="200" y="10" width="200" height="44" rx="12" fill="#d97b34" opacity="0.2" stroke="#d97b34" stroke-width="2"/>
+      <text x="300" y="37" text-anchor="middle" font-size="13" font-weight="700" fill="#d97b34">Supervised Learning</text>
+      <line x1="220" y1="54" x2="140" y2="90" stroke="#d97b34" stroke-width="2"/>
+      <line x1="380" y1="54" x2="460" y2="90" stroke="#d97b34" stroke-width="2"/>
+      <rect x="40" y="92" width="200" height="44" rx="10" fill="#8b5cf6" opacity="0.15" stroke="#8b5cf6" stroke-width="1.5"/>
+      <text x="140" y="119" text-anchor="middle" font-size="12" font-weight="700" fill="#8b5cf6">Classification</text>
+      <rect x="360" y="92" width="200" height="44" rx="10" fill="#2d8a4e" opacity="0.15" stroke="#2d8a4e" stroke-width="1.5"/>
+      <text x="460" y="119" text-anchor="middle" font-size="12" font-weight="700" fill="#2d8a4e">Regression</text>
+      <!-- classification metrics -->
+      <text x="30" y="160" font-size="10" fill="#8b5cf6">Confusion Matrix</text>
+      <text x="30" y="174" font-size="10" fill="#8b5cf6">Precision / Recall</text>
+      <text x="30" y="188" font-size="10" fill="#8b5cf6">F1-Score / Accuracy</text>
+      <!-- regression metrics -->
+      <text x="370" y="160" font-size="10" fill="#2d8a4e">MAE — Mean Absolute Error</text>
+      <text x="370" y="174" font-size="10" fill="#2d8a4e">MSE — Mean Squared Error</text>
+      <text x="370" y="188" font-size="10" fill="#2d8a4e">RMSE — Root MSE</text>
+    </svg>
+  </div>
+
+  <!-- 2.3.1 CLASSIFICATION METRICS -->
+  <h3 class="sh">2.3.1 — Evaluation Metrics for Classification</h3>
+
+  <h4 class="ssh">1. Confusion Matrix</h4>
+  <p class="bd">A Confusion Matrix is a table used to evaluate the performance of a classification model. It summarises predictions against actual outcomes. It creates an <strong>N×N matrix</strong>, where N = number of classes. For binary classification (N=2), it creates a 2×2 matrix.</p>
+
+  <!-- CONFUSION MATRIX VISUAL -->
+  <div class="cm-wrap">
+    <div class="cm-table-wrap">
+      <table class="cm-table">
+        <tr>
+          <th></th>
+          <th>Predicted: YES</th>
+          <th>Predicted: NO</th>
+        </tr>
+        <tr>
+          <th>Actual: YES</th>
+          <td class="tp-cell">✅ TP<br><span style="font-size:.75rem;font-weight:400;">True Positive</span></td>
+          <td class="fn-cell">❌ FN<br><span style="font-size:.75rem;font-weight:400;">False Negative</span></td>
+        </tr>
+        <tr>
+          <th>Actual: NO</th>
+          <td class="fp-cell">⚠️ FP<br><span style="font-size:.75rem;font-weight:400;">False Positive</span></td>
+          <td class="tn-cell">✅ TN<br><span style="font-size:.75rem;font-weight:400;">True Negative</span></td>
+        </tr>
+      </table>
+    </div>
+    <div class="cm-legend">
+      <div class="cm-legend-item"><div class="cm-dot" style="background:#22c55e;"></div><strong style="color:#16a34a;">TP:</strong> Predicted Yes, Actually Yes</div>
+      <div class="cm-legend-item"><div class="cm-dot" style="background:#3b82f6;"></div><strong style="color:#1d4ed8;">TN:</strong> Predicted No, Actually No</div>
+      <div class="cm-legend-item"><div class="cm-dot" style="background:#f97316;"></div><strong style="color:#c2410c;">FP:</strong> Predicted Yes, Actually No (Type I Error)</div>
+      <div class="cm-legend-item"><div class="cm-dot" style="background:#ef4444;"></div><strong style="color:#dc2626;">FN:</strong> Predicted No, Actually Yes (Type II Error)</div>
+    </div>
+  </div>
+
+  <h4 class="ssh">2. Precision, Recall, F1-Score & Accuracy — Formulas</h4>
+  <div class="formula-grid">
+    <div class="formula-box">
+      <div class="formula-label">Metric 1</div>
+      <div class="formula-name">Precision</div>
+      <div class="formula-eq">TP / (TP + FP)</div>
+      <div class="formula-desc">What proportion of <em>predicted Positives</em> is truly Positive? Should be as high as possible.</div>
+    </div>
+    <div class="formula-box">
+      <div class="formula-label">Metric 2</div>
+      <div class="formula-name">Recall</div>
+      <div class="formula-eq">TP / (TP + FN)</div>
+      <div class="formula-desc">What proportion of <em>actual Positives</em> is correctly classified? Also called Sensitivity.</div>
+    </div>
+    <div class="formula-box">
+      <div class="formula-label">Metric 3</div>
+      <div class="formula-name">F1-Score</div>
+      <div class="formula-eq">2 × (Precision × Recall) / (Precision + Recall)</div>
+      <div class="formula-desc">Harmonic mean of Precision and Recall. Perfect = 1, Total failure = 0. Low FP and low FN = good F1.</div>
+    </div>
+    <div class="formula-box">
+      <div class="formula-label">Metric 4</div>
+      <div class="formula-name">Accuracy</div>
+      <div class="formula-eq">(TP + TN) / (TP + FP + FN + TN)</div>
+      <div class="formula-desc">Number of correct predictions ÷ Total number of predictions. Overall performance measure.</div>
+    </div>
+  </div>
+
+  <!-- 2.3.2 REGRESSION METRICS -->
+  <h3 class="sh">2.3.2 — Evaluation Metrics for Regression</h3>
+  <div class="formula-grid">
+    <div class="formula-box">
+      <div class="formula-label">Regression Metric 1</div>
+      <div class="formula-name">MAE</div>
+      <div class="formula-eq">Σ |y − ŷ| / n</div>
+      <div class="formula-desc">Mean Absolute Error — sum of absolute differences between predictions and actual values. Value of 0 = perfect predictions.</div>
+    </div>
+    <div class="formula-box">
+      <div class="formula-label">Regression Metric 2</div>
+      <div class="formula-name">MSE</div>
+      <div class="formula-eq">Σ (y − ŷ)² / n</div>
+      <div class="formula-desc">Mean Squared Error — most commonly used. Mean of squared distances between target and predicted values. Penalises large errors more.</div>
+    </div>
+    <div class="formula-box">
+      <div class="formula-label">Regression Metric 3</div>
+      <div class="formula-name">RMSE</div>
+      <div class="formula-eq">√ MSE</div>
+      <div class="formula-desc">Root Mean Square Error — standard deviation of residuals. Preferred over MSE because it is in the same units as the target variable.</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION 2.4 — PRACTICAL ACTIVITIES
+════════════════════════════════════════ -->
+<section class="topic" id="practical">
+<div class="container">
+  <div class="s-tag">Section 2.4</div>
+  <div class="s-title">Practical Activities</div>
+  <div class="s-intro">
+    Three hands-on activities from the textbook: manually calculating MSE and RMSE using MS Excel, computing Precision/Recall/F1/Accuracy from a confusion matrix, and implementing a complete Linear Regression model in Python using a salary dataset.
+  </div>
+
+  <!-- 2.4.1 MSE RMSE EXCEL -->
+  <h3 class="sh">2.4.1 — Calculate MSE and RMSE Using MS Excel</h3>
+  <p class="bd">Given 10 predicted and actual values, calculate the residuals, squared residuals, MSE, and RMSE.</p>
+
+  <div class="practical-table">
+    <table>
+      <tr><th>Predicted</th><th>Actual</th><th>Residual (Actual − Predicted)</th><th>Squared Residual</th></tr>
+      <tr><td>14</td><td>17</td><td>3</td><td>9</td></tr>
+      <tr><td>19</td><td>18</td><td>−1</td><td>1</td></tr>
+      <tr><td>17</td><td>18</td><td>1</td><td>1</td></tr>
+      <tr><td>13</td><td>15</td><td>2</td><td>4</td></tr>
+      <tr><td>12</td><td>18</td><td>6</td><td>36</td></tr>
+      <tr><td>7</td><td>11</td><td>4</td><td>16</td></tr>
+      <tr><td>24</td><td>20</td><td>−4</td><td>16</td></tr>
+      <tr><td>23</td><td>18</td><td>−5</td><td>25</td></tr>
+      <tr><td>17</td><td>13</td><td>−4</td><td>16</td></tr>
+      <tr><td>18</td><td>19</td><td>1</td><td>1</td></tr>
+      <tr class="total-row"><td colspan="3"><strong>Total Squared Residuals</strong></td><td><strong>125</strong></td></tr>
+      <tr class="result-row"><td colspan="3"><strong>MSE</strong> = 125 ÷ 10</td><td><strong>12.5</strong></td></tr>
+      <tr class="result-row"><td colspan="3"><strong>RMSE</strong> = √12.5</td><td><strong>3.54</strong></td></tr>
+    </table>
+  </div>
+
+  <!-- 2.4.2 CONFUSION MATRIX CALCULATION -->
+  <h3 class="sh">2.4.2 — Confusion Matrix — Calculate All Metrics</h3>
+  <p class="bd">Given: <strong>TP = 35, TN = 50, FP = 10, FN = 5</strong>. Calculate Precision, Recall, F1-Score, and Accuracy.</p>
+
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">confusion_matrix_calculations.txt</span></div>
+    <pre><span class="cm">Given:</span>
+<span class="cl">TP</span> = <span class="nm">35</span>   <span class="cm"># True Positives</span>
+<span class="cl">TN</span> = <span class="nm">50</span>   <span class="cm"># True Negatives</span>
+<span class="cl">FP</span> = <span class="nm">10</span>   <span class="cm"># False Positives</span>
+<span class="cl">FN</span> =  <span class="nm">5</span>   <span class="cm"># False Negatives</span>
+
+<span class="cm">Precision = TP / (TP + FP)</span>
+         = <span class="nm">35</span> / (<span class="nm">35</span> + <span class="nm">10</span>) = <span class="nm">35</span>/<span class="nm">45</span> = <span class="st">0.778 → 77.8%</span>
+
+<span class="cm">Recall    = TP / (TP + FN)</span>
+         = <span class="nm">35</span> / (<span class="nm">35</span> + <span class="nm">5</span>)  = <span class="nm">35</span>/<span class="nm">40</span> = <span class="st">0.875 → 87.5%</span>
+
+<span class="cm">F1-Score  = 2 × (Precision × Recall) / (Precision + Recall)</span>
+         = <span class="nm">2</span> × (<span class="nm">0.778</span> × <span class="nm">0.875</span>) / (<span class="nm">0.778</span> + <span class="nm">0.875</span>)
+         = <span class="nm">2</span> × <span class="nm">0.681</span> / <span class="nm">1.653</span>  = <span class="st">0.823 → 82.3%</span>
+
+<span class="cm">Accuracy  = (TP + TN) / (TP + FP + FN + TN)</span>
+         = (<span class="nm">35</span> + <span class="nm">50</span>) / (<span class="nm">35</span> + <span class="nm">10</span> + <span class="nm">5</span> + <span class="nm">50</span>)
+         = <span class="nm">85</span> / <span class="nm">100</span> = <span class="st">0.85 → 85%</span>
+
+<span class="cm">Summary of Metrics:</span>
+  Precision : <span class="st">77.8%</span>
+  Recall    : <span class="st">87.5%</span>
+  F1 Score  : <span class="st">82.3%</span>
+  Accuracy  : <span class="st">85.0%</span></pre>
+  </div>
+
+  <!-- 2.4.3 PYTHON CODE -->
+  <h3 class="sh">2.4.3 — Python Code to Evaluate a Linear Regression Model</h3>
+  <p class="bd">Using the <strong>Salary vs. Years of Experience dataset</strong> (from Kaggle) — 30 rows, 2 columns. Demonstrates the complete pipeline: load → EDA → prepare → train → evaluate.</p>
+
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">salary_linear_regression.py</span></div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">import</span> seaborn <span class="kw">as</span> sns
+<span class="kw">from</span> sklearn.metrics <span class="kw">import</span> mean_squared_error
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> <span class="cl">LinearRegression</span>
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
+
+<span class="cm"># ── Load Dataset ──</span>
+df = pd.read_csv(<span class="st">'/kaggle/input/random-salary-data/Salary_Data.csv'</span>, sep=<span class="st">','</span>)
+<span class="fn2">print</span>(df.head())
+
+<span class="cm"># ── EDA ──</span>
+<span class="fn2">print</span>(df.shape)         <span class="cm"># (30, 2)</span>
+<span class="fn2">print</span>(df.isnull().sum())
+<span class="cm"># YearsExperience    0
+# Salary             0    ← No missing values</span>
+
+<span class="cm"># ── Data Preparation ──</span>
+X = np.array(df[<span class="st">'YearsExperience'</span>]).reshape(<span class="nm">-1</span>, <span class="nm">1</span>)
+Y = np.array(df[<span class="st">'Salary'</span>]).reshape(<span class="nm">-1</span>, <span class="nm">1</span>)
+<span class="fn2">print</span>(X.shape, Y.shape)  <span class="cm"># (30,1) (30,1)</span>
+
+<span class="cm"># ── Configure Train-Test Split (80% / 20%) ──</span>
+X_train, X_test, Y_train, Y_test = train_test_split(
+    X, Y, test_size=<span class="nm">0.2</span>, shuffle=<span class="nm">True</span>, random_state=<span class="nm">10</span>)
+
+<span class="cm"># ── Fit the Model ──</span>
+model = <span class="cl">LinearRegression</span>()
+model.fit(X_train, Y_train)
+
+<span class="cm"># ── Evaluate on Training Data ──</span>
+train_score = model.score(X_train, Y_train)
+<span class="fn2">print</span>(<span class="st">f"Training R² score: {train_score:.4f}"</span>)
+
+<span class="cm"># ── Evaluate on Testing Data ──</span>
+test_score = model.score(X_test, Y_test)
+<span class="fn2">print</span>(<span class="st">f"Testing R² score:  {test_score:.4f}"</span>)
+
+<span class="cm"># ── Calculate Mean Squared Error ──</span>
+Y_pred = model.predict(X_test)
+mse = mean_squared_error(Y_test, Y_pred)
+rmse = np.sqrt(mse)
+<span class="fn2">print</span>(<span class="st">f"Mean Squared Error (MSE):  {mse:.2f}"</span>)
+<span class="fn2">print</span>(<span class="st">f"Root Mean Squared Error:   {rmse:.2f}"</span>)
+
+<span class="cm"># ── Visualise: Scatter Plot + Regression Line ──</span>
+plt.figure(figsize=(<span class="nm">8</span>, <span class="nm">5</span>))
+plt.scatter(X_test, Y_test, color=<span class="st">'steelblue'</span>, label=<span class="st">'Actual'</span>, alpha=<span class="nm">0.7</span>)
+plt.plot(X_test, Y_pred, color=<span class="st">'red'</span>, linewidth=<span class="nm">2</span>, label=<span class="st">'Predicted Line'</span>)
+plt.xlabel(<span class="st">'Years of Experience'</span>)
+plt.ylabel(<span class="st">'Salary'</span>)
+plt.title(<span class="st">'Salary Estimation — Linear Regression'</span>)
+plt.legend()
+plt.tight_layout()
+plt.show()</pre>
+  </div>
+
+  <div class="hl"><strong>💡 Base Reference:</strong> Dataset from Kaggle — <em>Random Salary Data of Employees (Age Wise)</em>. This practical demonstrates the full Data Science Methodology pipeline: Data Collection → Data Understanding (EDA) → Data Preparation → Modelling (Train-Test Split + Linear Regression) → Evaluation (MSE, RMSE, R²).</div>
+
+  <!-- CASE STUDY D1 -->
+  <h3 class="sh">Case Study D1 — MSE & RMSE from Raw Data</h3>
+  <div class="practical-table">
+    <table>
+      <tr><th>Actual (A)</th><th>Predicted (P)</th><th>Residual (A−P)</th><th>Squared Residual</th></tr>
+      <tr><td>100</td><td>110</td><td>−10</td><td>100</td></tr>
+      <tr><td>120</td><td>125</td><td>−5</td><td>25</td></tr>
+      <tr><td>150</td><td>145</td><td>5</td><td>25</td></tr>
+      <tr><td>170</td><td>165</td><td>5</td><td>25</td></tr>
+      <tr><td>200</td><td>190</td><td>10</td><td>100</td></tr>
+      <tr><td>210</td><td>205</td><td>5</td><td>25</td></tr>
+      <tr><td>220</td><td>225</td><td>−5</td><td>25</td></tr>
+      <tr><td>250</td><td>240</td><td>10</td><td>100</td></tr>
+      <tr><td>300</td><td>310</td><td>−10</td><td>100</td></tr>
+      <tr><td>350</td><td>340</td><td>10</td><td>100</td></tr>
+      <tr class="total-row"><td colspan="3"><strong>Total</strong></td><td><strong>625</strong></td></tr>
+      <tr class="result-row"><td colspan="3"><strong>MSE</strong> = 625 ÷ 10</td><td><strong>62.5</strong></td></tr>
+      <tr class="result-row"><td colspan="3"><strong>RMSE</strong> = √62.5</td><td><strong>7.91</strong></td></tr>
+    </table>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     SECTION — EXERCISES
+════════════════════════════════════════ -->
+<section class="topic" id="exercises">
+<div class="container">
+  <div class="s-tag">Exercises — From the Textbook</div>
+  <div class="s-title">All Practice Questions</div>
+  <div class="s-intro">Every question from Section A (Objective), B (Short Answer), C (Long Answer), D (Case Study) and E (Competency Based) — directly from the CBSE Class XII AI handbook.</div>
+
+  <h3 class="sh">Section A — Objective Type Questions (15 MCQs with Answers)</h3>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">mcq_answers.txt</span></div>
+    <pre><span class="nm">1.</span>  Which is the hardest stage in DS Methodology?
+    a) Business Understanding  <span class="st">b) Data Collection ✓</span>  c) Modelling  d) Evaluation
+
+<span class="nm">2.</span>  Business Sponsors define the problem from a ________ perspective.
+    a) Economic  b) Feedback  <span class="st">c) Business ✓</span>  d) Data Collection
+
+<span class="nm">3.</span>  Match: Descriptive→B(Current Status), Diagnostic→A(Statistical Analysis),
+          Predictive→D(Probabilities), Prescriptive→C(How to solve)
+    <span class="st">Answer: b) (i)–B, (ii)–A, (iii)–D, (iv)–C ✓</span>
+
+<span class="nm">4.</span>  Arrange in order: iv(identify), ii(collect), iii(statistics), i(fill gaps)
+    <span class="st">Answer: b) iv, ii, iii, i ✓</span>
+
+<span class="nm">5.</span>  Data Modelling focuses on _____________ or _____________ models.
+    a) Supervised, Unsupervised  <span class="st">b) Predictive, Descriptive ✓</span>
+    c) Classification, Regression  d) Train-test, Cross Validation
+
+<span class="nm">6.</span>  Statement 1: No optimal split percentage. Statement 2: Most common is 20%-80%.
+    <span class="st">Answer: c) Both Statement 1 and 2 are true ✓</span>
+
+<span class="nm">7.</span>  Train-test split function is from which module?
+    <span class="st">a) sklearn.model_selection ✓</span>  b) sklearn.ensemble
+
+<span class="nm">8.</span>  Identify the incorrect: "cross-validation takes short time to run" is WRONG.
+    <span class="st">Answer: c) ii only ✓</span>
+
+<span class="nm">9.</span>  Identifying data content, formats and sources is done in which step?
+    <span class="st">a) Data Requirements ✓</span>  b) Data Collection
+
+<span class="nm">10.</span> Which does NOT provide online data?
+    a) UNICEF  b) WHO  c) Google  <span class="st">d) Edge ✓</span>
+
+<span class="nm">11.</span> A _______ set has historical data where outcomes are already known.
+    <span class="st">a) Training set ✓</span>
+
+<span class="nm">12.</span> ________ dataset is used to evaluate the fit model.
+    <span class="st">b) Test set ✓</span>
+
+<span class="nm">13.</span> test_size=0.2 → training size = ?
+    <span class="st">b) 0.8 ✓</span>  (80%)
+
+<span class="nm">14.</span> In k-fold, k represents:
+    <span class="st">d) all of the above ✓</span>  (subsets, experiments, and folds)
+
+<span class="nm">15.</span> Correct points about MSE: iii (preferred with regression) and iv (penalises large errors)
+    <span class="st">Answer: c) iii and iv ✓</span></pre>
+  </div>
+
+  <h3 class="sh">Section B — Short Answer Questions</h3>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">short_answers.txt</span></div>
+    <pre><span class="nm">Q1.</span> How many steps in DS Methodology? Name them in order.
+<span class="st">10 steps: (1) Business Understanding (2) Analytic Approach
+(3) Data Requirements (4) Data Collection (5) Data Understanding
+(6) Data Preparation (7) AI Modelling (8) Evaluation
+(9) Deployment (10) Feedback</span>
+
+<span class="nm">Q2.</span> What is Feature Engineering?
+<span class="st">The process of selecting, modifying, or creating new features (variables)
+from raw data to improve the performance of machine learning models.
+E.g., Age of house = Current year − Year built; Price/sqft = Price ÷ Area.</span>
+
+<span class="nm">Q3.</span> Explain different types of data sources with examples.
+<span class="st">Primary: Original firsthand data — surveys, IoT sensors, feedback forms.
+Secondary: Pre-existing data — Kaggle, WHO, World Bank, web scraping,
+social media tracking. DBAs and programmers often work together to
+extract from both sources.</span>
+
+<span class="nm">Q4.</span> Which step is related to constructing the dataset? Explain.
+<span class="st">Data Understanding (Step 5). It encompasses all activities to build the
+dataset, evaluating relevance, comprehensiveness, and suitability using
+descriptive statistics (univariate analysis, pairwise correlation) and
+visualisation (histograms, scatter plots).</span>
+
+<span class="nm">Q5.</span> Short note on Data Preparation steps.
+<span class="st">1. Cleaning: handle missing/invalid values, remove duplicates, correct formats.
+2. Combine: merge data from multiple sources (archives, tables, platforms).
+3. Transform: convert to meaningful input variables (encoding, normalisation).
+4. Feature Engineering: create new derived features to improve model accuracy.
+It is the MOST time-consuming step in DS Methodology.</span>
+
+<span class="nm">Q6.</span> Difference: Descriptive vs Predictive Modelling.
+<span class="st">Descriptive: Summarises current data without predictions. Goal: understand.
+ Techniques: mean, charts, histograms, box plots.
+Predictive: Uses historical data to predict future outcomes. Goal: forecast.
+ Techniques: regression, classification, time-series forecasting.</span>
+
+<span class="nm">Q7.</span> Metrics for evaluating Classification models.
+<span class="st">1. Confusion Matrix: 2×2 table of TP, TN, FP, FN
+2. Precision = TP/(TP+FP) — what proportion of predicted positives are real
+3. Recall = TP/(TP+FN) — what proportion of actual positives were caught
+4. F1 = 2×(P×R)/(P+R) — harmonic mean; 1=perfect, 0=failure
+5. Accuracy = (TP+TN)/(TP+FP+FN+TN)</span>
+
+<span class="nm">Q8.</span> Is Feedback a necessary step? Justify.
+<span class="st">Yes. Feedback collects results from deployment, user reviews, and
+observations from the live environment. Without feedback, the team cannot
+know if the problem is actually solved. Feedback drives iterative improvement
+and model refinement. The methodology is cyclical — feedback triggers
+revisions to earlier steps.</span>
+
+<span class="nm">Q9.</span> Comparative study: Train-Test Split vs Cross Validation.
+<span class="st">Train-Test Split: large datasets, fast, one estimate, clear demarcation.
+K-Fold CV: small datasets, slower (k models trained), more accurate
+estimate, every point is used as test data at some point.</span>
+
+<span class="nm">Q10.</span> Why is model validation important?
+<span class="st">Post-training, validation using test data measures accuracy on unseen data.
+Benefits: enhances model quality, reduces error risk, prevents overfitting
+(memorising training data) and underfitting (model too simple).</span></pre>
+  </div>
+
+  <h3 class="sh">Section C — Long Answer Questions</h3>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">long_answers.txt</span></div>
+    <pre><span class="nm">Q1.</span> Explain k-fold cross validation with diagram.
+<span class="st">Divide data into k equal folds (e.g., k=5, each fold = 20%).
+Experiment 1: Fold 1 = Test, Folds 2-5 = Train → measure quality.
+Experiment 2: Fold 2 = Test, Folds 1,3,4,5 = Train → measure quality.
+...repeat for all k folds. Average the k quality measurements.
+Result: 100% of data is used as holdout at some point.
+Advantages: More reliable quality estimate than single split.
+Disadvantage: Takes k times longer to run than train-test split.</span>
+
+<span class="nm">Q2.</span> Data requirements → collection → understanding → preparation.
+<span class="st">Requirements (5W1H): Identify type (structured/unstructured), format,
+ source, preprocessing needed.
+Collection: Primary (surveys, IoT) or Secondary (Kaggle, WHO, web scrape).
+ May be revisited after Understanding stage.
+Understanding: Check data represents the problem. Apply descriptive stats
+ (mean, std, correlation) and visualisation (histogram). Identify issues.
+Preparation: Clean (fix NaN, typos, duplicates), combine sources, transform
+ variables, feature engineering. MOST time-consuming step.</span></pre>
+  </div>
+
+  <h3 class="sh">Section E — Competency Based Questions</h3>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">competency_answers.txt</span></div>
+    <pre><span class="nm">Q1.</span> Investment firm wants to use AI to understand client preferences and
+    risk tolerance. Which DS Methodology stage?
+<span class="st">→ Stage 1: Business Understanding.
+The firm is defining their problem: "Can AI predict client investment
+preferences and risk tolerance?" This is exactly the stage of problem
+scoping, understanding customer needs, and setting project objectives.</span>
+
+<span class="nm">Q2.</span> Online Learning Platform has a recommendation system. They need to
+    assess its effectiveness and accuracy. Which stage?
+<span class="st">→ Stage 8: Evaluation (and also relates to Stage 2.2 Model Validation).
+The platform needs to evaluate whether the recommendation model is
+working as intended using metrics like Precision, Recall, and Accuracy.
+If it is already deployed, it also relates to Stage 10: Feedback.</span></pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     INTERACTIVE ASSESSMENT
+════════════════════════════════════════ -->
+<section id="assessment">
+<div class="container">
+  <div class="aw">
+    <div class="a-title">📝 Interactive Assessment</div>
+    <div class="a-sub">Unit 2 — Data Science Methodology &nbsp;·&nbsp; Full interactive test</div>
+
+    <div class="qlabel">Section A — MCQs (15 questions · 1 mark each)</div>
+
+    <div class="mcq" id="q1"><div class="mcq-q"><em>Q1.</em> How many steps are there in IBM's Data Science Methodology?</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q1','a','c')"><div class="ltr">A</div>5 steps</div>
+      <div class="opt" onclick="chk('q1','b','c')"><div class="ltr">B</div>7 steps</div>
+      <div class="opt" onclick="chk('q1','c','c')"><div class="ltr">C</div>10 steps</div>
+      <div class="opt" onclick="chk('q1','d','c')"><div class="ltr">D</div>12 steps</div>
+    </div></div>
+
+    <div class="mcq" id="q2"><div class="mcq-q"><em>Q2.</em> Which analytics type answers "Why did this happen?"</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q2','a','b')"><div class="ltr">A</div>Descriptive Analytics</div>
+      <div class="opt" onclick="chk('q2','b','b')"><div class="ltr">B</div>Diagnostic Analytics</div>
+      <div class="opt" onclick="chk('q2','c','b')"><div class="ltr">C</div>Predictive Analytics</div>
+      <div class="opt" onclick="chk('q2','d','b')"><div class="ltr">D</div>Prescriptive Analytics</div>
+    </div></div>
+
+    <div class="mcq" id="q3"><div class="mcq-q"><em>Q3.</em> Which is the MOST time-consuming step in Data Science Methodology?</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q3','a','c')"><div class="ltr">A</div>Data Collection</div>
+      <div class="opt" onclick="chk('q3','b','c')"><div class="ltr">B</div>AI Modelling</div>
+      <div class="opt" onclick="chk('q3','c','c')"><div class="ltr">C</div>Data Preparation</div>
+      <div class="opt" onclick="chk('q3','d','c')"><div class="ltr">D</div>Deployment</div>
+    </div></div>
+
+    <div class="mcq" id="q4"><div class="mcq-q"><em>Q4.</em> In K-Fold Cross Validation with k=5, each fold represents what percentage of data?</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q4','a','b')"><div class="ltr">A</div>10%</div>
+      <div class="opt" onclick="chk('q4','b','b')"><div class="ltr">B</div>20%</div>
+      <div class="opt" onclick="chk('q4','c','b')"><div class="ltr">C</div>25%</div>
+      <div class="opt" onclick="chk('q4','d','b')"><div class="ltr">D</div>50%</div>
+    </div></div>
+
+    <div class="mcq" id="q5"><div class="mcq-q"><em>Q5.</em> Precision is calculated as:</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q5','a','a')"><div class="ltr">A</div>TP / (TP + FP)</div>
+      <div class="opt" onclick="chk('q5','b','a')"><div class="ltr">B</div>TP / (TP + FN)</div>
+      <div class="opt" onclick="chk('q5','c','a')"><div class="ltr">C</div>(TP + TN) / Total</div>
+      <div class="opt" onclick="chk('q5','d','a')"><div class="ltr">D</div>2 × P × R / (P + R)</div>
+    </div></div>
+
+    <div class="mcq" id="q6"><div class="mcq-q"><em>Q6.</em> Which function imports train_test_split in Python?</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q6','a','a')"><div class="ltr">A</div>sklearn.model_selection</div>
+      <div class="opt" onclick="chk('q6','b','a')"><div class="ltr">B</div>sklearn.metrics</div>
+      <div class="opt" onclick="chk('q6','c','a')"><div class="ltr">C</div>sklearn.preprocessing</div>
+      <div class="opt" onclick="chk('q6','d','a')"><div class="ltr">D</div>sklearn.ensemble</div>
+    </div></div>
+
+    <div class="mcq" id="q7"><div class="mcq-q"><em>Q7.</em> A model that memorises training data but fails on new data suffers from:</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q7','a','b')"><div class="ltr">A</div>Underfitting</div>
+      <div class="opt" onclick="chk('q7','b','b')"><div class="ltr">B</div>Overfitting</div>
+      <div class="opt" onclick="chk('q7','c','b')"><div class="ltr">C</div>Bias</div>
+      <div class="opt" onclick="chk('q7','d','b')"><div class="ltr">D</div>Variance only</div>
+    </div></div>
+
+    <div class="mcq" id="q8"><div class="mcq-q"><em>Q8.</em> If TP=35, TN=50, FP=10, FN=5 — what is the Accuracy?</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q8','a','c')"><div class="ltr">A</div>77.8%</div>
+      <div class="opt" onclick="chk('q8','b','c')"><div class="ltr">B</div>87.5%</div>
+      <div class="opt" onclick="chk('q8','c','c')"><div class="ltr">C</div>85%</div>
+      <div class="opt" onclick="chk('q8','d','c')"><div class="ltr">D</div>82.3%</div>
+    </div></div>
+
+    <div class="mcq" id="q9"><div class="mcq-q"><em>Q9.</em> Which data type has no predefined structure? (e.g., images, social media posts)</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q9','a','c')"><div class="ltr">A</div>Structured Data</div>
+      <div class="opt" onclick="chk('q9','b','c')"><div class="ltr">B</div>Semi-structured Data</div>
+      <div class="opt" onclick="chk('q9','c','c')"><div class="ltr">C</div>Unstructured Data</div>
+      <div class="opt" onclick="chk('q9','d','c')"><div class="ltr">D</div>Tabular Data</div>
+    </div></div>
+
+    <div class="mcq" id="q10"><div class="mcq-q"><em>Q10.</em> RMSE is preferred over MSE because:</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q10','a','b')"><div class="ltr">A</div>It is always a smaller number</div>
+      <div class="opt" onclick="chk('q10','b','b')"><div class="ltr">B</div>It is in the same units as the target variable</div>
+      <div class="opt" onclick="chk('q10','c','b')"><div class="ltr">C</div>It doesn't penalise large errors</div>
+      <div class="opt" onclick="chk('q10','d','b')"><div class="ltr">D</div>It is easier to compute</div>
+    </div></div>
+
+    <div class="mcq" id="q11"><div class="mcq-q"><em>Q11.</em> The stage in DS Methodology where the model is made available to real users is called:</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q11','a','c')"><div class="ltr">A</div>Evaluation</div>
+      <div class="opt" onclick="chk('q11','b','c')"><div class="ltr">B</div>Feedback</div>
+      <div class="opt" onclick="chk('q11','c','c')"><div class="ltr">C</div>Deployment</div>
+      <div class="opt" onclick="chk('q11','d','c')"><div class="ltr">D</div>Modelling</div>
+    </div></div>
+
+    <div class="mcq" id="q12"><div class="mcq-q"><em>Q12.</em> Feature Engineering is part of which DS Methodology stage?</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q12','a','d')"><div class="ltr">A</div>Data Collection</div>
+      <div class="opt" onclick="chk('q12','b','d')"><div class="ltr">B</div>Data Understanding</div>
+      <div class="opt" onclick="chk('q12','c','d')"><div class="ltr">C</div>AI Modelling</div>
+      <div class="opt" onclick="chk('q12','d','d')"><div class="ltr">D</div>Data Preparation</div>
+    </div></div>
+
+    <div class="mcq" id="q13"><div class="mcq-q"><em>Q13.</em> Cross validation is normally applied on:</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q13','a','b')"><div class="ltr">A</div>Large datasets</div>
+      <div class="opt" onclick="chk('q13','b','b')"><div class="ltr">B</div>Small datasets</div>
+      <div class="opt" onclick="chk('q13','c','b')"><div class="ltr">C</div>Only classification problems</div>
+      <div class="opt" onclick="chk('q13','d','b')"><div class="ltr">D</div>Regression problems only</div>
+    </div></div>
+
+    <div class="mcq" id="q14"><div class="mcq-q"><em>Q14.</em> In a Confusion Matrix, False Positive means:</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q14','a','b')"><div class="ltr">A</div>Predicted No, Actually No</div>
+      <div class="opt" onclick="chk('q14','b','b')"><div class="ltr">B</div>Predicted Yes, Actually No</div>
+      <div class="opt" onclick="chk('q14','c','b')"><div class="ltr">C</div>Predicted No, Actually Yes</div>
+      <div class="opt" onclick="chk('q14','d','b')"><div class="ltr">D</div>Predicted Yes, Actually Yes</div>
+    </div></div>
+
+    <div class="mcq" id="q15"><div class="mcq-q"><em>Q15.</em> The MSE for the 10-row table in Practical 2.4.1 (given in textbook) is:</div>
+    <div class="opts">
+      <div class="opt" onclick="chk('q15','a','b')"><div class="ltr">A</div>3.54</div>
+      <div class="opt" onclick="chk('q15','b','b')"><div class="ltr">B</div>12.5</div>
+      <div class="opt" onclick="chk('q15','c','b')"><div class="ltr">C</div>125</div>
+      <div class="opt" onclick="chk('q15','d','b')"><div class="ltr">D</div>25</div>
+    </div></div>
+
+    <button class="sbtn" onclick="submitQ()">Submit MCQs &amp; See Score ✓</button>
+    <div class="spanel" id="spanel" style="display:none;">
+      <div><div class="snum" id="sval">0/15</div><div style="font-size:.84rem;color:var(--text-muted);">Your MCQ Score</div></div>
+      <div style="font-size:.9rem;color:var(--text-muted);max-width:300px;" id="smsg"></div>
+    </div>
+
+    <!-- VERY SHORT QUESTIONS -->
+    <div class="qlabel">Section B — Very Short Answer Questions (4 · 1–2 marks)</div>
+
+    <div class="qa"><div class="qa-q"><em>VSQ 1.</em> Name the 5 modules of IBM Data Science Methodology.</div>
+    <button class="rbtn" onclick="tog('v1')">Show Answer</button>
+    <div class="ans" id="v1">1. From Problem to Approach (Business Understanding + Analytic Approach)<br>2. From Requirements to Collection (Data Requirements + Data Collection)<br>3. From Understanding to Preparation (Data Understanding + Data Preparation)<br>4. From Modelling to Evaluation (AI Modelling + Evaluation)<br>5. From Deployment to Feedback (Deployment + Feedback)</div></div>
+
+    <div class="qa"><div class="qa-q"><em>VSQ 2.</em> What is Feature Engineering? Give one example.</div>
+    <button class="rbtn" onclick="tog('v2')">Show Answer</button>
+    <div class="ans" id="v2">Feature Engineering is the process of selecting, modifying, or creating new features from raw data to improve ML model performance.<br><br>Example: If raw data has "Year house was built" and current year is 2024 →<br><strong>New Feature: Age of house = 2024 − Year built</strong><br>This derived feature helps the model predict house prices more accurately.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>VSQ 3.</em> What is a Confusion Matrix? Name its four components.</div>
+    <button class="rbtn" onclick="tog('v3')">Show Answer</button>
+    <div class="ans" id="v3">A Confusion Matrix is a table used to evaluate a classification model by comparing predicted outcomes against actual outcomes. For binary classification it is a 2×2 matrix with:<br><br>• <strong>TP (True Positive)</strong> — Predicted Yes, Actually Yes<br>• <strong>TN (True Negative)</strong> — Predicted No, Actually No<br>• <strong>FP (False Positive)</strong> — Predicted Yes, Actually No<br>• <strong>FN (False Negative)</strong> — Predicted No, Actually Yes</div></div>
+
+    <div class="qa"><div class="qa-q"><em>VSQ 4.</em> What is the difference between primary and secondary data sources?</div>
+    <button class="rbtn" onclick="tog('v4')">Show Answer</button>
+    <div class="ans" id="v4"><strong>Primary Data Source:</strong> Original, firsthand data collected directly through observation, surveys, interviews, or IoT sensors. Raw and unbiased.<br>Examples: Feedback forms, marketing campaign data, IoT sensor readings.<br><br><strong>Secondary Data Source:</strong> Pre-existing data already stored and ready for use. Collected from books, journals, websites, or databases.<br>Examples: Kaggle, WHO, World Bank Open Data, Google, UNICEF.</div></div>
+
+    <!-- SHORT QUESTIONS -->
+    <div class="qlabel">Section C — Short Answer Questions (3 · 3–4 marks)</div>
+
+    <div class="qa"><div class="qa-q"><em>SQ 1.</em> Explain the four types of Data Analytics with examples.</div>
+    <button class="rbtn" onclick="tog('s1')">Show Answer</button>
+    <div class="ans" id="s1">
+      <strong>1. Descriptive Analytics</strong> — Summarises past data to understand WHAT happened. Uses graphs, mean, median, mode. Example: Average exam marks; last year's sales trends.<br><br>
+      <strong>2. Diagnostic Analytics</strong> — Analyses WHY things happened using root cause analysis and correlation. Example: Why did sales drop? Was it poor service or bad product?<br><br>
+      <strong>3. Predictive Analytics</strong> — Uses historical data to predict FUTURE outcomes using regression/classification. Example: Forecasting next quarter's sales; predicting customer churn.<br><br>
+      <strong>4. Prescriptive Analytics</strong> — Recommends the BEST ACTION to take based on predictions. Example: Optimise festival-season pricing strategy using past data analysis.
+    </div></div>
+
+    <div class="qa"><div class="qa-q"><em>SQ 2.</em> Explain K-Fold Cross Validation. How does it differ from Train-Test Split?</div>
+    <button class="rbtn" onclick="tog('s2')">Show Answer</button>
+    <div class="ans" id="s2">
+      <strong>K-Fold Cross Validation:</strong> The dataset is divided into k equal folds. For k=5, each fold = 20%. In Experiment 1, Fold 1 is the test set and Folds 2–5 are training. In Experiment 2, Fold 2 is test. This repeats k times, so 100% of data is used as a holdout at some point. The k quality estimates are averaged for a final result.<br><br>
+      <strong>Differences:</strong><br>
+      • Train-Test Split: for large datasets, fast (one model), clear separation of train/test<br>
+      • K-Fold CV: for small datasets, more accurate estimate, slower (k models trained), every data point serves as test at some point
+    </div></div>
+
+    <div class="qa"><div class="qa-q"><em>SQ 3.</em> Given TP=40, TN=30, FP=8, FN=2 — calculate Precision, Recall, F1-Score and Accuracy.</div>
+    <button class="rbtn" onclick="tog('s3')">Show Answer</button>
+    <div class="ans" id="s3">
+      <strong>Precision</strong> = TP/(TP+FP) = 40/(40+8) = 40/48 = <strong>0.833 → 83.3%</strong><br><br>
+      <strong>Recall</strong> = TP/(TP+FN) = 40/(40+2) = 40/42 = <strong>0.952 → 95.2%</strong><br><br>
+      <strong>F1-Score</strong> = 2 × (0.833 × 0.952) / (0.833 + 0.952) = 2 × 0.793 / 1.785 = <strong>0.889 → 88.9%</strong><br><br>
+      <strong>Accuracy</strong> = (TP+TN)/(TP+FP+FN+TN) = (40+30)/(40+8+2+30) = 70/80 = <strong>0.875 → 87.5%</strong>
+    </div></div>
+
+  </div>
+</div>
+</section>
+
+<footer>
+  <p>Class XII · Artificial Intelligence · Subject Code 843 · CBSE</p>
+  <p style="margin-top:.4rem;">Unit 2 — Data Science Methodology &nbsp;·&nbsp; <span>IBM 10-Step Framework · Model Validation · Evaluation Metrics · Practical Activities</span></p>
+</footer>
+
+<script>
+// Stars
+const sw = document.getElementById('stars');
+for(let i=0;i<180;i++){
+  const s=document.createElement('div');s.className='star';
+  const sz=Math.random()*2.4+0.5;
+  s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*4}s;--dl:${Math.random()*5}s;`;
+  sw.appendChild(s);
+}
+// Theme
+let isDay=true;
+function toggleTheme(){
+  isDay=!isDay;
+  document.documentElement.setAttribute('data-theme',isDay?'day':'night');
+  document.getElementById('tlbl').textContent=isDay?'Day':'Night';
+  document.getElementById('tico').textContent=isDay?'☀️':'🌙';
+}
+// MCQ
+const answered={};
+const correctMap={q1:'c',q2:'b',q3:'c',q4:'b',q5:'a',q6:'a',q7:'b',q8:'c',q9:'c',q10:'b',q11:'c',q12:'d',q13:'b',q14:'b',q15:'b'};
+function chk(qid,chosen,right){
+  if(answered[qid])return;
+  answered[qid]=chosen;
+  const c=document.getElementById(qid);
+  const opts=c.querySelectorAll('.opt');
+  ['a','b','c','d'].forEach((l,i)=>{
+    opts[i].style.pointerEvents='none';
+    if(l===right)opts[i].classList.add('correct');
+    else if(l===chosen&&chosen!==right)opts[i].classList.add('wrong');
+  });
+}
+function submitQ(){
+  let score=0;
+  Object.keys(correctMap).forEach(qid=>{
+    if(!answered[qid]){chk(qid,'?',correctMap[qid]);answered[qid]='?';}
+    if(answered[qid]===correctMap[qid])score++;
+  });
+  const p=document.getElementById('spanel');
+  p.style.display='flex';
+  document.getElementById('sval').textContent=score+'/15';
+  const msgs=['Keep studying — review the notes! 💪','Getting there, more revision needed 📖','Good effort, almost there 👍','Great job, well done! 🎉','Outstanding — perfect score! 🏆'];
+  document.getElementById('smsg').textContent=msgs[Math.min(Math.floor(score/3.5),4)];
+  p.scrollIntoView({behavior:'smooth'});
+}
+function tog(id){
+  const b=document.getElementById(id);
+  const btn=b.previousElementSibling;
+  b.classList.toggle('show');
+  btn.textContent=b.classList.contains('show')?'Hide Answer':'Show Answer';
+}
+// Nav active
+const secs=document.querySelectorAll('section[id]');
+const nls=document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  secs.forEach(s=>{if(window.scrollY>=s.offsetTop-90)cur=s.id;});
+  nls.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="day">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Assessments — Class XII AI · MRIS-14</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--tr:1.2s cubic-bezier(.4,0,.2,1);}
+[data-theme="day"]{
+  --bg:#fdf6ec;--surface:#fffbf5;--surface2:#fef3e2;--border:#e8d5b7;--border2:#f0e4cc;
+  --text:#2c1810;--text-muted:#7a5c42;--text-faint:#b8956a;
+  --accent:#d97b34;--accent2:#2d8a4e;--accent3:#c94f27;
+  --accent-glow:rgba(217,123,52,.2);--nav-bg:rgba(253,246,236,0.96);
+  --sky-top:#5ca8d0;--sky-mid:#a8d4ee;--sky-bot:#fde0b0;
+  --sun-col:#fff176;--sun-glow:rgba(255,200,50,.65);--star-op:0;--cloud-op:1;
+  --correct-bg:rgba(45,138,78,.1);--correct-border:#2d8a4e;--correct-text:#2d8a4e;
+  --wrong-bg:rgba(201,79,39,.1);--wrong-border:#c94f27;--wrong-text:#c94f27;
+  --tag-case:rgba(91,140,255,.12);--tag-case-border:rgba(91,140,255,.35);--tag-case-text:#3a68d8;
+  --tag-obj:rgba(217,123,52,.12);--tag-obj-border:rgba(217,123,52,.35);--tag-obj-text:#b5621a;
+}
+[data-theme="night"]{
+  --bg:#080e1f;--surface:#0e1828;--surface2:#121e33;--border:#1c2b46;--border2:#16243d;
+  --text:#e8edf8;--text-muted:#7a90b8;--text-faint:#4a618a;
+  --accent:#5b8cff;--accent2:#00d4aa;--accent3:#ff6b9d;
+  --accent-glow:rgba(91,140,255,.2);--nav-bg:rgba(8,14,31,0.97);
+  --sky-top:#020818;--sky-mid:#091526;--sky-bot:#152240;
+  --sun-col:#e0eaff;--sun-glow:rgba(150,180,255,.55);--star-op:1;--cloud-op:0;
+  --correct-bg:rgba(0,212,170,.1);--correct-border:#00d4aa;--correct-text:#00d4aa;
+  --wrong-bg:rgba(255,107,157,.1);--wrong-border:#ff6b9d;--wrong-text:#ff6b9d;
+  --tag-case:rgba(91,140,255,.15);--tag-case-border:rgba(91,140,255,.4);--tag-case-text:#7aabff;
+  --tag-obj:rgba(255,180,91,.12);--tag-obj-border:rgba(255,180,91,.35);--tag-obj-text:#ffb45b;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.75;transition:background var(--tr),color var(--tr);overflow-x:hidden;}
+
+/* SKY */
+.sky{position:fixed;inset:0;z-index:-2;pointer-events:none;}
+.sky-grad{position:absolute;inset:0;background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 55%,var(--sky-bot) 100%);opacity:.14;transition:background var(--tr);}
+[data-theme="night"] .sky-grad{opacity:.42;}
+.celestial{position:absolute;top:52px;right:120px;width:56px;height:56px;border-radius:50%;background:var(--sun-col);box-shadow:0 0 35px var(--sun-glow),0 0 80px var(--sun-glow);transition:all var(--tr);}
+[data-theme="night"] .celestial{width:46px;height:46px;top:68px;right:96px;}
+.crater{position:absolute;border-radius:50%;background:rgba(0,0,0,.09);opacity:0;transition:opacity var(--tr);}
+[data-theme="night"] .crater{opacity:1;}
+.cr1{width:11px;height:11px;top:13px;left:12px;}.cr2{width:7px;height:7px;top:27px;left:28px;}.cr3{width:8px;height:8px;top:9px;left:30px;}
+.stars-wrap{position:absolute;inset:0;opacity:var(--star-op);transition:opacity var(--tr);}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite var(--dl,0s);}
+@keyframes twinkle{0%,100%{opacity:.12;transform:scale(1)}50%{opacity:1;transform:scale(1.6)}}
+.clouds{position:absolute;inset:0;opacity:var(--cloud-op);transition:opacity var(--tr);pointer-events:none;}
+.cloud{position:absolute;border-radius:60px;background:rgba(255,255,255,.78);}
+.cloud::before,.cloud::after{content:'';position:absolute;background:inherit;border-radius:50%;}
+.cl1{width:120px;height:36px;top:108px;left:8%;animation:drift 32s linear infinite;}
+.cl1::before{width:58px;height:50px;top:-22px;left:15px;}.cl1::after{width:44px;height:38px;top:-16px;left:52px;}
+.cl2{width:90px;height:30px;top:168px;left:52%;animation:drift 44s linear infinite 7s;}
+.cl2::before{width:48px;height:40px;top:-18px;left:12px;}.cl2::after{width:34px;height:28px;top:-12px;left:38px;}
+@keyframes drift{from{transform:translateX(-280px)}to{transform:translateX(112vw)}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:300;background:var(--nav-bg);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.8rem;height:52px;gap:1rem;transition:background var(--tr),border-color var(--tr);}
+.nav-logo{font-family:'Playfair Display',serif;font-weight:900;font-size:1rem;color:var(--accent);flex-shrink:0;}
+.nav-divider{width:1px;height:20px;background:var(--border);}
+.nav-sub{font-size:.7rem;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;color:var(--text-muted);}
+.nav-right{display:flex;align-items:center;gap:.9rem;margin-left:auto;}
+.nav-back{font-size:.78rem;font-weight:600;color:var(--text-muted);text-decoration:none;padding:.25rem .7rem;border:1px solid var(--border);border-radius:8px;transition:all .2s;}
+.nav-back:hover{color:var(--accent);border-color:var(--accent);}
+.toggle-wrap{display:flex;align-items:center;gap:8px;}
+.tlabel{font-size:.68rem;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--text-muted);user-select:none;}
+.tbtn{width:54px;height:26px;background:var(--surface2);border:1.5px solid var(--border);border-radius:99px;cursor:pointer;position:relative;transition:all var(--tr);}
+.tbtn::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--sun-col);box-shadow:0 0 6px var(--sun-glow);transition:transform .5s cubic-bezier(.4,0,.2,1);}
+[data-theme="night"] .tbtn::after{transform:translateX(28px);}
+
+/* HERO */
+.page-hero{padding:7rem 2rem 3.5rem;text-align:center;max-width:800px;margin:0 auto;}
+.page-eyebrow{display:inline-block;font-size:.65rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);padding:.28rem 1.1rem;border-radius:20px;margin-bottom:1rem;}
+.page-title{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2.2rem,6vw,3.8rem);letter-spacing:-1.5px;line-height:1.05;margin-bottom:.6rem;}
+.page-title em{color:var(--accent);font-style:normal;}
+.page-desc{color:var(--text-muted);font-size:.95rem;line-height:1.7;max-width:560px;margin:0 auto 2rem;}
+
+/* CHAPTER TABS */
+.chapter-nav{position:sticky;top:52px;z-index:100;background:var(--nav-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:.6rem 1.5rem;transition:background var(--tr);}
+.chapter-tabs{display:flex;gap:.4rem;overflow-x:auto;scrollbar-width:none;max-width:1200px;margin:0 auto;}
+.chapter-tabs::-webkit-scrollbar{display:none;}
+.ch-tab{background:var(--surface2);border:1.5px solid var(--border);border-radius:30px;padding:.38rem 1.1rem;font-size:.74rem;font-weight:700;cursor:pointer;color:var(--text-muted);transition:all .22s;white-space:nowrap;font-family:'Outfit',sans-serif;flex-shrink:0;}
+.ch-tab:hover{border-color:var(--accent);color:var(--accent);}
+.ch-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* CHAPTER PANEL */
+.chapter-panel{display:none;max-width:1000px;margin:0 auto;padding:3rem 2rem 5rem;}
+.chapter-panel.show{display:block;animation:fadeUp .35s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.ch-header{margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
+.ch-num{font-size:.65rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem;}
+.ch-title{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(1.6rem,4vw,2.4rem);margin-bottom:.4rem;}
+.ch-desc{color:var(--text-muted);font-size:.9rem;}
+.ch-stats{display:flex;gap:1rem;margin-top:1.2rem;flex-wrap:wrap;}
+.ch-stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.5rem 1.2rem;font-size:.78rem;font-weight:700;color:var(--text-muted);}
+.ch-stat span{color:var(--accent);font-size:1.1rem;display:block;font-family:'Playfair Display',serif;font-weight:900;}
+
+/* SECTION HEADERS */
+.assess-section{margin-bottom:3rem;}
+.assess-section-head{display:flex;align-items:center;gap:.8rem;margin-bottom:1.5rem;padding-bottom:.7rem;border-bottom:2px solid var(--border);}
+.assess-section-icon{width:38px;height:38px;border-radius:10px;background:color-mix(in srgb,var(--accent) 12%,transparent);border:1.5px solid color-mix(in srgb,var(--accent) 28%,transparent);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.assess-section-title{font-family:'Playfair Display',serif;font-weight:900;font-size:1.35rem;color:var(--text);}
+.assess-section-sub{font-size:.8rem;color:var(--text-muted);margin-top:.1rem;}
+.assess-score-badge{margin-left:auto;background:var(--surface2);border:1.5px solid var(--border);border-radius:20px;padding:.3rem .9rem;font-size:.75rem;font-weight:700;color:var(--text-muted);font-family:'DM Mono',monospace;}
+
+/* MCQ */
+.mcq-item{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:1.4rem 1.6rem;margin-bottom:1rem;transition:border-color .2s;}
+.mcq-item.answered-correct{border-color:var(--correct-border);background:var(--correct-bg);}
+.mcq-item.answered-wrong{border-color:var(--wrong-border);background:var(--wrong-bg);}
+.mcq-top{display:flex;align-items:flex-start;gap:.8rem;margin-bottom:.9rem;}
+.mcq-num{width:28px;height:28px;border-radius:8px;background:color-mix(in srgb,var(--accent) 12%,transparent);border:1.5px solid color-mix(in srgb,var(--accent) 25%,transparent);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;color:var(--accent);flex-shrink:0;font-family:'DM Mono',monospace;}
+.mcq-tags{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.4rem;}
+.tag{font-size:.6rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:.18rem .6rem;border-radius:20px;}
+.tag-case{background:var(--tag-case);border:1px solid var(--tag-case-border);color:var(--tag-case-text);}
+.tag-obj{background:var(--tag-obj);border:1px solid var(--tag-obj-border);color:var(--tag-obj-text);}
+.tag-scen{background:rgba(160,100,220,.12);border:1px solid rgba(160,100,220,.3);color:#8b5cf6;}
+[data-theme="night"] .tag-scen{color:#c084fc;}
+.mcq-q{font-size:.95rem;font-weight:600;color:var(--text);line-height:1.55;flex:1;}
+.mcq-opts{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.2rem;}
+.mcq-opt{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:.6rem .9rem;cursor:pointer;font-size:.84rem;color:var(--text-muted);display:flex;align-items:center;gap:.6rem;transition:all .2s;user-select:none;}
+.mcq-opt:hover:not(.locked){border-color:var(--accent);color:var(--text);background:color-mix(in srgb,var(--accent) 6%,var(--surface2));}
+.mcq-opt.correct{background:var(--correct-bg);border-color:var(--correct-border);color:var(--correct-text);font-weight:700;}
+.mcq-opt.wrong{background:var(--wrong-bg);border-color:var(--wrong-border);color:var(--wrong-text);}
+.mcq-opt.locked{cursor:default;pointer-events:none;}
+.opt-ltr{width:22px;height:22px;border-radius:6px;background:color-mix(in srgb,var(--accent) 12%,transparent);border:1.5px solid color-mix(in srgb,var(--accent) 25%,transparent);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;color:var(--accent);flex-shrink:0;transition:all .2s;}
+.mcq-opt.correct .opt-ltr{background:var(--correct-border);border-color:var(--correct-border);color:#fff;}
+.mcq-opt.wrong .opt-ltr{background:var(--wrong-border);border-color:var(--wrong-border);color:#fff;}
+.mcq-feedback{margin-top:.8rem;padding:.6rem .9rem;border-radius:8px;font-size:.82rem;display:none;line-height:1.55;}
+.mcq-feedback.show{display:block;}
+.mcq-feedback.ok{background:var(--correct-bg);color:var(--correct-text);border:1px solid color-mix(in srgb,var(--correct-border) 30%,transparent);}
+.mcq-feedback.no{background:var(--wrong-bg);color:var(--wrong-text);border:1px solid color-mix(in srgb,var(--wrong-border) 30%,transparent);}
+
+/* PROGRESS */
+.mcq-progress{background:var(--surface2);border-radius:99px;height:6px;margin-bottom:1.5rem;overflow:hidden;}
+.mcq-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .4s ease;width:0%;}
+.mcq-result{text-align:center;padding:1.8rem;background:var(--surface);border:1.5px solid var(--border);border-radius:16px;margin-top:1rem;display:none;}
+.mcq-result.show{display:block;animation:fadeUp .3s ease;}
+.result-ring{width:100px;height:100px;border-radius:50%;border:4px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:900;color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--surface));box-shadow:0 0 30px var(--accent-glow);}
+.result-title{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;margin-bottom:.3rem;}
+.result-sub{color:var(--text-muted);font-size:.88rem;margin-bottom:1.2rem;}
+.retry-btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:.6rem 1.8rem;font-size:.85rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:opacity .2s;}
+.retry-btn:hover{opacity:.85;}
+
+/* VSA */
+.vsa-item{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;margin-bottom:1rem;overflow:hidden;transition:border-color .2s;}
+.vsa-item:hover{border-color:color-mix(in srgb,var(--accent) 40%,transparent);}
+.vsa-q{padding:1.1rem 1.4rem;display:flex;align-items:flex-start;gap:.8rem;cursor:pointer;user-select:none;}
+.vsa-num{width:26px;height:26px;border-radius:7px;background:color-mix(in srgb,var(--accent2) 12%,transparent);border:1.5px solid color-mix(in srgb,var(--accent2) 25%,transparent);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;color:var(--accent2);flex-shrink:0;font-family:'DM Mono',monospace;}
+.vsa-qtext{font-size:.93rem;font-weight:600;color:var(--text);flex:1;line-height:1.5;}
+.vsa-toggle{color:var(--text-muted);font-size:.85rem;transition:transform .3s;flex-shrink:0;}
+.vsa-item.open .vsa-toggle{transform:rotate(180deg);}
+.vsa-ans{display:none;padding:0 1.4rem 1.1rem 3.6rem;font-size:.88rem;color:var(--text-muted);line-height:1.65;border-top:1px solid var(--border2);}
+.vsa-item.open .vsa-ans{display:block;animation:fadeUp .2s ease;}
+.vsa-ans-label{font-size:.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);margin-bottom:.3rem;margin-top:.6rem;}
+
+/* LONG ANSWER */
+.la-item{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:1.4rem 1.6rem;margin-bottom:1.2rem;}
+.la-top{display:flex;align-items:flex-start;gap:.8rem;margin-bottom:.8rem;}
+.la-num{width:28px;height:28px;border-radius:8px;background:color-mix(in srgb,var(--accent3) 12%,transparent);border:1.5px solid color-mix(in srgb,var(--accent3) 25%,transparent);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:var(--accent3);flex-shrink:0;font-family:'DM Mono',monospace;}
+.la-marks{margin-left:auto;font-size:.7rem;font-weight:700;color:var(--text-faint);font-family:'DM Mono',monospace;}
+.la-qtext{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:var(--text);flex:1;line-height:1.45;}
+.la-toggle-btn{background:transparent;border:1.5px solid var(--border);border-radius:8px;padding:.35rem .9rem;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--text-muted);transition:all .2s;font-family:'Outfit',sans-serif;white-space:nowrap;}
+.la-toggle-btn:hover{border-color:var(--accent);color:var(--accent);}
+.la-ans-wrap{display:none;margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--border2);}
+.la-ans-wrap.open{display:block;animation:fadeUp .25s ease;}
+.la-ans-label{font-size:.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent3);margin-bottom:.5rem;}
+.la-ans-text{font-size:.88rem;color:var(--text-muted);line-height:1.75;}
+
+/* FOOTER */
+footer{text-align:center;padding:3rem 2rem;color:var(--text-muted);font-size:.82rem;border-top:1px solid var(--border);}
+footer strong{color:var(--accent);}
+
+@media(max-width:600px){
+  .mcq-opts{grid-template-columns:1fr;}
+  .chapter-panel{padding:2rem 1.2rem 4rem;}
+  .ch-stats{gap:.6rem;}
+  .la-top{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<div class="sky">
+  <div class="sky-grad"></div>
+  <div class="celestial"><div class="crater cr1"></div><div class="crater cr2"></div><div class="crater cr3"></div></div>
+  <div class="stars-wrap" id="stars"></div>
+  <div class="clouds"><div class="cloud cl1"></div><div class="cloud cl2"></div></div>
+</div>
+
+<nav>
+  <div class="nav-logo">Class XII · AI</div>
+  <div class="nav-divider"></div>
+  <span class="nav-sub">Assessments · MRIS-14</span>
+  <div class="nav-right">
+    <a href="index.html" class="nav-back">← Back to Repository</a>
+    <div class="toggle-wrap">
+      <span class="tlabel" id="tlbl">Day</span>
+      <div class="tbtn" onclick="toggleTheme()"></div>
+      <span id="tico">☀️</span>
+    </div>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div class="page-eyebrow">CBSE · Class XII · Subject Code 843</div>
+  <h1 class="page-title">Chapter <em>Assessments</em></h1>
+  <p class="page-desc">20 MCQs (objective + case-based + scenario) · 5 Very Short Answers · 5 Long Answers — for every unit. Click any option to check your answer instantly.</p>
+</div>
+
+<div class="chapter-nav">
+  <div class="chapter-tabs" id="chapterTabs"></div>
+</div>
+
+<div id="panelsWrap"></div>
+
+<footer>
+  <p><strong>Class XII · Artificial Intelligence · Subject Code 843 · CBSE · MRIS-14</strong></p>
+  <p style="margin-top:.3rem;font-family:'DM Mono',monospace;font-size:.72rem;">Assessments by Avdhesh — All 8 Units</p>
+</footer>
+
+<script>
+/* ── Stars ── */
+const sw=document.getElementById('stars');
+for(let i=0;i<160;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*2+0.4;s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*4}s;--dl:${Math.random()*5}s;`;sw.appendChild(s);}
+let isDay=true;
+function toggleTheme(){isDay=!isDay;document.documentElement.setAttribute('data-theme',isDay?'day':'night');document.getElementById('tlbl').textContent=isDay?'Day':'Night';document.getElementById('tico').textContent=isDay?'☀️':'🌙';}
+
+/* ════════════════════════════════════
+   ASSESSMENT DATA
+════════════════════════════════════ */
+const CHAPTERS = [
+
+/* ─────────────── UNIT 1 ─────────────── */
+{
+  id:'u1', num:'Unit 01', color:'#d97b34',
+  title:'Python Programming-II',
+  desc:'NumPy · Pandas · CSV Handling · Missing Values · Linear Regression',
+  mcqs:[
+    {type:'obj', q:'Which NumPy function creates an array filled entirely with zeros?', opts:['np.zeros()','np.empty()','np.blank()','np.null()'], a:0, e:'np.zeros(shape) creates an array of given shape, every element initialised to 0.'},
+    {type:'case', q:'Ram needs to work with a 3×4 matrix where every value starts at 0 before he fills in sensor readings. Which NumPy function should Ram use?', opts:['np.full(3,4)','np.zeros((3,4))','np.empty((3,4))','np.init((3,4))'], a:1, e:'np.zeros((3,4)) returns a 3-row, 4-column matrix filled with 0.0 — ideal for pre-allocating sensor data.'},
+    {type:'scen', q:'Priya has a Pandas DataFrame and wants to know how many missing values are in each column. Which one-liner should she write?', opts:['df.missing()','df.null().count()','df.isnull().sum()','df.count(NaN)'], a:2, e:'df.isnull() creates a boolean mask (True where NaN); .sum() then counts Trues column-wise.'},
+    {type:'obj', q:'What data structure does pd.read_csv() return by default?', opts:['NumPy ndarray','Python list','Pandas DataFrame','Pandas Series'], a:2, e:'pd.read_csv() reads a comma-separated file and returns a two-dimensional Pandas DataFrame.'},
+    {type:'case', q:'Arjun loads a CSV of student marks and finds some marks are missing. He wants to replace all NaN values with 0. Which method should he call?', opts:['df.dropna(0)','df.fillna(0)','df.replace(NaN,0)','df.setna(0)'], a:1, e:'df.fillna(value) replaces every NaN with the specified value — here, 0.'},
+    {type:'obj', q:'In a NumPy array, what does the .shape attribute return?', opts:['Total number of elements','A tuple of dimension sizes','Memory size in bytes','Data type of elements'], a:1, e:'.shape returns a tuple, e.g. (3,4) for a 3-row, 4-column array.'},
+    {type:'scen', q:'A student wants to remove all rows containing at least one NaN from a DataFrame df. Which method achieves this?', opts:['df.fillna()','df.clean()','df.dropna()','df.reset()'], a:2, e:'df.dropna() removes any row that contains at least one NaN value by default.'},
+    {type:'obj', q:'Which function from sklearn.model_selection is used to split a dataset into training and testing sets?', opts:['split_data()','test_train_split()','train_test_split()','divide_data()'], a:2, e:'sklearn.model_selection.train_test_split(X, y, test_size=0.2) is the standard utility.'},
+    {type:'case', q:'Sneha has a Pandas DataFrame and needs to find and then remove duplicate rows before analysis. Which method should she call?', opts:['df.remove_dup()','df.drop_duplicates()','df.unique()','df.deduplicate()'], a:1, e:'df.drop_duplicates() returns a DataFrame with duplicate rows removed, keeping the first occurrence.'},
+    {type:'obj', q:'In Linear Regression (y = mx + c), what does the intercept "c" represent?', opts:['The slope of the line','Rate of change of y per unit x','The value of y when x equals 0','The R² score'], a:2, e:'The intercept c is the y-value where the regression line crosses the y-axis (i.e., when x = 0).'},
+    {type:'scen', q:'A data scientist trains a Linear Regression model and gets R² = 0.92. What does this indicate?', opts:['The model explains 8% of variance','The model has 92% accuracy on all datasets','The model explains 92% of variance in y','The MSE is 0.92'], a:2, e:'R² (coefficient of determination) tells what fraction of the target variable\'s variance the model explains. 0.92 is very good.'},
+    {type:'obj', q:'Which NumPy function computes the arithmetic mean of an array?', opts:['np.average()','np.mean()','np.median()','np.sum()'], a:1, e:'np.mean(array) returns the arithmetic mean. np.average() can accept weights; np.mean() is simpler.'},
+    {type:'case', q:'Kavya has a 1D array [3,7,3,2,7] and needs to find how many unique values exist. Which combination would give her unique values?', opts:['np.count(array)','np.distinct(array)','np.unique(array)','array.unique()'], a:2, e:'np.unique(array) returns the sorted unique elements; len(np.unique(a)) gives the count.'},
+    {type:'obj', q:'Which Pandas method is used to view the first 5 rows of a DataFrame quickly?', opts:['df.start()','df.top()','df.head()','df.first()'], a:2, e:'df.head(n) returns the first n rows (default 5) — great for quick data inspection.'},
+    {type:'scen', q:'A student needs to merge two DataFrames df1 and df2 on a common column "id". Which function should be used?', opts:['pd.concat()','pd.merge()','pd.join()','pd.combine()'], a:1, e:'pd.merge(df1, df2, on="id") performs SQL-style joins on one or more common columns.'},
+    {type:'obj', q:'What does the slope "m" represent in Linear Regression y = mx + c?', opts:['y-intercept value','Rate of change of y per unit increase in x','The R² score','The residual error'], a:1, e:'The slope m quantifies how much y changes for every 1-unit increase in x — the core relationship.'},
+    {type:'case', q:'Rohan splits his data: 80% train, 20% test. He passes test_size=0.2 in train_test_split. If he has 500 samples, how many go to testing?', opts:['80','100','200','250'], a:1, e:'20% of 500 = 100 samples go to the test set; the remaining 400 are used for training.'},
+    {type:'obj', q:'Which Pandas method gives a quick statistical summary (mean, std, min, max) of numeric columns?', opts:['df.info()','df.describe()','df.summary()','df.stats()'], a:1, e:'df.describe() generates descriptive statistics for all numeric columns including count, mean, std, min, 25%, 50%, 75%, max.'},
+    {type:'scen', q:'A teacher wants to create a new column "Grade" in DataFrame df where Grade = Marks × 0.1. Which is correct?', opts:['df["Grade"] = df["Marks"] + 0.1','df.add("Grade", Marks*0.1)','df["Grade"] = df["Marks"] * 0.1','df.create("Grade")'], a:2, e:'Pandas allows vectorised column creation directly: df["new_col"] = df["existing_col"] * scalar.'},
+    {type:'obj', q:'The range of R² (coefficient of determination) is:', opts:['0 to 100','0 to 1 only','−∞ to 1','−1 to +1'], a:2, e:'R² can be negative (model worse than a flat mean line), 0 (no fit), or up to 1 (perfect fit).'},
+  ],
+  vsa:[
+    {q:'What is a NumPy ndarray?', a:'A NumPy ndarray (N-dimensional array) is a fixed-type, grid-like data structure for efficient numerical computation, faster than Python lists for math operations.'},
+    {q:'What is the difference between dropna() and fillna()?', a:'dropna() removes rows/columns with missing values entirely. fillna(value) replaces missing values with a specified value like 0 or mean, preserving all rows.'},
+    {q:'What does the R² score measure in Linear Regression?', a:'R² measures how well the regression line fits the data. It shows the proportion of variance in y explained by x; 1.0 is perfect, 0 means no fit.'},
+    {q:'Why do we split data into training and testing sets?', a:'To evaluate model performance on unseen data. Training data builds the model; test data checks if it generalises — preventing overfitting to the training set.'},
+    {q:'What is the purpose of pd.read_csv()?', a:'pd.read_csv() reads a comma-separated values file from disk and loads it into a Pandas DataFrame, making tabular data ready for analysis and manipulation.'},
+  ],
+  la:[
+    {q:'Explain the concept of Linear Regression. How is it implemented using scikit-learn? Include the role of train-test split, model fitting, and evaluation using R².', marks:'5 marks', a:'Linear Regression models the relationship between an independent variable x and a dependent variable y as a straight line: y = mx + c. Steps in scikit-learn: (1) Import LinearRegression from sklearn.linear_model. (2) Split data using train_test_split(X, y, test_size=0.2). (3) Create model object: lr = LinearRegression(). (4) Fit on training data: lr.fit(X_train, y_train). (5) Predict: y_pred = lr.predict(X_test). (6) Evaluate: r2_score(y_test, y_pred). R² near 1 means good fit; the slope m shows rate of change and intercept c shows baseline value.'},
+    {q:'What are missing values in a dataset? Describe any three techniques to handle them in Pandas with examples.', marks:'5 marks', a:'Missing values (NaN — Not a Number) occur when data is unavailable or not recorded. Three handling techniques: (1) Drop: df.dropna() removes any row with at least one NaN — useful when missing data is rare. (2) Fill with constant: df.fillna(0) replaces NaN with 0 — useful for counts or flags. (3) Fill with mean/median: df["col"].fillna(df["col"].mean()) replaces NaN with the column average — preserves statistical distribution. Choice depends on data type, percentage of missing values, and analysis goals.'},
+    {q:'Explain the key differences between NumPy arrays and Python lists. Why are NumPy arrays preferred for numerical computation?', marks:'4 marks', a:'Python lists are heterogeneous (can store mixed types), slow for math, and use more memory. NumPy arrays are: (1) Homogeneous — all elements same type, enabling compact storage. (2) Faster — backed by C, supporting vectorised operations without Python loops. (3) Feature-rich — built-in mathematical functions (mean, std, dot product). (4) Multi-dimensional — support 2D/3D arrays. Example: np.array([1,2,3]) * 2 gives [2,4,6] directly, while a list requires a loop.'},
+    {q:'Describe the steps involved in a complete data analysis workflow using Pandas, from loading a CSV to basic analysis.', marks:'5 marks', a:'Step 1: Load data — df = pd.read_csv("file.csv"). Step 2: Explore — df.head(), df.shape, df.dtypes, df.describe(). Step 3: Check missing values — df.isnull().sum(). Step 4: Handle missing values — df.fillna() or df.dropna(). Step 5: Remove duplicates — df.drop_duplicates(). Step 6: Feature engineering — create new columns. Step 7: Analysis — groupby, value_counts, correlation. Step 8: Export — df.to_csv("output.csv"). Each step ensures data quality before modelling.'},
+    {q:'What is train-test split? Why is it important, and what problems arise if you evaluate a model on training data itself?', marks:'4 marks', a:'Train-test split divides a dataset into two parts: training set (e.g. 80%) used to fit the model, and test set (20%) to evaluate it. Importance: it measures generalisation — how well the model works on new, unseen data. If evaluated on training data, the model may appear to perform perfectly because it has memorised patterns (overfitting). This gives an overly optimistic score that doesn\'t reflect real-world performance. Example: a model scoring R²=0.99 on training but 0.4 on test is overfit and unreliable.'},
+  ]
+},
+
+/* ─────────────── UNIT 2 ─────────────── */
+{
+  id:'u2', num:'Unit 02', color:'#5b8cff',
+  title:'Data Science Methodology',
+  desc:'IBM\'s 10-step DS Methodology · Model Evaluation · Cross-Validation',
+  mcqs:[
+    {type:'obj', q:'Who developed IBM\'s 10-step Data Science Methodology?', opts:['Andrew Ng','John B. Rollins','Geoffrey Hinton','Yann LeCun'], a:1, e:'IBM\'s DS Methodology was created by John B. Rollins and is widely used as a structured framework.'},
+    {type:'case', q:'Rahul\'s team is starting a new data science project for a bank. According to IBM\'s methodology, what should be their very first step?', opts:['Collect data immediately','Build a model','Understand the business problem clearly','Clean the data'], a:2, e:'Business Understanding is always the first step — the team must clearly define what problem they\'re solving before anything else.'},
+    {type:'obj', q:'How many total steps are in IBM\'s Data Science Methodology?', opts:['6','8','10','12'], a:2, e:'The IBM DS Methodology has exactly 10 steps from Business Understanding through to Feedback.'},
+    {type:'scen', q:'A model predicts a patient has a disease (Positive) but the actual result is Negative. This is classified as:', opts:['True Positive','True Negative','False Positive','False Negative'], a:2, e:'False Positive (Type I error): model predicted Positive, but ground truth was Negative.'},
+    {type:'obj', q:'Precision is calculated as:', opts:['TP/(TP+FN)','TP/(TP+FP)','TN/(TN+FP)','FP/(FP+TN)'], a:1, e:'Precision = TP/(TP+FP) — of all cases predicted positive, what fraction were truly positive.'},
+    {type:'case', q:'Seema builds a classifier and gets high precision but low recall. What does this mean for her model in a disease detection context?', opts:['It catches all diseases but has many false alarms','It misses many actual disease cases but rarely gives false alarms','It is perfectly balanced','It works only on training data'], a:1, e:'High precision = low false positives (rarely wrong when saying positive). Low recall = many false negatives (misses actual positives).'},
+    {type:'obj', q:'K-Fold Cross-Validation is primarily used to:', opts:['Speed up training','Prevent overfitting and give reliable evaluation','Fix class imbalance','Reduce dataset size'], a:1, e:'K-Fold ensures every data point is tested exactly once across k folds, giving a more robust performance estimate.'},
+    {type:'obj', q:'What is the F1-Score?', opts:['Sum of Precision and Recall','Arithmetic mean of Precision and Recall','Harmonic mean of Precision and Recall','Geometric mean of Precision and Recall'], a:2, e:'F1 = 2*(P*R)/(P+R). The harmonic mean penalises extreme imbalance between precision and recall.'},
+    {type:'scen', q:'A data scientist gets R²=0.98 on training data but only 0.41 on test data. This likely indicates:', opts:['Good generalisation','Underfitting','Overfitting','Data leakage fixed'], a:2, e:'A large gap between train and test R² is a classic sign of overfitting — the model memorised training data.'},
+    {type:'case', q:'Priya is comparing two models for a loan default detector. Model A has Precision 0.95, Recall 0.50. Model B has Precision 0.70, Recall 0.85. Which model is safer for a bank trying to catch all defaulters?', opts:['Model A — fewer false alarms','Model B — catches more defaulters','Both are equal','Neither model is useful'], a:1, e:'High recall (0.85) means Model B catches 85% of actual defaulters. For risk-averse applications, recall matters more than precision.'},
+    {type:'obj', q:'Recall (Sensitivity) is calculated as:', opts:['TP/(TP+FP)','TN/(TN+FN)','TP/(TP+FN)','FP/(FP+TN)'], a:2, e:'Recall = TP/(TP+FN) — of all actual positives, what fraction did the model correctly identify.'},
+    {type:'obj', q:'Which step in IBM\'s DS Methodology comes immediately after Data Collection?', opts:['Model Building','Data Understanding','Business Understanding','Deployment'], a:1, e:'After collecting data, the team performs Data Understanding — exploring, profiling, and assessing quality.'},
+    {type:'scen', q:'A student trained a decision tree with max_depth=None on a small dataset and scored 100% train accuracy but 52% on test. What should be done?', opts:['Increase training data only','Add more features','Prune the tree or limit depth to reduce overfitting','Do nothing — 100% is perfect'], a:2, e:'Unlimited depth causes severe overfitting. Limiting max_depth (pruning) prevents the tree from memorising noise.'},
+    {type:'obj', q:'True Negative (TN) in a confusion matrix means:', opts:['Predicted positive, actually positive','Predicted negative, actually positive','Predicted positive, actually negative','Predicted negative, actually negative'], a:3, e:'TN = the model predicted Negative AND the actual label was also Negative. A correct negative prediction.'},
+    {type:'case', q:'A school uses an AI system to flag students at risk of failing. The system has Recall = 0.95. What does this mean?', opts:['95% of flagged students were actually at risk','It flags 95% of all at-risk students correctly','It has 95% overall accuracy','It misses 95% of at-risk students'], a:1, e:'Recall 0.95 means the model identifies 95% of all actual at-risk students — very important in education interventions.'},
+    {type:'obj', q:'The last step in IBM\'s 10-step DS Methodology is:', opts:['Deployment','Model Evaluation','Feedback','Data Preparation'], a:2, e:'Feedback is the final step — continuously monitoring model performance in production and cycling improvements back.'},
+    {type:'scen', q:'In 5-Fold Cross-Validation on 500 samples, how many samples are used for testing in each fold?', opts:['50','100','200','500'], a:1, e:'In 5-Fold CV, the data is split into 5 equal parts. Each fold uses 500/5 = 100 samples as the test set.'},
+    {type:'obj', q:'An Analytic Approach in IBM\'s methodology determines:', opts:['What data to collect','What type of analysis or model is needed','How to deploy the model','How to clean data'], a:1, e:'The Analytic Approach step decides whether the problem needs classification, regression, clustering, etc.'},
+    {type:'case', q:'Meera\'s spam detector has a confusion matrix: TP=90, FP=10, FN=5, TN=95. What is the Precision?', opts:['0.90','0.947','0.50','0.857'], a:0, e:'Precision = TP/(TP+FP) = 90/(90+10) = 90/100 = 0.90. Meera\'s model is precise in calling emails spam.'},
+    {type:'obj', q:'Data Preparation in IBM\'s methodology includes:', opts:['Only collecting data','Cleansing, transforming, and feature engineering before modelling','Deploying the model','Evaluating model performance'], a:1, e:'Data Preparation covers cleaning, handling missing values, encoding, scaling, and feature engineering.'},
+  ],
+  vsa:[
+    {q:'What is a confusion matrix?', a:'A confusion matrix is a table showing True Positives, True Negatives, False Positives, and False Negatives — summarising a classifier\'s performance across all prediction outcomes.'},
+    {q:'Define Precision and Recall in one sentence each.', a:'Precision = of all predicted positives, how many are truly positive. Recall = of all actual positives, how many did the model correctly detect.'},
+    {q:'Why is K-Fold Cross-Validation better than a single train-test split?', a:'K-Fold uses all data for both training and testing across k rounds, giving a more reliable and less variance-prone performance estimate than a single split.'},
+    {q:'What does the Feedback step do in IBM\'s DS Methodology?', a:'Feedback continuously evaluates the deployed model against real-world results and cycles improvements back to refine the model, data, or business understanding.'},
+    {q:'What is overfitting in Machine Learning?', a:'Overfitting occurs when a model learns the training data\'s noise and details too well, performing excellently on training data but poorly on new, unseen test data.'},
+  ],
+  la:[
+    {q:'Explain IBM\'s 10-step Data Science Methodology in order, briefly describing the purpose of each step.', marks:'5 marks', a:'1. Business Understanding: Define the problem and goals. 2. Analytic Approach: Choose model type (classification, regression, etc.). 3. Data Requirements: Identify needed data. 4. Data Collection: Gather raw data. 5. Data Understanding: Explore and profile data quality. 6. Data Preparation: Clean, transform, engineer features. 7. Modelling: Build and train the model. 8. Model Evaluation: Test on held-out data using metrics. 9. Deployment: Release model to production. 10. Feedback: Monitor performance and iterate. The cycle is iterative — later steps may feed back to earlier ones.'},
+    {q:'Describe the confusion matrix. Explain TP, FP, TN, FN with an example from medical diagnosis, and calculate Precision and Recall from sample values.', marks:'5 marks', a:'Confusion matrix for disease detection (Positive = diseased): True Positive (TP) = predicted diseased, actually diseased. False Positive (FP) = predicted diseased, actually healthy — false alarm. False Negative (FN) = predicted healthy, actually diseased — dangerous miss. True Negative (TN) = predicted healthy, actually healthy. Example: TP=80, FP=20, FN=10, TN=90. Precision = 80/100 = 0.80 (80% of flagged patients truly ill). Recall = 80/90 = 0.89 (catches 89% of all ill patients). In medical contexts, recall is critical — missing a disease is worse than a false alarm.'},
+    {q:'What is K-Fold Cross-Validation? Explain the process with a diagram description for k=5 and discuss its advantages over a simple train-test split.', marks:'5 marks', a:'K-Fold Cross-Validation divides the dataset into k equal folds. In 5-Fold: Fold 1: test on fold1, train on 2-5. Fold 2: test on fold2, train on 1,3-5. ...repeat 5 times. Final score = average of all 5 test scores. Advantages: (1) Every data point is tested exactly once. (2) Less sensitive to how data was split. (3) Better estimate of generalisation. (4) Uses all data for both training and evaluation. Disadvantage: 5× computational cost vs single split. Best used for smaller datasets or when reliable metrics are critical.'},
+    {q:'Compare and contrast Precision, Recall, and F1-Score. When would you prioritise Recall over Precision?', marks:'4 marks', a:'Precision = TP/(TP+FP): how many positive predictions are correct. Recall = TP/(TP+FN): how many actual positives were found. F1-Score = harmonic mean of both: 2PR/(P+R). F1 is best when you need balance. Prioritise Recall when missing a positive is very costly: disease detection (missing illness dangerous), fraud detection (missing fraud costly), disaster warning systems. Prioritise Precision when false alarms are costly: spam filters (don\'t want important emails deleted), legal evidence flagging. F1 is used when both errors matter equally.'},
+    {q:'What is overfitting? How can it be detected and what are three strategies to prevent it?', marks:'4 marks', a:'Overfitting occurs when a model memorises training data — learning noise rather than patterns. Detection: large gap between training accuracy (e.g. 99%) and test accuracy (e.g. 55%). Prevention strategies: (1) Cross-Validation: evaluate on multiple splits to get real performance. (2) Regularisation (L1/L2): penalises large weights to keep the model simple. (3) Pruning/Limiting complexity: for decision trees, limit depth; for neural networks, use dropout. (4) More training data: a larger dataset makes it harder to overfit. (5) Feature selection: remove irrelevant features that add noise.'},
+  ]
+},
+
+/* ─────────────── UNIT 3 ─────────────── */
+{
+  id:'u3', num:'Unit 03', color:'#00d4aa',
+  title:'Making Machines See',
+  desc:'Computer Vision · Image Processing · Applications · Ethics',
+  mcqs:[
+    {type:'obj', q:'Computer Vision primarily enables machines to:', opts:['Translate text between languages','Interpret and understand visual data','Generate audio from text','Store images efficiently'], a:1, e:'Computer Vision (CV) gives machines the ability to extract meaningful information from images and video.'},
+    {type:'case', q:'A self-driving car needs to recognise pedestrians, traffic signs, and lane markings in real time. Which AI field is primarily responsible for this?', opts:['Natural Language Processing','Reinforcement Learning','Computer Vision','Knowledge Graphs'], a:2, e:'Computer Vision powers object detection, lane detection, and sign recognition in autonomous vehicles.'},
+    {type:'obj', q:'What is the purpose of edge detection in image processing?', opts:['Add colour to images','Identify object boundaries and structural features','Reduce file size','Increase resolution'], a:1, e:'Edge detection (e.g. Canny algorithm) finds the boundaries between regions — critical for object recognition.'},
+    {type:'scen', q:'A hospital AI system analyses X-ray images to flag suspected tumours. This is an application of:', opts:['NLP','Generative AI','Computer Vision — Medical Imaging','Big Data analytics'], a:2, e:'Medical imaging — tumour detection from X-rays, MRIs, CT scans — is a key CV application.'},
+    {type:'obj', q:'Image Segmentation means:', opts:['Deleting part of an image','Dividing an image into meaningful regions','Rotating an image','Compressing pixels'], a:1, e:'Segmentation partitions an image into regions corresponding to different objects or areas of interest.'},
+    {type:'case', q:'Riya is building a face unlock system for a phone. The system must locate the face and verify identity. Which two CV tasks are involved?', opts:['Object Classification and NLP','Face Detection and Face Recognition','Edge Detection only','Image Compression and Segmentation'], a:1, e:'Face Detection locates the face in the frame; Face Recognition verifies identity by comparing features.'},
+    {type:'obj', q:'CNNs are preferred for image recognition because they:', opts:['Have no hidden layers','Use recurrence for sequences','Automatically learn spatial features like edges and textures','Only work with grayscale images'], a:2, e:'Convolutional layers in CNNs learn spatial features hierarchically — edges → shapes → objects.'},
+    {type:'obj', q:'Which of the following is NOT a challenge in Computer Vision?', opts:['Variation in lighting conditions','Occlusion (partial hiding) of objects','Unlimited labelled training data','Real-time processing demands'], a:2, e:'Unlimited labelled data is not a challenge — in fact, scarcity of labelled data is a major challenge in CV.'},
+    {type:'scen', q:'An AI camera system at a mall tracks shopper movement to study buying behaviour. Which ethical concern does this primarily raise?', opts:['Energy consumption','Privacy and surveillance without consent','Image resolution quality','Processing speed'], a:1, e:'Tracking individuals without explicit consent raises serious privacy and surveillance ethics concerns.'},
+    {type:'case', q:'Vikram is training a fruit classifier with only 200 images per class. The model overfits. His mentor suggests Data Augmentation. What will this do?', opts:['Collect more real images automatically','Reduce the number of classes','Create new training samples via transformations like flipping and rotation','Compress images to save memory'], a:2, e:'Data augmentation applies transformations (flip, rotate, crop, zoom, brightness) to artificially expand training data.'},
+    {type:'obj', q:'Object Detection differs from Image Classification in that it:', opts:['Only works with videos','Assigns one label to the whole image','Locates AND labels multiple objects within an image','Generates new images'], a:2, e:'Object Detection outputs bounding boxes + labels for multiple objects; Classification gives one label to the whole image.'},
+    {type:'obj', q:'RGB to Grayscale conversion reduces the image from:', opts:['3 channels to 2 channels','3 channels to 1 channel','1 channel to 3 channels','16-bit to 8-bit'], a:1, e:'RGB images have 3 channels (Red, Green, Blue). Grayscale collapses these to 1 channel — a single intensity value.'},
+    {type:'scen', q:'A CV model performs well on sunny daytime images but poorly on night images. This is most likely due to:', opts:['Overfitting to lighting conditions','Too many convolutional layers','High image resolution','Using ReLU activation'], a:0, e:'The model overfit to the lighting in training data. Without night images in training, it can\'t generalise.'},
+    {type:'case', q:'A retailer installs a camera that uses facial recognition to identify known shoplifters. What ethical concerns exist?', opts:['The camera might break down','High energy cost','Privacy violation, racial bias in recognition, consent issues','The images take too much storage'], a:2, e:'Facial recognition raises concerns: wrongful identification (especially for minorities due to dataset bias), lack of consent, and surveillance misuse.'},
+    {type:'obj', q:'Which deep learning architecture is most commonly used for Computer Vision tasks?', opts:['RNN','LSTM','CNN','Transformer only'], a:2, e:'Convolutional Neural Networks (CNNs) are the dominant architecture for image-related CV tasks.'},
+    {type:'obj', q:'What is "Optical Character Recognition" (OCR) in Computer Vision?', opts:['Generating images from text','Recognising and extracting text from images','Classifying images into categories','Detecting faces in images'], a:1, e:'OCR converts handwritten or printed text in images into machine-readable digital text.'},
+    {type:'scen', q:'An autonomous drone uses CV to avoid obstacles while flying. Which CV task is most relevant here?', opts:['Image Classification','Depth Estimation and Object Detection','Image Compression','Style Transfer'], a:1, e:'Obstacle avoidance requires understanding distances (depth estimation) and identifying what objects are nearby.'},
+    {type:'case', q:'Ananya trains a dog vs cat classifier. It achieves 99% accuracy on training images but only 60% on new photos. What should she try?', opts:['Add more layers only','Use a bigger learning rate','Apply data augmentation and regularisation to reduce overfitting','Reduce image resolution'], a:2, e:'Classic overfitting — data augmentation + dropout/regularisation will help the model generalise to new images.'},
+    {type:'obj', q:'What does "Transfer Learning" mean in the context of Computer Vision?', opts:['Moving images between computers','Using a pre-trained model\'s features as a starting point for a new task','Translating labels to another language','Transferring models to mobile devices'], a:1, e:'Transfer Learning reuses a model pre-trained on large datasets (e.g. ImageNet) and fine-tunes it for a specific task with less data.'},
+    {type:'obj', q:'Which technique helps a CV model see an image as a set of smaller overlapping patches to detect local features?', opts:['Pooling','Convolution','Fully Connected Layer','Softmax'], a:1, e:'Convolution slides a small filter (kernel) over the image to detect local features like edges, textures, and patterns.'},
+  ],
+  vsa:[
+    {q:'What is Computer Vision?', a:'Computer Vision is a field of AI that enables machines to interpret and understand visual data from images and videos, extracting meaningful information similar to human vision.'},
+    {q:'What is Image Segmentation and why is it useful?', a:'Image segmentation divides an image into distinct regions representing different objects. It helps in medical imaging, self-driving cars, and satellite analysis where exact object boundaries matter.'},
+    {q:'What is Data Augmentation in CV and why is it used?', a:'Data augmentation creates new training images by applying transformations like flips, rotations, and brightness changes. It artificially expands small datasets and reduces overfitting.'},
+    {q:'Name two ethical concerns with facial recognition technology.', a:'Privacy violation through mass surveillance without consent, and racial/gender bias because many facial recognition systems are less accurate for darker-skinned individuals due to biased training data.'},
+    {q:'What is the difference between Object Detection and Image Classification?', a:'Image classification assigns one label to an entire image. Object detection identifies and locates multiple objects within an image using bounding boxes with individual labels for each.'},
+  ],
+  la:[
+    {q:'Explain the key steps in how a CNN processes an image from input to final classification. Include the role of convolutional layers, pooling, and fully connected layers.', marks:'5 marks', a:'A CNN processes images in stages: (1) Input Layer: receives raw pixel values (e.g. 224×224×3 for RGB). (2) Convolutional Layer: applies learnable filters to detect local features — edges in early layers, shapes in middle, objects in deep layers. (3) Activation (ReLU): introduces non-linearity. (4) Pooling (Max/Avg Pooling): reduces spatial dimensions, keeping dominant features, reducing computation. (5) Multiple Conv+Pool blocks: build hierarchical feature understanding. (6) Flatten: converts 2D feature maps to 1D vector. (7) Fully Connected (Dense) Layer: combines all features for decision-making. (8) Softmax Output: produces probability per class. The network learns all filter values through backpropagation on labelled images.'},
+    {q:'Discuss three real-world applications of Computer Vision. For each, explain what CV task is involved and its impact on society.', marks:'5 marks', a:'(1) Medical Imaging: CNNs analyse X-rays and MRIs to detect tumours, diabetic retinopathy, and fractures. Impact: earlier, more accurate diagnosis; reduces radiologist workload. (2) Autonomous Vehicles: CV handles lane detection, pedestrian recognition, traffic sign reading, and obstacle avoidance. Impact: potential to eliminate human-error accidents (94% of crashes involve human error). (3) Facial Recognition: used in phone unlocking, airport security, and law enforcement. CV locates and matches faces to databases. Impact: faster security checks but raises major privacy concerns. All applications show CV\'s dual nature: powerful utility combined with ethical responsibility.'},
+    {q:'What are the main challenges in Computer Vision? Explain any four with examples.', marks:'4 marks', a:'(1) Lighting Variation: an object looks very different in sunlight vs shadow — models trained in one condition may fail in another. (2) Occlusion: when objects are partially hidden (e.g. a person partly behind a pillar), the model may fail to detect them. (3) Intra-class Variation: objects in the same category look very different — e.g. dogs come in hundreds of shapes and sizes. (4) Scale and Viewpoint: the same object seen from different angles or distances looks completely different. (5) Scarcity of Labelled Data: training CNNs requires thousands of labelled images per class, which is expensive and time-consuming to produce. Solutions include transfer learning and data augmentation.'},
+    {q:'Explain the ethical implications of Computer Vision in surveillance systems. Cover privacy, bias, and accountability.', marks:'5 marks', a:'CV-powered surveillance raises three major ethical concerns: (1) Privacy: mass CCTV networks with facial recognition can track citizens without consent, creating "surveillance states." People may self-censor knowing they\'re watched. (2) Algorithmic Bias: studies (MIT Media Lab, 2018) showed facial recognition error rates up to 35% for dark-skinned women vs 1% for light-skinned men. Biased training data leads to discriminatory outcomes — wrongful arrests, denied access. (3) Accountability: when an AI system wrongly identifies someone, it\'s unclear who is responsible — the developer, deployer, or the algorithm. Regulations like GDPR address some aspects, but CV ethics requires: informed consent, diverse training data, transparent systems, and human oversight for high-stakes decisions.'},
+    {q:'What is Transfer Learning? Why is it important for Computer Vision, especially when data is limited?', marks:'4 marks', a:'Transfer Learning uses a model pre-trained on a large dataset (e.g. VGG16 on ImageNet\'s 1.2M images) as a starting point for a new task. Steps: (1) Take a pre-trained CNN — it has already learned to detect edges, textures, shapes in its early layers. (2) Remove the final classification layer. (3) Add new layers specific to your task (e.g. 5-class fruit classifier). (4) Fine-tune on your small dataset. Why it matters: training from scratch requires millions of images and weeks of computation. Transfer learning achieves good results with hundreds of images and hours of training. Applications: medical imaging (limited patient scans), industrial defect detection, rare species identification. It democratises CV by reducing data and compute barriers.'},
+  ]
+},
+
+/* ─────────────── UNIT 4 ─────────────── */
+{
+  id:'u4', num:'Unit 04', color:'#ff9d6c',
+  title:'AI with Orange Data Mining Tool',
+  desc:'Visual ML · Widgets · Data Mining · NLP · Evaluation',
+  mcqs:[
+    {type:'obj', q:'Orange is primarily described as a:', opts:['Text-based scripting tool','Component-based visual programming tool','Command-line ML framework','Database management system'], a:1, e:'Orange uses a drag-and-drop widget-based visual interface — no coding required.'},
+    {type:'case', q:'Mohan wants to analyse data without writing any code. Which tool allows him to build ML pipelines visually by connecting widgets?', opts:['TensorFlow','Orange Data Mining','Jupyter Notebook','VS Code'], a:1, e:'Orange is specifically designed for visual, no-code data mining through its widget-based workflow.'},
+    {type:'obj', q:'In Orange, the basic building blocks of any workflow are called:', opts:['Modules','Scripts','Widgets','Nodes'], a:2, e:'Widgets are Orange\'s reusable visual components — each performs a specific task (load, visualise, model, evaluate).'},
+    {type:'scen', q:'A student opens Orange and wants to load her CSV dataset. Which widget should she use first?', opts:['Data Table','File widget','Scatter Plot','CSV Importer'], a:1, e:'The File widget loads datasets from local files (CSV, Excel, etc.) into the Orange workflow.'},
+    {type:'obj', q:'What does the "Test and Score" widget in Orange evaluate?', opts:['Feature importance only','Model speed','Model performance using cross-validation metrics','Data quality'], a:2, e:'Test and Score runs cross-validation on one or more models and reports accuracy, AUC, F1, precision, recall.'},
+    {type:'case', q:'Anita connects a Naive Bayes widget and a kNN widget both to Test and Score in Orange. What will she achieve?', opts:['She will train both models on different data','She will compare both models\' performance side by side','She will merge both models into one','Orange will crash'], a:1, e:'Orange\'s Test and Score accepts multiple learners simultaneously and presents a comparison table of all their metrics.'},
+    {type:'obj', q:'The Orange3-Text add-on is used for:', opts:['Image processing','Natural Language Processing tasks','Big Data analysis','Neural network design'], a:1, e:'Orange3-Text provides NLP widgets: preprocessing, bag-of-words, topic modelling, sentiment analysis, and word clouds.'},
+    {type:'obj', q:'What does the Image Embedder widget in Orange do?', opts:['Displays images in a grid','Converts images into numerical feature vectors using deep learning','Deletes duplicate images','Resizes images'], a:1, e:'Image Embedder passes images through a pre-trained CNN (e.g. Inception) to generate compact feature vectors.'},
+    {type:'scen', q:'Rajan uses Orange to cluster students by academic performance without giving any labels. Which widget category is he using?', opts:['Supervised Learning','Unsupervised Learning — Clustering','Visualisation','Evaluation'], a:1, e:'Clustering (k-Means, DBSCAN in Orange) is unsupervised — it groups data without pre-defined labels.'},
+    {type:'case', q:'Neha\'s dataset has 25 features. She wants to reduce it to the most important 10 before building a model. Which Orange widget should she use?', opts:['Data Table','Rank (Feature Selection)','Scatter Plot','Confusion Matrix'], a:1, e:'The Rank widget scores each feature by importance using various methods, letting Neha select the top features.'},
+    {type:'obj', q:'In Orange, which widget provides an interactive scatter plot for exploring relationships between two numeric attributes?', opts:['Box Plot','Scatter Plot','Heat Map','Linear Projection'], a:1, e:'The Scatter Plot widget visualises the relationship between any two chosen numeric features interactively.'},
+    {type:'obj', q:'Data Mining is best defined as:', opts:['Manually storing large databases','Discovering patterns, correlations, and knowledge from large datasets','Writing SQL queries for reports','Visualising raw numbers in tables'], a:1, e:'Data Mining extracts hidden patterns, trends, correlations, and actionable knowledge from large datasets.'},
+    {type:'scen', q:'A student runs k-Means clustering with k=3 in Orange on a dataset of customers. Orange produces 3 groups. What is the next logical widget to understand each group?', opts:['Confusion Matrix','Box Plot or Scatter Plot to visualise cluster characteristics','Test and Score','File widget'], a:1, e:'After clustering, Box Plot or Scatter Plot helps visualise what characteristics define each cluster (mean age, spending, etc.).'},
+    {type:'case', q:'Tina is building a spam detector in Orange using text data. In what order should she connect these widgets: Bag of Words → Naive Bayes → File → Corpus', opts:['File → Corpus → Bag of Words → Naive Bayes','Naive Bayes → File → Corpus → Bag of Words','Bag of Words → File → Naive Bayes → Corpus','Corpus → Bag of Words → File → Naive Bayes'], a:0, e:'Correct NLP pipeline: File (load data) → Corpus (text preprocessing) → Bag of Words (feature extraction) → Naive Bayes (classifier).'},
+    {type:'obj', q:'The "Distances" widget in Orange computes:', opts:['Distance between two files','Pairwise distances between all data instances','Speed of data processing','Only Euclidean distance'], a:1, e:'Distances computes all pairwise distances between data instances using Euclidean, cosine, or other metrics.'},
+    {type:'obj', q:'Which Orange widget is used to evaluate a model\'s performance visually through a matrix of correct vs incorrect predictions?', opts:['Test and Score','ROC Analysis','Confusion Matrix','Feature Importance'], a:2, e:'The Confusion Matrix widget displays the full TP, FP, FN, TN breakdown visually for a classification model.'},
+    {type:'scen', q:'A student opens the ROC Analysis widget in Orange after classification. What does the ROC curve show?', opts:['How quickly the model trains','Tradeoff between True Positive Rate and False Positive Rate at different thresholds','The confusion matrix in curve form','Accuracy vs number of features'], a:1, e:'ROC (Receiver Operating Characteristic) curve plots TPR (Recall) vs FPR at various decision thresholds. AUC measures quality.'},
+    {type:'case', q:'Ravi has 1000 text reviews and wants to find 5 main topics without labelling. Which Orange widget should he use?', opts:['Word Cloud','Topic Modelling (LDA)','Bag of Words only','Naive Bayes Classifier'], a:1, e:'Topic Modelling (LDA — Latent Dirichlet Allocation) discovers hidden topics in text documents unsupervised.'},
+    {type:'obj', q:'Feature selection in Orange helps by:', opts:['Adding more features to the model','Removing irrelevant or redundant features to improve model accuracy','Normalising the dataset','Merging two datasets'], a:1, e:'Feature selection removes noisy or irrelevant features, reducing overfitting, speeding up training, and often improving accuracy.'},
+    {type:'obj', q:'Orange is an open-source tool developed by:', opts:['IBM','Google','University of Ljubljana','MIT'], a:2, e:'Orange was developed at the Bioinformatics Laboratory, University of Ljubljana, Slovenia, and is freely available.'},
+  ],
+  vsa:[
+    {q:'What is Orange and what makes it different from traditional ML tools?', a:'Orange is a visual, open-source data mining tool where users build ML workflows by connecting widgets — no coding needed. Unlike scikit-learn or TensorFlow, it\'s fully GUI-based.'},
+    {q:'What is the role of the "Rank" widget in Orange?', a:'The Rank widget performs feature selection by scoring each feature\'s importance using methods like Information Gain or ANOVA, helping users pick the most relevant features for modelling.'},
+    {q:'What is Bag of Words in NLP and how does it work in Orange?', a:'Bag of Words converts text into a numerical matrix where each row is a document and each column is a word\'s frequency count, ignoring grammar and word order.'},
+    {q:'What does the Image Embedder widget do in Orange?', a:'Image Embedder passes images through a pre-trained deep learning model (like Inception) to convert them into compact numerical feature vectors, enabling image classification without training a CNN from scratch.'},
+    {q:'What is the purpose of the Test and Score widget?', a:'Test and Score evaluates one or more machine learning models using cross-validation, reporting accuracy, AUC, F1, precision, and recall — making it easy to compare multiple classifiers in Orange.'},
+  ],
+  la:[
+    {q:'Describe a complete Orange workflow to classify images into two categories (e.g. cats vs dogs). List each widget and explain its role in the pipeline.', marks:'5 marks', a:'Complete image classification workflow in Orange: (1) Import Images widget: loads images from labelled folders. (2) Image Viewer: optionally preview images. (3) Image Embedder: passes each image through Inception/VGG pre-trained CNN, generating a feature vector per image. (4) Rank (optional): identifies most discriminative features. (5) Data Sampler: splits into 80% train / 20% test. (6) Choose classifier: e.g. Logistic Regression, SVM, or Random Forest widget. (7) Test and Score: cross-validates and reports accuracy, AUC, F1. (8) Confusion Matrix: visual breakdown of correct/wrong predictions. (9) ROC Analysis: plots tradeoff curves. This pipeline requires no code, making CV accessible to non-programmers.'},
+    {q:'What is Data Mining? Explain the key stages of a Data Mining process and how Orange supports each stage.', marks:'5 marks', a:'Data Mining is the process of discovering patterns, correlations, anomalies, and useful insights from large datasets. Key stages: (1) Data Collection: Orange\'s File widget loads CSV, Excel, SQL data. (2) Data Exploration: Scatter Plot, Box Plot, Heat Map widgets visualise distributions and outliers. (3) Preprocessing: Preprocess Data widget handles scaling, missing values, encoding. (4) Feature Selection: Rank widget scores and removes irrelevant features. (5) Modelling: Supervised (Naive Bayes, SVM, Random Forest) or Unsupervised (k-Means, Hierarchical Clustering). (6) Evaluation: Test and Score, Confusion Matrix, ROC Analysis measure model quality. (7) Visualisation: all results displayable without code. Orange democratises data mining by making every stage GUI-based.'},
+    {q:'Explain how Orange handles a complete Natural Language Processing (NLP) pipeline for text classification. Include all relevant widgets.', marks:'5 marks', a:'NLP pipeline in Orange using Orange3-Text: (1) Corpus widget (or File): loads text data with labels. (2) Preprocess Text: tokenisation, stop word removal, lowercase conversion, stemming/lemmatisation. (3) Bag of Words (or TF-IDF): converts text to numerical feature matrix. (4) Topic Modelling (optional): LDA to discover themes unsupervised. (5) Word Cloud: visual frequency display. (6) Naive Bayes / Logistic Regression: text classifier. (7) Test and Score: cross-validate the classifier. (8) Confusion Matrix: see misclassifications. (9) Sentiment Analysis widget (if installed): assigns positive/negative sentiment. This pipeline handles tasks like spam detection, news categorisation, and review classification entirely within Orange\'s GUI.'},
+    {q:'Compare Supervised and Unsupervised Learning approaches in Orange. Give one example widget for each and explain when you would use each.', marks:'4 marks', a:'Supervised Learning: model learns from labelled data (input + known output). Orange widgets: Naive Bayes, Random Forest, SVM, Logistic Regression. Use case: spam detection (labelled "spam"/"not spam"), disease diagnosis (labelled X-rays), grade prediction. Unsupervised Learning: model finds patterns in unlabelled data. Orange widgets: k-Means Clustering, DBSCAN, Hierarchical Clustering, Topic Modelling. Use case: customer segmentation (group buyers by behaviour without predefined labels), topic discovery in news articles. Key difference: supervised needs labels (expensive to collect); unsupervised explores structure in raw data. Both are supported seamlessly in Orange through its modular widget system.'},
+    {q:'Describe what Feature Selection is and why it is important in ML. How does the Rank widget in Orange help achieve this?', marks:'4 marks', a:'Feature Selection is the process of choosing the most relevant subset of input features for a model. Importance: (1) Reduces overfitting — fewer irrelevant features means less noise. (2) Speeds up training. (3) Improves interpretability. (4) Can improve accuracy by removing misleading features. The Rank widget in Orange scores each feature using metrics like Information Gain (how much the feature reduces uncertainty), ANOVA (difference of means between classes), and Chi-squared. It displays features ranked by score. Users can then select the top N features and connect the output to classifiers. Example: a dataset with 50 features about patients — Rank might show that age, blood pressure, and cholesterol are the top 3, while others add noise.'},
+  ]
+},
+
+/* ─────────────── UNIT 5 ─────────────── */
+{
+  id:'u5', num:'Unit 05', color:'#a78bfa',
+  title:'Introduction to Big Data & Data Analytics',
+  desc:'6 V\'s of Big Data · Analytics Types · Hadoop · Data Streams',
+  mcqs:[
+    {type:'obj', q:'Which of these is NOT one of the 6 V\'s of Big Data?', opts:['Volume','Velocity','Validity','Variability'], a:2, e:'The 6 V\'s are: Volume, Velocity, Variety, Veracity, Value, Variability. Validity is not part of this framework.'},
+    {type:'case', q:'A hospital collects patient records, social media health posts, lab results in JSON, and CCTV footage simultaneously. Which "V" of Big Data best describes this diversity of formats?', opts:['Volume','Veracity','Variety','Variability'], a:2, e:'Variety refers to the range of data types and sources — structured, unstructured, semi-structured.'},
+    {type:'obj', q:'"Veracity" in Big Data refers to:', opts:['Speed of data generation','Total data volume','Trustworthiness and accuracy of data','Variety of formats'], a:2, e:'Veracity measures how reliable, accurate, and trustworthy the data is — poor veracity leads to wrong insights.'},
+    {type:'scen', q:'A company generates 10 terabytes of transaction data every hour and needs to process it in under 5 seconds. Which two V\'s are most relevant?', opts:['Value and Variety','Volume and Velocity','Veracity and Variability','Velocity and Veracity'], a:1, e:'Volume (10 TB/hour is massive) and Velocity (must process in near real-time, under 5s) are the key challenges here.'},
+    {type:'obj', q:'Descriptive Analytics answers which question?', opts:['What will happen?','What should we do?','What happened?','Why did it happen?'], a:2, e:'Descriptive Analytics summarises historical data — dashboards, reports, aggregations — to answer "What happened?"'},
+    {type:'case', q:'A retail chain analyses last month\'s sales data to generate a report on best-selling products and peak shopping hours. Which type of analytics is this?', opts:['Predictive Analytics','Prescriptive Analytics','Descriptive Analytics','Diagnostic Analytics'], a:2, e:'Summarising past sales data = Descriptive Analytics. It looks backward at what already happened.'},
+    {type:'obj', q:'Predictive Analytics answers:', opts:['What happened?','Why did it happen?','What will happen?','What should we do?'], a:2, e:'Predictive Analytics uses ML/statistical models to forecast future events based on historical patterns.'},
+    {type:'scen', q:'Netflix uses viewer history to recommend shows you haven\'t watched yet. Which type of analytics powers this?', opts:['Descriptive','Diagnostic','Predictive','Prescriptive'], a:2, e:'Predicting what a user will likely enjoy based on past behaviour is Predictive Analytics.'},
+    {type:'obj', q:'Apache Hadoop is primarily associated with:', opts:['Real-time streaming only','Relational SQL databases','Distributed storage and batch processing of Big Data','Neural network training'], a:2, e:'Hadoop provides HDFS (distributed file storage) and MapReduce (distributed batch computation) for Big Data.'},
+    {type:'case', q:'Aarav\'s company wants to reduce customer churn. After finding "why customers leave" (Diagnostic), they want the system to suggest specific retention offers automatically. Which analytics type does this next step represent?', opts:['Descriptive','Predictive','Prescriptive','Reactive'], a:2, e:'Prescriptive Analytics recommends actions — not just "what will happen" but "what should we do about it?"'},
+    {type:'obj', q:'Data Streams are best characterised by:', opts:['Batch stored datasets','Continuous real-time flowing data','Only structured SQL data','Weekly data updates'], a:1, e:'Data Streams are unbounded, continuous flows of data generated in real time — e.g. IoT sensors, tweets, transactions.'},
+    {type:'obj', q:'Which "V" describes the business usefulness of Big Data?', opts:['Volume','Variability','Veracity','Value'], a:3, e:'Value is the most important V — all other Vs only matter if the data ultimately delivers business or social value.'},
+    {type:'scen', q:'A weather station network generates millions of temperature, humidity, and wind readings per second. Mining patterns from this is an example of:', opts:['Batch data processing','Data stream mining','Database querying','NLP analysis'], a:1, e:'Real-time sensor data flowing continuously must be processed as a data stream — you can\'t wait to batch it.'},
+    {type:'case', q:'A bank\'s fraud detection system must flag suspicious transactions within 200 milliseconds of occurrence. Which Big Data characteristic makes this technically challenging?', opts:['Volume — too much data','Velocity — real-time processing requirement','Variety — different fraud types','Veracity — untrusted data'], a:1, e:'Velocity is the challenge — data arrives so fast (milliseconds per transaction) that processing must be near-instantaneous.'},
+    {type:'obj', q:'"Variability" in Big Data means:', opts:['The physical volume of storage','Data that changes meaning or context over time','The variety of data formats','The number of data sources'], a:1, e:'Variability means the meaning or context of data changes — e.g. the word "hot" means different things in weather vs social media.'},
+    {type:'obj', q:'Diagnostic Analytics answers:', opts:['What happened?','Why did it happen?','What will happen?','What should we do?'], a:1, e:'Diagnostic Analytics digs deeper than descriptive to find root causes — "sales dropped in Q3 because of X."'},
+    {type:'scen', q:'An e-commerce platform analyses real-time clickstream data to personalise ads dynamically as a user browses. This combines:', opts:['Only Descriptive Analytics','Data Stream processing + Prescriptive Analytics','Batch processing only','NLP and Computer Vision'], a:1, e:'Real-time clickstream = data stream; dynamically serving personalised ads = prescriptive (recommending action).'},
+    {type:'case', q:'Divya\'s organisation collects social media data for analysis but finds tweets contradict official health statistics. Which V is problematic here?', opts:['Volume','Velocity','Variety','Veracity'], a:3, e:'Conflicting data sources highlight Veracity issues — the trustworthiness and accuracy of the data is in question.'},
+    {type:'obj', q:'Apache Spark differs from Hadoop MapReduce mainly in:', opts:['It only runs on cloud','It processes data in-memory making it much faster for iterative tasks','It doesn\'t support distributed computing','It only handles structured data'], a:1, e:'Spark stores intermediate data in RAM (in-memory) vs Hadoop\'s disk-based MapReduce, making it 10-100× faster.'},
+    {type:'obj', q:'Prescriptive Analytics is considered the most advanced because it:', opts:['Only describes the past','Finds root causes of past events','Recommends specific actions to achieve desired outcomes','Predicts future probabilities only'], a:2, e:'Prescriptive Analytics goes beyond prediction to recommend optimal actions, often using optimisation algorithms.'},
+  ],
+  vsa:[
+    {q:'What are the 6 V\'s of Big Data? Name them all.', a:'Volume (massive scale), Velocity (high speed generation), Variety (diverse formats), Veracity (data trustworthiness), Value (business usefulness), and Variability (changing context and meaning of data).'},
+    {q:'Distinguish between Descriptive and Predictive Analytics.', a:'Descriptive Analytics analyses past data to answer "What happened?" (e.g. sales reports). Predictive Analytics uses models to answer "What will happen?" (e.g. customer churn forecasts).'},
+    {q:'What is a Data Stream? Give one real-world example.', a:'A data stream is a continuous, real-time flow of data generated without a defined end. Example: IoT sensors in smart cities sending temperature and pollution readings every second.'},
+    {q:'What is the role of Apache Hadoop in Big Data?', a:'Apache Hadoop provides HDFS for distributed file storage and MapReduce for parallel batch processing of massive datasets across commodity hardware clusters at low cost.'},
+    {q:'Why is "Value" considered the most important V of Big Data?', a:'All other V\'s — volume, velocity, variety — are only meaningful if the data ultimately generates actionable insights, business decisions, or social benefits. Without value, Big Data has no purpose.'},
+  ],
+  la:[
+    {q:'Explain all 6 V\'s of Big Data with a real-world example for each. Why are all six important for a complete Big Data strategy?', marks:'5 marks', a:'(1) Volume: Facebook processes 100 petabytes of data daily. Challenge: storage and processing at scale. (2) Velocity: Twitter generates 500M tweets/day. Challenge: real-time ingestion and analysis. (3) Variety: e-commerce data includes structured orders, unstructured reviews, semi-structured JSON clickstreams. Challenge: integrating diverse formats. (4) Veracity: health data from wearables may be inaccurate. Challenge: validating data before analysis. (5) Value: analysing customer data to increase sales by 15% = direct value. Challenge: extracting signal from noise. (6) Variability: "sick" in medical records means ill; in slang means excellent. Challenge: context-aware analysis. All 6 must be addressed: high volume with poor veracity gives wrong insights; fast velocity without value generation wastes resources.'},
+    {q:'Compare and contrast all four types of Data Analytics (Descriptive, Diagnostic, Predictive, Prescriptive) with examples from e-commerce.', marks:'5 marks', a:'(1) Descriptive: "What happened?" — Sales report showing ₹2Cr revenue last quarter, top-selling product categories, peak traffic hours. Backward-looking, uses aggregation. (2) Diagnostic: "Why did it happen?" — Investigating why sales dropped 20% in August: found website downtime + competitor discount. Uses drill-down, correlation. (3) Predictive: "What will happen?" — Forecasting next quarter sales using ML on past trends and seasonal patterns. Output: probability estimates. (4) Prescriptive: "What should we do?" — System recommends: "Launch 15% discount on Product X this Tuesday to maximise Q4 revenue." Uses optimisation algorithms. Progression: each level builds on the previous and requires more sophisticated tools. Most companies start with descriptive and gradually mature toward prescriptive.'},
+    {q:'What are Data Streams? Explain the key challenges in processing streaming data and describe one real-world streaming analytics application.', marks:'5 marks', a:'Data Streams are unbounded, continuous, real-time flows of data — unlike static databases, they never "end." Key challenges: (1) Speed: data arrives faster than traditional systems process. (2) Memory: cannot store all incoming data; must process and discard. (3) Order: data may arrive out of sequence. (4) Concept Drift: data distribution changes over time (fraud patterns evolve). (5) Volume: millions of events per second. Tools: Apache Kafka (message streaming), Apache Flink/Spark Streaming (stream processing). Real-world example — Credit Card Fraud Detection: Visa processes 24,000 transactions/second. Each transaction is analysed in <100ms for fraud signals (unusual location, unusual amount pattern). ML model running on stream outputs risk score in real time, blocking suspicious transactions instantly. This saves billions in fraud annually.'},
+    {q:'What is Apache Hadoop? Explain its two main components (HDFS and MapReduce) and how they work together for Big Data processing.', marks:'4 marks', a:'Apache Hadoop is an open-source framework for distributed storage and processing of massive datasets across clusters of commodity hardware. Two main components: (1) HDFS (Hadoop Distributed File System): splits large files into 128MB blocks and distributes them across many machines. Each block is replicated 3× for fault tolerance. Reads data from where it lives — no large data transfers. (2) MapReduce: a programming model for parallel processing. Map phase: each node processes its local data chunk and produces intermediate key-value pairs. Shuffle phase: groups data by key across nodes. Reduce phase: aggregates grouped results. Example: counting word frequency in 1TB of text — each node counts words in its chunk (Map); results combined (Reduce). Together HDFS+MapReduce enable petabyte-scale analysis on thousands of cheap machines, replacing expensive supercomputers.'},
+    {q:'Why is Big Data transforming industries? Discuss the impact on any two industries with specific examples of how analytics is being used.', marks:'5 marks', a:'Big Data is transforming industries by enabling data-driven decisions at unprecedented scale and speed. (1) Healthcare: Big Data + predictive analytics enable: early disease detection (Google\'s DeepMind detects eye diseases from retinal scans with 94% accuracy), drug discovery (analysing genomic + clinical data to find drug candidates 60% faster), personalised medicine (treatment plans based on genetic profiles). Challenge: patient data privacy (HIPAA, GDPR compliance). Impact: lower costs, better outcomes, faster research. (2) Finance/Banking: Real-time fraud detection (Visa analyses 24K transactions/sec). Credit scoring uses 2000+ variables vs traditional 10. Algorithmic trading processes market streams to execute trades in microseconds. Risk management models simulate thousands of economic scenarios. Challenge: explainability of AI decisions (regulators require transparency). Impact: billions saved in fraud, more accurate lending, faster markets. Both industries show Big Data\'s power to save lives and money while raising new ethical and privacy challenges.'},
+  ]
+},
+
+/* ─────────────── UNIT 6 ─────────────── */
+{
+  id:'u6', num:'Unit 06', color:'#ff6b9d',
+  title:'Understanding Neural Networks',
+  desc:'Neurons · Layers · Activation Functions · CNN · RNN · Deep Learning',
+  mcqs:[
+    {type:'obj', q:'The basic computational unit of a neural network is called a:', opts:['Layer','Weight','Neuron (Perceptron)','Bias'], a:2, e:'The neuron (or perceptron) is the fundamental building block — receives inputs, applies weights, activates, and outputs.'},
+    {type:'case', q:'Ananya is designing a neural network to classify handwritten digits. She wants it to automatically learn edges, curves, and digit shapes. Which architecture is best?', opts:['Simple Feedforward NN','Recurrent Neural Network (RNN)','Convolutional Neural Network (CNN)','Linear Regression'], a:2, e:'CNNs learn spatial features (edges, curves, shapes) through convolutional filters — ideal for image classification tasks.'},
+    {type:'obj', q:'Weights in a neural network represent:', opts:['Number of neurons','Strength of connection between neurons','Learning rate value','Output layer activation'], a:1, e:'Weights are adjustable parameters controlling how strongly one neuron\'s output influences the next neuron.'},
+    {type:'scen', q:'A student\'s neural network trains to 99% accuracy on training images but only 54% on test images. The most likely cause is:', opts:['Too few neurons','Underfitting — model is too simple','Overfitting — model memorised training data','Incorrect use of activation function'], a:2, e:'Large train-test accuracy gap = overfitting. The model memorised training patterns instead of learning generalisable features.'},
+    {type:'obj', q:'The Sigmoid activation function outputs values in which range?', opts:['−∞ to +∞','−1 to +1','0 to 1','0 to +∞'], a:2, e:'Sigmoid σ(x) = 1/(1+e^-x) squashes any input to the range (0,1) — useful for binary classification outputs.'},
+    {type:'case', q:'Rajan needs to build a model that translates English sentences to French. This involves processing sequences of words. Which network type is most appropriate?', opts:['CNN','Feedforward NN','RNN (Recurrent Neural Network)','Autoencoder'], a:2, e:'RNNs process sequential data — each word\'s output feeds back as input for the next word, enabling sequence-to-sequence translation.'},
+    {type:'obj', q:'Backpropagation is the process of:', opts:['Passing data forward through the network','Updating weights by computing and propagating gradients backward','Randomly initialising weights','Adding more hidden layers'], a:1, e:'Backpropagation computes the loss gradient and propagates it backward layer by layer, updating each weight to reduce error.'},
+    {type:'obj', q:'"Hidden layers" are located:', opts:['Before the input layer','Between the input and output layers','After the output layer','Outside the network'], a:1, e:'Hidden layers sit between input and output. They learn intermediate representations — edges, shapes, concepts.'},
+    {type:'scen', q:'A sentiment analysis model processes movie reviews word by word, remembering earlier words when processing later ones. This memory across time steps is characteristic of:', opts:['CNN','Feedforward NN','RNN','SVM'], a:2, e:'RNNs have recurrent connections — each time step receives both the current input and the hidden state from the previous step.'},
+    {type:'case', q:'Priya wants to build a disease diagnosis system using patient medical records with 50 input features. The output is binary (disease/no disease). Design the output layer.', opts:['50 neurons, Softmax','1 neuron, Sigmoid','2 neurons, ReLU','50 neurons, ReLU'], a:1, e:'Binary classification: 1 output neuron with Sigmoid activation — outputs a probability between 0 and 1.'},
+    {type:'obj', q:'The ReLU (Rectified Linear Unit) activation function outputs:', opts:['max(−1, x)','1/(1+e^-x)','max(0, x)','x² always'], a:2, e:'ReLU(x) = max(0, x) — outputs 0 for negative inputs, and x for positive. Simple, fast, and avoids vanishing gradients.'},
+    {type:'obj', q:'Deep Learning refers to neural networks with:', opts:['Only one hidden layer','No hidden layers','Many hidden layers for hierarchical feature learning','Convolutional layers only'], a:2, e:'Deep Learning = networks with many layers that learn hierarchical representations. Depth enables learning complex abstractions.'},
+    {type:'scen', q:'Training a neural network on 50,000 images takes 3 hours per epoch. A student suggests using a GPU instead of CPU. Why would this help?', opts:['GPUs have better memory','GPUs are specifically designed for massively parallel matrix operations in neural networks','GPUs run on electricity instead of batteries','GPUs don\'t need backpropagation'], a:1, e:'Neural network training involves billions of matrix multiplications — GPUs have thousands of cores designed exactly for this parallelism.'},
+    {type:'case', q:'Meera\'s image classifier has 3 output classes: cat, dog, rabbit. What activation function should she use for the output layer?', opts:['Sigmoid','ReLU','Softmax','Tanh'], a:2, e:'Softmax outputs a probability distribution across multiple classes — all probabilities sum to 1. Perfect for multi-class classification.'},
+    {type:'obj', q:'The vanishing gradient problem primarily affects:', opts:['CNNs','RNNs and very deep networks','Linear Regression','Decision Trees'], a:1, e:'In deep/RNN networks, gradients can shrink exponentially as they propagate back, making early layers learn very slowly.'},
+    {type:'obj', q:'Bias in a neuron allows:', opts:['The model to scale inputs','The activation function threshold to shift left or right','Noise reduction','Storing weight values'], a:1, e:'Bias adds a learnable offset — enabling the activation function to fire (or not) independent of the input values.'},
+    {type:'scen', q:'A music recommendation system must remember what genres a user listened to 20 songs ago. Which network architecture handles long-term dependencies best?', opts:['Standard RNN','CNN','LSTM (Long Short-Term Memory)','Feedforward NN'], a:2, e:'Standard RNNs suffer from vanishing gradients with long sequences. LSTMs have memory cells that maintain information over long sequences.'},
+    {type:'case', q:'Karan adds Dropout (rate=0.5) to his neural network. This means during training:', opts:['50% of the data is dropped','50% of neurons are randomly deactivated each batch, reducing overfitting','The learning rate is halved','50% of weights are set to zero permanently'], a:1, e:'Dropout randomly deactivates 50% of neurons each training step, preventing co-adaptation and acting as regularisation to reduce overfitting.'},
+    {type:'obj', q:'Which societal concern is associated with facial recognition neural networks?', opts:['They consume too much electricity only','Job creation in all sectors','Privacy violation and algorithmic bias especially for minorities','They make computers slower'], a:2, e:'Facial recognition systems show higher error rates for minorities (bias from non-diverse training data) and enable mass surveillance.'},
+    {type:'obj', q:'The output of the Softmax function across all classes always sums to:', opts:['0','0.5','1','100'], a:2, e:'Softmax normalises the output vector so all probabilities sum to exactly 1 — making it a valid probability distribution.'},
+  ],
+  vsa:[
+    {q:'What is backpropagation and why is it important?', a:'Backpropagation computes the gradient of the loss function with respect to every weight by propagating error backward through the network. It enables the network to update weights and learn from mistakes.'},
+    {q:'What is the difference between ReLU and Sigmoid activation functions?', a:'Sigmoid outputs 0–1 (useful for binary output). ReLU outputs max(0,x) — computationally simpler, avoids vanishing gradients, and is preferred in hidden layers of deep networks.'},
+    {q:'Why are CNNs preferred for image tasks over regular feedforward networks?', a:'CNNs use convolutional filters to detect local spatial features (edges, textures, shapes) automatically, require fewer parameters than fully connected networks, and maintain spatial structure of images.'},
+    {q:'What is Dropout in neural networks?', a:'Dropout randomly deactivates a fraction of neurons during each training step, preventing neurons from co-adapting and acting as a regularisation technique to reduce overfitting in deep networks.'},
+    {q:'What is the vanishing gradient problem?', a:'In deep networks, gradients become extremely small as they propagate backward through many layers, making early layers update very slowly or not at all, hindering learning of long-range dependencies.'},
+  ],
+  la:[
+    {q:'Explain how a neural network learns through the Forward Pass, Loss Calculation, and Backpropagation cycle. Use a simple example.', marks:'5 marks', a:'Learning cycle: (1) Forward Pass: Input data flows forward — each neuron computes weighted_sum + bias, applies activation function, passes output to next layer. For digit recognition: input pixels → edge detection → shape features → class probabilities. (2) Loss Calculation: compare predicted output to true label using a loss function (e.g. Cross-Entropy for classification). If true label is 3 but network predicts 7, loss is high. (3) Backpropagation: compute gradient of loss with respect to each weight (using chain rule of calculus). Propagate gradients backward from output to input. (4) Weight Update (Gradient Descent): w = w − learning_rate × gradient. Weights pulling toward wrong class get reduced; correct ones get reinforced. (5) Repeat for all training examples across many epochs until loss converges. The network gradually learns the optimal set of weights that minimise prediction error.'},
+    {q:'Compare CNN, RNN, and Feedforward Neural Networks. For each, describe the architecture, what type of data it\'s best for, and one real-world application.', marks:'5 marks', a:'Feedforward NN: data flows one direction (input→hidden→output), no cycles. Best for: tabular/structured data. Application: loan default prediction from financial features. CNN (Convolutional NN): uses convolutional layers with shared filters to detect local spatial patterns. Pooling reduces dimensions. Best for: images, videos, spatial data. Application: tumour detection in medical scans, self-driving car perception. RNN (Recurrent NN): has cycles — each time step\'s output feeds back as input. Hidden state acts as memory. Best for: sequential/time-series data. Application: speech recognition, machine translation, stock prediction. LSTM (special RNN): solves vanishing gradient for long sequences. Application: language modelling, music generation. Key insight: choose architecture based on data structure — spatial (CNN), sequential (RNN/LSTM), or independent features (feedforward).'},
+    {q:'What is Deep Learning? Explain how increasing network depth enables learning of hierarchical features, using image recognition as an example.', marks:'4 marks', a:'Deep Learning refers to neural networks with many layers (depth) that learn increasingly abstract representations. In image recognition, the hierarchy works as: Layer 1 (edges): neurons detect horizontal, vertical, diagonal edges — basic primitives. Layer 2 (textures/curves): combinations of edges form curves, corners, colour gradients. Layer 3 (parts): textures combine into object parts — eyes, wheels, leaves. Layer 4 (objects): parts combine into recognisable objects — faces, cars, trees. Output layer: classification into final categories. This hierarchical learning is impossible with shallow networks. A 1-layer network can only draw a linear boundary; a deep network can separate any complex manifold. Deep networks are why ImageNet accuracy jumped from 74% to 97%+ between 2011 and 2020 — depth unlocked representation power.'},
+    {q:'Discuss three societal impacts of neural networks — both positive and negative. How can society manage these impacts responsibly?', marks:'5 marks', a:'Positive impacts: (1) Healthcare: AlphaFold predicted structures of 200M proteins, potentially revolutionising drug discovery. Neural networks detect cancer from scans with doctor-level accuracy. (2) Accessibility: speech recognition (Siri, Alexa) and image captioning help visually impaired individuals navigate the world. (3) Scientific discovery: neural networks model climate change, discover new materials, and assist particle physics research. Negative impacts: (1) Job displacement: automation through neural networks threatens 85M jobs by 2025 in routine pattern-recognition tasks. (2) Deepfakes: generative neural networks create photorealistic fake videos — threats to democracy, consent, and trust. (3) Surveillance and bias: facial recognition systems with racial bias deployed by police cause wrongful arrests. Responsible management: regulation (EU AI Act classifies high-risk AI), diverse and audited training datasets, explainable AI requirements for high-stakes decisions, universal basic income discussions for job displacement, and digital literacy education.'},
+    {q:'Explain the LSTM architecture. Why was it developed and how does it solve the problem that standard RNNs face with long sequences?', marks:'5 marks', a:'Problem with standard RNNs: the vanishing gradient problem — when sequences are long (50+ words), gradients become negligibly small during backpropagation through time, making the network forget information from the beginning of the sequence. LSTM Solution (Hochreiter & Schmidhuber, 1997): introduces a Cell State (long-term memory) and three gates: (1) Forget Gate: decides what fraction of old cell state to erase (sigmoid × cell state). (2) Input Gate: decides what new information to add to cell state (sigmoid for relevance × tanh for new values). (3) Output Gate: decides what part of cell state to output as hidden state. The gates are learned via backpropagation. The cell state acts as a "conveyor belt" — information can flow unchanged across many time steps. Example in translation: LSTM translating "The cat that was sleeping in the garden woke up" — it must remember "cat" (subject) over many words to correctly choose "woke" (singular). Standard RNN forgets by word 5; LSTM remembers to word 15+. Applications: machine translation (Google Translate), speech recognition, time-series forecasting.'},
+  ]
+},
+
+/* ─────────────── UNIT 7 ─────────────── */
+{
+  id:'u7', num:'Unit 07', color:'#34d399',
+  title:'Generative AI',
+  desc:'LLMs · GANs · Generative vs Discriminative · Ethics',
+  mcqs:[
+    {type:'obj', q:'Generative AI is best described as AI that:', opts:['Only classifies existing data','Creates new content (text, image, audio, video) that resembles training data','Cleans and preprocesses datasets','Detects patterns only'], a:1, e:'Generative AI generates new, original content — text, images, music, code — by learning the distribution of training data.'},
+    {type:'case', q:'Kavya uses an AI tool to generate realistic portraits of people who don\'t exist. What type of generative model is most likely powering this?', opts:['Decision Tree','GAN (Generative Adversarial Network)','Linear Regression','K-Means Clustering'], a:1, e:'GANs are famous for generating photorealistic synthetic images — a generator creates images, a discriminator judges them.'},
+    {type:'obj', q:'In a GAN, the two main components are:', opts:['Encoder and Decoder','Generator and Discriminator','Input layer and Output layer','Convolutional and Pooling layers'], a:1, e:'GAN = Generator (creates fake samples) + Discriminator (distinguishes real from fake). They compete to improve each other.'},
+    {type:'scen', q:'An AI system receives a prompt "Write a poem about the monsoon" and produces a unique, well-formed poem. This is an example of:', opts:['Computer Vision','Predictive Analytics','Generative AI — Large Language Model','Data Mining'], a:2, e:'Text generation from prompts is a core LLM capability — the model generates new text conditioned on the prompt.'},
+    {type:'obj', q:'LLM stands for:', opts:['Large Learning Module','Linear Logic Model','Large Language Model','Layered Linguistic Matrix'], a:2, e:'LLM = Large Language Model — neural networks trained on vast text corpora to understand and generate human language.'},
+    {type:'case', q:'A company uses an AI system that creates realistic fake video of a CEO announcing a fake merger to manipulate stock prices. This is called a:', opts:['Data Breach','Phishing attack','Deepfake','Model Collapse'], a:2, e:'Deepfakes are AI-generated synthetic media (video/audio) that convincingly misrepresent real people — a major ethical threat.'},
+    {type:'obj', q:'A Discriminative Model focuses on:', opts:['Generating new data samples','Learning the boundary between classes (P(y|x))','Modelling the full data distribution','Creating images from noise'], a:1, e:'Discriminative models learn decision boundaries — given input x, predict class y. Examples: Logistic Regression, SVM, CNNs for classification.'},
+    {type:'obj', q:'What is the key difference between Generative and Discriminative models?', opts:['Generative is supervised; Discriminative is unsupervised','Generative models the full distribution P(x,y); Discriminative models only P(y|x)','They are identical','Discriminative generates images; Generative classifies them'], a:1, e:'Generative: learns the full joint distribution, can sample new data. Discriminative: learns the conditional probability for classification only.'},
+    {type:'scen', q:'GPT-4, used in ChatGPT, generates coherent multi-paragraph responses by predicting the next token repeatedly. This architecture is based on:', opts:['Recurrent Networks only','CNN','Transformer architecture with self-attention','GAN'], a:2, e:'Modern LLMs like GPT-4 use the Transformer architecture with self-attention mechanisms — not RNNs.'},
+    {type:'case', q:'Rohan uses DALL-E 3 to generate an image by typing "a fox reading a book in a library." What two fields of AI are combined here?', opts:['Computer Vision and Reinforcement Learning','Natural Language Processing and Computer Vision (text-to-image)','Big Data and NLP','Data Mining and Robotics'], a:1, e:'Text-to-image models combine NLP (understanding the text prompt) with Computer Vision/generative modelling (producing the image).'},
+    {type:'obj', q:'Which ethical concern is MOST directly associated with Generative AI\'s ability to produce realistic synthetic media?', opts:['High electricity consumption','Misinformation, deepfakes, and erosion of trust in media','Slower internet speeds','Increased storage requirements'], a:1, e:'Generative AI enabling undetectable deepfakes and synthetic text is a primary driver of misinformation and media trust erosion.'},
+    {type:'obj', q:'In a GAN training setup, the training is said to converge when:', opts:['The generator loss reaches zero','The discriminator always identifies fakes correctly','The generator produces samples the discriminator cannot distinguish from real (Nash Equilibrium)','The dataset runs out'], a:2, e:'GAN equilibrium: Generator creates perfect fakes; Discriminator can only guess (50% chance). This Nash Equilibrium is the training goal.'},
+    {type:'scen', q:'A student uses ChatGPT to write her entire school essay and submits it as her own. Apart from academic integrity, what AI ethics concern does this raise?', opts:['Privacy violation','Intellectual property and academic dishonesty','Energy consumption','Data bias'], a:1, e:'Using AI-generated content without attribution raises issues of academic dishonesty, IP ownership, and eroding learning outcomes.'},
+    {type:'case', q:'Divya notices her company\'s AI image generator creates professional headshots but consistently generates darker-skinned people in lower-status roles. What is this a sign of?', opts:['Hallucination','Model collapse','Training data bias perpetuated by Generative AI','Vanishing gradient'], a:2, e:'Generative models amplify biases present in training data. If training images associate certain groups with certain roles, the model replicates this.'},
+    {type:'obj', q:'VAE stands for:', opts:['Variable Attention Engine','Variational Autoencoder','Visual Analysis Evaluation','Vector Arithmetic Encoder'], a:1, e:'VAE (Variational Autoencoder) is a generative model that learns a probabilistic latent space and can generate new samples by sampling from it.'},
+    {type:'obj', q:'The Transformer architecture\'s key innovation over RNNs is:', opts:['Using convolutional filters for text','Processing sequences in parallel using self-attention instead of step-by-step','Having no hidden layers','Using only linear activation'], a:1, e:'Transformers process all tokens simultaneously via self-attention — no sequential dependency, enabling massive parallelism and longer context.'},
+    {type:'scen', q:'An AI music tool listens to 1000 jazz songs and can now generate new jazz melodies in a similar style. This is:', opts:['Supervised classification','Generative AI — music generation via style learning','Descriptive analytics','Computer Vision'], a:1, e:'Learning the style distribution of jazz music and generating new music in that style is a Generative AI application.'},
+    {type:'case', q:'A news website uses an AI to automatically write thousands of articles with fake quotes attributed to real politicians. Which two harms does this cause?', opts:['Only copyright violation','Misinformation + defamation; undermining democratic discourse and personal reputation','Only energy waste','Only data privacy issues'], a:1, e:'Fake AI-generated quotes attributed to real people = misinformation (false news) + defamation (reputational harm) — serious societal threats.'},
+    {type:'obj', q:'Prompt Engineering refers to:', opts:['Building physical computers for AI','Designing and refining input prompts to get better outputs from LLMs','Training the LLM from scratch','Compressing model weights'], a:1, e:'Prompt Engineering is the skill of crafting effective prompts — including context, examples, and instructions — to guide LLM responses.'},
+    {type:'obj', q:'Which of these is a primary concern about LLMs "hallucinating"?', opts:['They use too much electricity','They generate factually incorrect but confidently stated information','They are too slow to respond','They only work in English'], a:1, e:'LLM hallucination: the model generates plausible-sounding but factually wrong information with high confidence — dangerous in medical/legal contexts.'},
+  ],
+  vsa:[
+    {q:'What is a GAN and how do its two components work together?', a:'A GAN has a Generator that creates fake samples from random noise, and a Discriminator that judges if samples are real or fake. They compete — the generator improves to fool the discriminator; the discriminator improves to detect fakes.'},
+    {q:'What is the difference between Generative and Discriminative AI models?', a:'Generative models learn the full data distribution and can create new samples (e.g. DALL-E making images). Discriminative models learn class boundaries to classify existing inputs (e.g. a spam detector).'},
+    {q:'What is an LLM?', a:'A Large Language Model is a neural network trained on massive text corpora to understand and generate human language. Examples include GPT-4 and Gemini. They predict the next token to produce coherent text.'},
+    {q:'What is a Deepfake and why is it dangerous?', a:'A Deepfake is AI-generated synthetic media where a real person\'s likeness is convincingly replaced or manipulated. It\'s dangerous because it spreads misinformation, damages reputations, and erodes public trust in media.'},
+    {q:'What is "hallucination" in the context of LLMs?', a:'Hallucination is when an LLM generates factually incorrect information stated with false confidence. It\'s dangerous in medical, legal, or educational contexts where accuracy is critical.'},
+  ],
+  la:[
+    {q:'Explain how a GAN works. Describe the training process, the roles of the Generator and Discriminator, and what Nash Equilibrium means in this context.', marks:'5 marks', a:'GAN (Generative Adversarial Network) architecture: Generator G: takes random noise z as input, outputs a synthetic sample (e.g. an image). Goal: fool the Discriminator. Discriminator D: receives either a real image from training data or a fake from G, outputs probability of being real. Goal: correctly classify real vs fake. Training process (adversarial): Step 1: Train D on real images (label=1) and fake images from G (label=0). Minimise binary cross-entropy. Step 2: Train G by maximising D\'s error — adjust G\'s weights so D classifies its outputs as real. Step 3: Alternate D and G training per batch. Progression: early training: G produces noise; D easily detects fakes. Mid training: G generates blurry images; D still accurate. Later: G produces realistic samples; D struggles. Nash Equilibrium: G generates perfect fakes and D can only guess randomly (50% accuracy). The generator has learned the true data distribution. Applications: photorealistic face generation (StyleGAN), image-to-image translation, video synthesis, data augmentation.'},
+    {q:'What are Large Language Models (LLMs)? Explain their architecture, training process, and three real-world applications including potential risks.', marks:'5 marks', a:'LLMs are neural networks with billions of parameters trained on internet-scale text to predict the next token in a sequence. Architecture: Transformer with self-attention: each token "attends" to all other tokens to capture context. Positional encoding handles word order. Multi-head attention captures different relationship types. Training: Pre-training on massive text corpus (trillions of tokens) using next-token prediction (self-supervised). Fine-tuning with RLHF (Reinforcement Learning from Human Feedback) to follow instructions safely. Applications: (1) Code generation (GitHub Copilot): writes and debugs code, boosting developer productivity 55%. (2) Education (Khan Academy\'s Khanmigo): personalised AI tutoring, explaining concepts at student level. (3) Healthcare: summarising medical notes, generating differential diagnoses for doctors to review. Risks: (1) Hallucination: confidently wrong medical/legal advice. (2) Bias: trained data biases reflected in outputs. (3) Misuse: generating exam essays, phishing emails, propaganda. (4) Intellectual property: training on copyrighted text. Responsible deployment requires citation, fact-checking, and human oversight.'},
+    {q:'Discuss the ethical challenges of Generative AI across three domains: misinformation, intellectual property, and bias. How can these be addressed?', marks:'5 marks', a:'(1) Misinformation & Deepfakes: Generative AI enables creation of synthetic videos of world leaders announcing false events, fake news articles with fabricated quotes, synthetic audio for voice fraud. Scale: anyone can produce convincing disinformation cheaply. Addresses: digital watermarking (C2PA standard), content provenance tracking, media literacy education, platform detection tools. (2) Intellectual Property: LLMs and image generators trained on copyrighted books, art, and code without compensation. Getty Images vs Stability AI lawsuit (2023). Questions: who owns AI-generated work? Can training = infringement? Addresses: opt-in training datasets, royalty frameworks for creators, clear AI content labelling laws. (3) Bias Amplification: If training data has racial/gender stereotypes, generative models amplify them. Image generators produce doctors as white men and nurses as women. LLMs may produce biased legal/hiring advice. Addresses: diverse training datasets, bias audits before deployment, fairness testing across demographic groups, diverse AI development teams. Overall framework: responsible AI principles — transparency, fairness, accountability, safety — must guide generative AI development.'},
+    {q:'What is Prompt Engineering? Explain its importance for LLMs and describe three techniques with examples.', marks:'4 marks', a:'Prompt Engineering is the practice of designing input prompts to elicit accurate, relevant, and useful responses from LLMs. Why it matters: LLMs are extremely sensitive to how questions are phrased — the same question asked differently can yield very different quality responses. Three techniques: (1) Zero-shot Prompting: directly ask without examples. "Translate this to French: Hello." — works for simple, common tasks. (2) Few-shot Prompting: provide 2-3 examples before asking. "Positive: Great movie! Negative: Terrible film. Classify: Best show ever!" — dramatically improves accuracy for classification tasks. (3) Chain-of-Thought Prompting: ask model to reason step-by-step. "Solve this maths problem. Think step by step: If 3 mangoes cost ₹15, how much do 7 cost?" — improves reasoning and reduces errors. (4) Role Prompting: "You are an expert cardiologist. Explain this ECG result to a patient simply." — frames the model\'s expertise and tone. Prompt engineering is now a valued professional skill — companies hire "Prompt Engineers" to optimise LLM pipelines.'},
+    {q:'Compare Traditional AI, Machine Learning, Deep Learning, and Generative AI. How does each build on the previous, and what new capabilities does each add?', marks:'5 marks', a:'(1) Traditional/Rule-Based AI (1950s-90s): hand-coded rules by experts. If temperature>38°C, flag fever. Limitation: cannot handle complexity or learn. (2) Machine Learning (1990s-2010s): algorithms learn patterns from data. No explicit rules — finds them statistically. Adds: generalisation from examples, classification, regression, clustering. Limitation: requires feature engineering by humans. (3) Deep Learning (2012-present): multi-layer neural networks automatically learn features. Adds: end-to-end learning (raw input → output), breakthrough performance in vision/speech. Limitation: needs massive labelled data, not interpretable. (4) Generative AI (2017-present, accelerated 2022+): neural networks that model data distribution and generate new samples. Adds: creation of novel content (text, image, video, code), open-ended interaction (ChatGPT), multi-modal understanding. Built on: Deep Learning + Transformers + massive compute + internet-scale data. Each generation expanded what AI can do — from following rules, to learning from data, to perceiving the world, to creating new content.'},
+  ]
+},
+
+/* ─────────────── UNIT 8 ─────────────── */
+{
+  id:'u8', num:'Unit 08', color:'#fbbf24',
+  title:'Data Storytelling',
+  desc:'Freytag\'s Pyramid · Visualisations · Narrative · Ethics',
+  mcqs:[
+    {type:'obj', q:'Data Storytelling combines which three essential elements?', opts:['Data, Code, and Visuals','Data, Narrative, and Visuals','Reports, Charts, and Tables','Numbers, Words, and Colours'], a:1, e:'The three pillars of Data Storytelling are Data (evidence), Narrative (story), and Visuals (clarity) — each is necessary.'},
+    {type:'case', q:'Neha presents sales data to her board. She shows the monthly trend chart, explains why Q3 dipped (narrative), and recommends an action plan. This is an example of:', opts:['Data Mining','Predictive Modelling','Data Storytelling','Computer Vision'], a:2, e:'Neha combines data (charts), narrative (explanation of Q3 dip), and a recommendation — a complete data story.'},
+    {type:'obj', q:'Freytag\'s Pyramid was originally created for:', opts:['Business presentations','Statistical modelling','Dramatic narrative structure in plays and novels','Data visualisation'], a:2, e:'Gustav Freytag\'s pyramid is a 19th-century dramatic structure framework, adapted for data storytelling.'},
+    {type:'obj', q:'Which stage comes FIRST in Freytag\'s Pyramid?', opts:['Rising Action','Climax','Exposition','Resolution'], a:2, e:'Exposition sets the scene, introduces context, background, and the central question the story will address.'},
+    {type:'scen', q:'A data analyst presents a story about declining app usage. After showing the trend (exposition) and causes (rising action), she reveals the most dramatic finding. In Freytag\'s structure, this is the:', opts:['Resolution','Falling Action','Climax','Denouement'], a:2, e:'The Climax is the peak moment of insight — the central, most dramatic finding that the entire story builds toward.'},
+    {type:'case', q:'Ravi wants to compare quarterly sales figures across 4 product categories. Which chart type is most appropriate?', opts:['Pie chart','Line chart','Grouped bar chart','Scatter plot'], a:2, e:'Grouped bar charts compare multiple categories (products) across groups (quarters) side by side — ideal for this.'},
+    {type:'obj', q:'A line chart is most suitable for:', opts:['Comparing categories','Showing part-to-whole proportions','Displaying trends over time','Showing correlations'], a:2, e:'Line charts connect data points chronologically — ideal for showing how a value changes over time (trends).'},
+    {type:'obj', q:'A pie chart is best used to show:', opts:['Correlation between two variables','Part-to-whole proportional relationships','Trends over time','Distribution of a dataset'], a:1, e:'Pie charts show proportions — how each slice (category) contributes to the whole (total). Limited to simple comparisons.'},
+    {type:'scen', q:'A health organisation presents a chart where the Y-axis starts at 95 instead of 0, making a 2% increase look like 400% growth. This is an example of:', opts:['Good data design','Cherry-picking','Truncated Y-axis — a misleading visualisation technique','Descriptive analytics'], a:2, e:'Starting Y-axis above 0 exaggerates differences visually. This is a common deceptive technique in data visualisation.'},
+    {type:'case', q:'Priya presents data on student performance but only shows the top 20% of students\' scores to prove her teaching method works. What ethical problem is this?', opts:['Privacy violation','Cherry-picking / Selection bias','Copyright violation','Poor visualisation choice'], a:1, e:'Cherry-picking = selecting only favourable data to support a predetermined conclusion, ignoring contradictory evidence.'},
+    {type:'obj', q:'Which chart type is best for showing the relationship and correlation between two numeric variables?', opts:['Bar chart','Pie chart','Scatter plot','Histogram'], a:2, e:'Scatter plots plot one variable on each axis — the pattern of dots reveals whether and how the two variables correlate.'},
+    {type:'obj', q:'The "Resolution" stage in Freytag\'s Pyramid (applied to data stories) represents:', opts:['The background context','The peak insight','Actionable recommendations and conclusions','The initial data collection'], a:2, e:'Resolution = the wrap-up with clear recommendations, next steps, or decisions the audience should make based on the story.'},
+    {type:'scen', q:'A government reports CO₂ emissions dropped 5% but uses two different baseline years for different regions to make the national number look better. This is:', opts:['Excellent data transparency','Misleading use of inconsistent baselines — data manipulation','Normal statistical practice','Data augmentation'], a:1, e:'Using inconsistent baselines to make data look better is deceptive — a form of misleading data storytelling.'},
+    {type:'case', q:'Arjun is presenting to a non-technical audience of school parents about student performance. He has detailed statistical models. Which data storytelling principle should guide his presentation?', opts:['Show all statistical outputs with maximum detail','Simplify: use simple visuals and narrative that connect emotionally with the audience','Use only raw data tables','Present everything in technical ML terminology'], a:1, e:'Data storytelling must be audience-centred — technical models must be translated into simple, relatable narratives and visuals for non-technical audiences.'},
+    {type:'obj', q:'What is the primary purpose of Data Storytelling?', opts:['To create complex technical reports','To communicate insights in a way that inspires decisions and actions','To replace raw data with attractive visuals','To simplify data for storage'], a:1, e:'Data storytelling bridges the gap between raw analysis and human understanding — its purpose is to inspire informed action.'},
+    {type:'obj', q:'A Histogram is best used to display:', opts:['Comparison of categories','Part-to-whole ratio','Distribution of a single continuous variable','Trends over time'], a:2, e:'Histograms show the frequency distribution of a continuous variable — grouping data into bins to show shape, spread, and skewness.'},
+    {type:'scen', q:'A climate researcher presents 150 years of global temperature data and connects it to industrial milestones, creating an emotional narrative about climate change. This demonstrates:', opts:['Data mining','The power of Data Storytelling — making complex data human and actionable','Predictive analytics only','Simple descriptive statistics'], a:1, e:'Combining historical data with a human narrative about industrial milestones turns statistics into a compelling story that drives action.'},
+    {type:'case', q:'Meera creates an infographic that uses a 3D bar chart for a budget comparison. Her colleague says this is problematic. Why?', opts:['3D charts look too modern','3D bar charts distort visual perception of bar heights, making comparisons inaccurate','3D charts take too long to make','3D charts require special software'], a:1, e:'3D charts distort relative sizes due to perspective — a shorter bar in front can appear equal to a taller one behind, misleading viewers.'},
+    {type:'obj', q:'Which ethical principle demands that data stories include the full context, limitations, and sources of data?', opts:['Visual minimalism','Transparency and Honest Representation','Aesthetic design','Complexity maximisation'], a:1, e:'Ethical data storytelling requires transparency — showing complete context, acknowledging limitations, citing sources, and not hiding inconvenient data.'},
+    {type:'case', q:'A company uses the same dataset to generate two different infographics: one showing customer satisfaction as "high" and another as "average" — just by choosing different visual scales. This demonstrates:', opts:['Good design flexibility','How the same data can be made to tell different stories through visual manipulation — a major ethical risk','Predictive analytics','Data augmentation techniques'], a:1, e:'Visual design choices (scale, colours, chart type) profoundly affect the story data tells. Ethical storytellers must not manipulate these to mislead.'},
+  ],
+  vsa:[
+    {q:'What are the three elements of Data Storytelling?', a:'Data (factual evidence and analysis), Narrative (the story that contextualises and interprets the data), and Visuals (charts, infographics that make data clear and engaging) — all three must work together.'},
+    {q:'What is Freytag\'s Pyramid and how is it applied to Data Storytelling?', a:'Freytag\'s Pyramid is a five-act dramatic structure: Exposition, Rising Action, Climax, Falling Action, Resolution. Applied to data stories, it frames data insights as a narrative with context, building tension, a key finding, and actionable conclusions.'},
+    {q:'What is Cherry-picking in Data Storytelling and why is it unethical?', a:'Cherry-picking is selecting only favourable data points that support a desired conclusion while ignoring contradictory evidence. It creates a false impression and misleads audiences — violating the principle of honest representation.'},
+    {q:'When should you use a scatter plot vs a bar chart?', a:'Use a scatter plot to show the relationship/correlation between two continuous numeric variables. Use a bar chart to compare discrete categories by their magnitude. The choice depends on the nature of the data and the story to tell.'},
+    {q:'What is the Climax in a data story?', a:'The Climax is the peak insight — the most significant, surprising, or critical finding the entire analysis reveals. It is the moment the audience\'s understanding shifts and the central question of the story is answered.'},
+  ],
+  la:[
+    {q:'Explain Freytag\'s Pyramid as applied to Data Storytelling. Create a complete data story about a school\'s declining exam results using all five stages.', marks:'5 marks', a:'Freytag\'s five stages applied to "School Exam Performance" data story: (1) Exposition: St. Xavier\'s School saw steady improvement 2018-2021. Context: strong faculty, growing enrolment. Audience introduced to the school\'s performance metrics. (2) Rising Action: From 2022, scores begin declining. Data shows: maths scores drop 15%, science 12%. Variables under investigation: teacher changes, curriculum shifts, post-COVID learning gaps. Tension builds. (3) Climax: The critical insight — a heatmap reveals 73% of declining scores come from 2 specific teachers\' classes after methodology changed. The central cause is identified. (4) Falling Action: Data supports the finding — student surveys, attendance records, and comparison with peer schools confirm the correlation. Secondary factors: inadequate lab resources also contribute. (5) Resolution: Recommendations: targeted professional development for 2 teachers, restore lab equipment budget, implement peer mentoring programme. Decision made: action plan approved. Good data storytelling makes complex analysis actionable by framing it as a human narrative with a clear problem, discovery, and solution.'},
+    {q:'Discuss the key ethical principles in Data Storytelling. Describe three common unethical practices with real examples and explain how to avoid them.', marks:'5 marks', a:'Ethical Data Storytelling principles: transparency, honesty, context, fairness, and citation. Three unethical practices: (1) Truncated Y-axis: Showing a Y-axis starting at 95 instead of 0 makes a 2% change look like a 50% increase. Example: media reports on poll numbers regularly use this trick. Fix: always start continuous Y-axes at 0 unless clearly labelled and justified. (2) Cherry-picking (Selection Bias): A pharma company shows only the 3 of 10 studies supporting its drug. Hides inconvenient evidence. Fix: pre-register studies, report all results, include confidence intervals and limitations. (3) Misleading Aggregates: Reporting "average income increased 20%" when median income dropped — because a few billionaires skewed the mean. Example: economic inequality reports frequently misuse mean vs median. Fix: always specify which average is used and show full distribution. Core rule: ethical data storytellers must ask: "Would my conclusion change if I showed ALL the data?" If yes — show all data. A data story that misleads, even unintentionally, can cause real harm — policy decisions, medical choices, and public trust all depend on honest data communication.'},
+    {q:'Describe five types of data visualisations, when each is appropriate, and common mistakes to avoid for each.', marks:'5 marks', a:'(1) Bar Chart: compare discrete categories. Use when: comparing sales across regions, survey responses. Mistake: 3D bars distort height perception; inconsistent colour encoding. (2) Line Chart: show trends over time. Use when: stock prices, temperature changes, website traffic. Mistake: too many lines (>5) create clutter; discontinuous axes mislead. (3) Pie Chart: part-to-whole proportions. Use when: market share (max 5 slices). Mistake: too many slices (unreadable); 3D pie charts skew proportion perception. (4) Scatter Plot: correlation between two variables. Use when: income vs education, height vs weight. Mistake: overplotting (too many points); not labelling outliers; confusing correlation with causation. (5) Histogram: distribution of a continuous variable. Use when: test score distribution, age distribution. Mistake: wrong bin width (too few = loss of detail; too many = noise). General principles: always label axes with units; use colourblind-friendly palettes; give a clear title stating the insight; cite data source.'},
+    {q:'Why is Data Storytelling considered a critical skill for Data Scientists and AI practitioners? How does it bridge technical analysis and business decision-making?', marks:'4 marks', a:'Data Storytelling is the bridge between technical analysis and actionable decisions. Without it: a data scientist can build a perfect model but executives won\'t act without understanding it. Research shows: people are 22× more likely to remember a story than a statistic alone (Stanford research). How it bridges: (1) Simplification: complex models translated into "Our churn model found that customers who don\'t log in for 14 days cancel 70% of the time" — immediately actionable. (2) Context: raw numbers mean nothing without context — "sales dropped 10%" vs "sales dropped 10% despite market growing 15% — we\'re losing share." (3) Emotional resonance: data paired with human stories (e.g. patient outcomes, not just survival rates) moves decision-makers. (4) Trust: well-structured narratives with clear evidence make stakeholders trust the analysis. Skills needed: choose the right chart, write clear narrative titles ("Sales Down 10% Due to Supply Chain" not "Q3 Results"), know your audience, and maintain ethical standards. In the AI era, the ability to explain an AI model\'s output in a compelling data story to non-technical stakeholders is one of the most valued career skills.'},
+    {q:'Compare and contrast different types of analytics (Descriptive, Diagnostic, Predictive, Prescriptive) from the perspective of Data Storytelling. How does the story change for each type?', marks:'5 marks', a:'Data Storytelling approach changes fundamentally with each analytics type: (1) Descriptive Storytelling: "What happened?" story. Uses historical charts, dashboards, KPI summaries. Narrative: "Last quarter, region B outperformed region A by 23% in revenue." Audience: executives wanting an overview. Visualisation: bar charts, time series, scorecards. (2) Diagnostic Storytelling: "Why did it happen?" story. Root cause narratives with drill-down analysis. "Region B outperformed because of 3 factors: new sales rep, promotional campaign timing, lower competitor pricing." Visualisation: correlation matrices, funnel charts, comparative breakdowns. (3) Predictive Storytelling: "What will happen?" story. Forward-looking with uncertainty ranges. "Based on current trends, Q2 revenue will be ₹1.2Cr ± 15%." Must communicate confidence intervals honestly. Visualisation: forecast lines with confidence bands, probability distributions. (4) Prescriptive Storytelling: "What should we do?" story. Action-oriented narrative with specific recommendations ranked by expected impact and feasibility. "To prevent Q2 shortfall, launch promotion in Region A by April 15." Visualisation: decision trees, scenario comparison tables, action roadmaps. Key insight: more advanced analytics = greater responsibility for honest, clear storytelling, especially when prescribing actions that affect people and resources.'},
+  ]
+}
+
+]; // end CHAPTERS
+
+/* ════════════════════════════════════
+   BUILD UI
+════════════════════════════════════ */
+const tabsEl = document.getElementById('chapterTabs');
+const panelsEl = document.getElementById('panelsWrap');
+const MCQ_ST = {}; // state per chapter
+
+CHAPTERS.forEach((ch, ci) => {
+  // Tab
+  const tab = document.createElement('button');
+  tab.className = 'ch-tab' + (ci===0?' active':'');
+  tab.textContent = ch.num + ' · ' + ch.title.split(' ').slice(0,2).join(' ');
+  tab.onclick = () => switchChapter(ch.id, tab);
+  tabsEl.appendChild(tab);
+
+  // Panel
+  const panel = document.createElement('div');
+  panel.className = 'chapter-panel' + (ci===0?' show':'');
+  panel.id = 'panel-' + ch.id;
+  panel.innerHTML = buildPanel(ch);
+  panelsEl.appendChild(panel);
+
+  // Init MCQ state
+  MCQ_ST[ch.id] = { done: new Array(ch.mcqs.length).fill(false), score: 0 };
+});
+
+function switchChapter(id, btn){
+  document.querySelectorAll('.ch-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.chapter-panel').forEach(p=>p.classList.remove('show'));
+  btn.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('show');
+  window.scrollTo({top:document.querySelector('.chapter-nav').offsetTop - 52, behavior:'smooth'});
+}
+
+function buildPanel(ch){
+  const mcqHtml = ch.mcqs.map((q,i) => `
+    <div class="mcq-item" id="mcq-${ch.id}-${i}">
+      <div class="mcq-top">
+        <div class="mcq-num">${String(i+1).padStart(2,'0')}</div>
+        <div style="flex:1">
+          <div class="mcq-tags">
+            <span class="tag ${q.type==='case'?'tag-case':q.type==='scen'?'tag-scen':'tag-obj'}">${q.type==='case'?'Case Based':q.type==='scen'?'Scenario':'Objective'}</span>
+          </div>
+          <div class="mcq-q">${q.q}</div>
+        </div>
+      </div>
+      <div class="mcq-opts">
+        ${q.opts.map((o,j)=>`<div class="mcq-opt" id="opt-${ch.id}-${i}-${j}" onclick="pickMCQ('${ch.id}',${i},${j})"><span class="opt-ltr">${'ABCD'[j]}</span>${o}</div>`).join('')}
+      </div>
+      <div class="mcq-feedback" id="fb-${ch.id}-${i}"></div>
+    </div>`).join('');
+
+  const vsaHtml = ch.vsa.map((v,i)=>`
+    <div class="vsa-item" id="vsa-${ch.id}-${i}">
+      <div class="vsa-q" onclick="toggleVSA('${ch.id}',${i})">
+        <div class="vsa-num">Q${i+1}</div>
+        <div class="vsa-qtext">${v.q}</div>
+        <div class="vsa-toggle">▾</div>
+      </div>
+      <div class="vsa-ans" id="vsaans-${ch.id}-${i}">
+        <div class="vsa-ans-label">Answer (20-30 words)</div>
+        ${v.a}
+      </div>
+    </div>`).join('');
+
+  const laHtml = ch.la.map((l,i)=>`
+    <div class="la-item">
+      <div class="la-top">
+        <div class="la-num">Q${i+1}</div>
+        <div class="la-qtext">${l.q}</div>
+        <div class="la-marks">${l.marks}</div>
+      </div>
+      <button class="la-toggle-btn" onclick="toggleLA(this)">Show Answer ▾</button>
+      <div class="la-ans-wrap">
+        <div class="la-ans-label">Model Answer (50+ words)</div>
+        <div class="la-ans-text">${l.a}</div>
+      </div>
+    </div>`).join('');
+
+  return `
+    <div class="ch-header">
+      <div class="ch-num" style="color:${ch.color}">${ch.num}</div>
+      <div class="ch-title">${ch.title}</div>
+      <div class="ch-desc">${ch.desc}</div>
+      <div class="ch-stats">
+        <div class="ch-stat"><span>20</span>MCQs</div>
+        <div class="ch-stat"><span>5</span>Very Short Answers</div>
+        <div class="ch-stat"><span>5</span>Long Answers</div>
+        <div class="ch-stat"><span>30</span>Total Questions</div>
+      </div>
+    </div>
+
+    <div class="assess-section">
+      <div class="assess-section-head">
+        <div class="assess-section-icon">📝</div>
+        <div>
+          <div class="assess-section-title">Section A — Multiple Choice Questions</div>
+          <div class="assess-section-sub">20 questions · Objective, Case-Based & Scenario · 1 mark each · Click to answer</div>
+        </div>
+        <div class="assess-score-badge" id="score-${ch.id}">0 / 20</div>
+      </div>
+      <div class="mcq-progress"><div class="mcq-progress-fill" id="prog-${ch.id}"></div></div>
+      <div id="mcqList-${ch.id}">${mcqHtml}</div>
+      <div class="mcq-result" id="result-${ch.id}">
+        <div class="result-ring" id="rring-${ch.id}"></div>
+        <div class="result-title" id="rtitle-${ch.id}"></div>
+        <div class="result-sub" id="rsub-${ch.id}"></div>
+        <button class="retry-btn" onclick="retryMCQ('${ch.id}')">↺ Retry Section A</button>
+      </div>
+    </div>
+
+    <div class="assess-section">
+      <div class="assess-section-head">
+        <div class="assess-section-icon">✍️</div>
+        <div>
+          <div class="assess-section-title">Section B — Very Short Answer Questions</div>
+          <div class="assess-section-sub">5 questions · 20-30 word answers · 2 marks each · Click to reveal answer</div>
+        </div>
+      </div>
+      ${vsaHtml}
+    </div>
+
+    <div class="assess-section">
+      <div class="assess-section-head">
+        <div class="assess-section-icon">📄</div>
+        <div>
+          <div class="assess-section-title">Section C — Long Answer Questions</div>
+          <div class="assess-section-sub">5 questions · 50+ word answers · 4-5 marks each · Click to reveal model answer</div>
+        </div>
+      </div>
+      ${laHtml}
+    </div>`;
+}
+
+/* ─── MCQ Logic ─── */
+function pickMCQ(cid, qi, oi){
+  const st = MCQ_ST[cid];
+  if(st.done[qi]) return;
+  st.done[qi] = true;
+  const ch = CHAPTERS.find(c=>c.id===cid);
+  const q = ch.mcqs[qi];
+  const ok = oi === q.a;
+  if(ok) st.score++;
+
+  // Style options
+  q.opts.forEach((_,j)=>{
+    const el = document.getElementById(`opt-${cid}-${qi}-${j}`);
+    el.classList.add('locked');
+    if(j===q.a) el.classList.add('correct');
+    else if(j===oi) el.classList.add('wrong');
+  });
+
+  // Feedback
+  const fb = document.getElementById(`fb-${cid}-${qi}`);
+  fb.textContent = (ok?'✓ Correct! ':'✗ Incorrect. ') + q.e;
+  fb.className = 'mcq-feedback show ' + (ok?'ok':'no');
+
+  // Card colour
+  const card = document.getElementById(`mcq-${cid}-${qi}`);
+  card.classList.add(ok?'answered-correct':'answered-wrong');
+
+  // Update score
+  const answered = st.done.filter(Boolean).length;
+  document.getElementById(`score-${cid}`).textContent = `${st.score} / 20`;
+  document.getElementById(`prog-${cid}`).style.width = (answered/20*100)+'%';
+
+  // Show result if all done
+  if(answered === 20) showMCQResult(cid);
+}
+
+function showMCQResult(cid){
+  const st = MCQ_ST[cid];
+  const pct = Math.round(st.score/20*100);
+  const r = document.getElementById(`result-${cid}`);
+  r.classList.add('show');
+  document.getElementById(`rring-${cid}`).textContent = `${st.score}/20`;
+  const medal = pct>=90?'🏆 Outstanding!':pct>=75?'🎯 Excellent!':pct>=60?'👍 Good Work!':pct>=40?'📚 Keep Practising':'🔄 Review & Retry';
+  document.getElementById(`rtitle-${cid}`).textContent = medal;
+  document.getElementById(`rsub-${cid}`).textContent = `Score: ${st.score}/20 (${pct}%). ${pct>=75?'Great understanding of this unit!':'Revise the chapter notes and try again, Avdhesh!'}`;
+  r.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function retryMCQ(cid){
+  MCQ_ST[cid] = {done:new Array(20).fill(false),score:0};
+  const ch = CHAPTERS.find(c=>c.id===cid);
+  document.getElementById(`mcqList-${cid}`).innerHTML = ch.mcqs.map((q,i)=>`
+    <div class="mcq-item" id="mcq-${cid}-${i}">
+      <div class="mcq-top">
+        <div class="mcq-num">${String(i+1).padStart(2,'0')}</div>
+        <div style="flex:1">
+          <div class="mcq-tags"><span class="tag ${q.type==='case'?'tag-case':q.type==='scen'?'tag-scen':'tag-obj'}">${q.type==='case'?'Case Based':q.type==='scen'?'Scenario':'Objective'}</span></div>
+          <div class="mcq-q">${q.q}</div>
+        </div>
+      </div>
+      <div class="mcq-opts">${q.opts.map((o,j)=>`<div class="mcq-opt" id="opt-${cid}-${i}-${j}" onclick="pickMCQ('${cid}',${i},${j})"><span class="opt-ltr">${'ABCD'[j]}</span>${o}</div>`).join('')}</div>
+      <div class="mcq-feedback" id="fb-${cid}-${i}"></div>
+    </div>`).join('');
+  document.getElementById(`score-${cid}`).textContent = '0 / 20';
+  document.getElementById(`prog-${cid}`).style.width = '0%';
+  document.getElementById(`result-${cid}`).classList.remove('show');
+}
+
+/* ─── VSA Toggle ─── */
+function toggleVSA(cid, i){
+  const item = document.getElementById(`vsa-${cid}-${i}`);
+  const ans = document.getElementById(`vsaans-${cid}-${i}`);
+  const isOpen = item.classList.contains('open');
+  item.classList.toggle('open', !isOpen);
+  ans.style.display = isOpen ? 'none' : 'block';
+  if(!isOpen) ans.style.animation='fadeUp .2s ease';
+}
+
+/* ─── LA Toggle ─── */
+function toggleLA(btn){
+  const wrap = btn.nextElementSibling;
+  const isOpen = wrap.classList.contains('open');
+  wrap.classList.toggle('open', !isOpen);
+  btn.textContent = isOpen ? 'Show Answer ▾' : 'Hide Answer ▴';
+}
+</script>
+</body>
+</html>

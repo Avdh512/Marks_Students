@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="day">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 6 — Understanding Neural Networks | Class XII AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── THEMES ─────────────────────────────── */
+:root{--tr:1.2s cubic-bezier(.4,0,.2,1);}
+[data-theme="day"]{
+  --sky-top:#74b9d8;--sky-mid:#b8dcf0;--sky-bot:#fde8c8;
+  --bg:#fdf6ec;--surface:#fffbf5;--surface2:#fef3e2;
+  --border:#e8d5b7;--text:#2c1810;--text-muted:#7a5c42;
+  --accent:#d97b34;--accent2:#2d8a4e;--accent3:#c94f27;
+  --accent4:#8b5cf6;--code-bg:#1a1410;--code-text:#f0e0c8;
+  --nav-bg:rgba(253,246,236,0.94);--sun-bg:#fff176;
+  --sun-shadow:rgba(255,200,50,.7);--star-op:0;--cloud-op:1;
+}
+[data-theme="night"]{
+  --sky-top:#020818;--sky-mid:#0a1628;--sky-bot:#1a2a4a;
+  --bg:#080e1f;--surface:#0e1828;--surface2:#141f35;
+  --border:#1e2d4a;--text:#e8edf8;--text-muted:#7a90b8;
+  --accent:#5b8cff;--accent2:#00d4aa;--accent3:#ff6b9d;
+  --accent4:#a78bfa;--code-bg:#030810;--code-text:#c9d8f0;
+  --nav-bg:rgba(8,14,31,0.95);--sun-bg:#e8eeff;
+  --sun-shadow:rgba(180,200,255,.55);--star-op:1;--cloud-op:0;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.78;transition:background var(--tr),color var(--tr);overflow-x:hidden;}
+
+/* ── SKY ──────────────────────────────── */
+.sky{position:fixed;inset:0;z-index:-2;pointer-events:none;}
+.sky-grad{position:absolute;inset:0;background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 55%,var(--sky-bot) 100%);opacity:.16;transition:background var(--tr),opacity var(--tr);}
+[data-theme="night"] .sky-grad{opacity:.38;}
+.celestial{position:absolute;top:55px;right:130px;width:66px;height:66px;border-radius:50%;background:var(--sun-bg);box-shadow:0 0 40px var(--sun-shadow),0 0 90px var(--sun-shadow);transition:all var(--tr);}
+[data-theme="night"] .celestial{width:54px;height:54px;top:75px;right:105px;}
+.crater{position:absolute;border-radius:50%;background:rgba(0,0,0,.08);opacity:0;transition:opacity var(--tr);}
+[data-theme="night"] .crater{opacity:1;}
+.cr1{width:13px;height:13px;top:17px;left:15px;}.cr2{width:8px;height:8px;top:31px;left:33px;}.cr3{width:10px;height:10px;top:11px;left:35px;}
+.stars-wrap{position:absolute;inset:0;opacity:var(--star-op);transition:opacity var(--tr);}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite var(--dl,0s);}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}
+.clouds{position:absolute;inset:0;opacity:var(--cloud-op);transition:opacity var(--tr);pointer-events:none;}
+.cloud{position:absolute;border-radius:60px;background:rgba(255,255,255,.82);}
+.cloud::before,.cloud::after{content:'';position:absolute;background:inherit;border-radius:50%;}
+.cl1{width:110px;height:34px;top:110px;left:7%;animation:drift 30s linear infinite;}
+.cl1::before{width:55px;height:46px;top:-20px;left:14px;}.cl1::after{width:42px;height:36px;top:-14px;left:50px;}
+.cl2{width:85px;height:28px;top:170px;left:54%;animation:drift 42s linear infinite 6s;}
+.cl2::before{width:46px;height:38px;top:-16px;left:11px;}.cl2::after{width:32px;height:26px;top:-10px;left:36px;}
+.cl3{width:65px;height:22px;top:85px;left:34%;animation:drift 55s linear infinite 14s;}
+.cl3::before{width:34px;height:28px;top:-12px;left:9px;}
+@keyframes drift{from{transform:translateX(-250px)}to{transform:translateX(110vw)}}
+
+/* ── TOGGLE ───────────────────────────── */
+.toggle-wrap{display:flex;align-items:center;gap:9px;flex-shrink:0;margin-left:auto;}
+.tlabel{font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);transition:color var(--tr);user-select:none;}
+.tbtn{width:62px;height:30px;background:var(--surface2);border:2px solid var(--border);border-radius:99px;cursor:pointer;position:relative;transition:background var(--tr),border-color var(--tr);flex-shrink:0;}
+.tbtn::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--sun-bg);box-shadow:0 0 8px var(--sun-shadow);transition:transform .5s cubic-bezier(.4,0,.2,1),background .5s;}
+[data-theme="night"] .tbtn::after{transform:translateX(32px);}
+
+/* ── NAV TOP BAR ─────────────────────── */
+.nav-top{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--nav-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.4rem;height:50px;gap:.8rem;transition:background var(--tr),border-color var(--tr);}
+.nav-logo{font-family:'Playfair Display',serif;font-weight:900;font-size:1rem;color:var(--accent);white-space:nowrap;flex-shrink:0;transition:color var(--tr);}
+.back-btn{display:flex;align-items:center;gap:.4rem;text-decoration:none;color:var(--text-muted);font-size:.72rem;font-weight:700;letter-spacing:.5px;flex-shrink:0;transition:all .2s;border:1.5px solid var(--border);border-radius:20px;padding:.22rem .8rem;white-space:nowrap;}
+.back-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+/* ── SCROLLABLE NAV STRIP ─────────────── */
+nav{position:fixed;top:50px;left:0;right:0;z-index:199;background:var(--nav-bg);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.2rem;height:36px;transition:background var(--tr),border-color var(--tr);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+.nav-links{display:flex;gap:.25rem;flex-shrink:0;align-items:center;}
+.nav-links a{font-size:.65rem;padding:.2rem .72rem;border-radius:20px;color:var(--text-muted);text-decoration:none;font-weight:600;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.nav-links a:hover,.nav-links a.active{background:var(--accent);color:#fff;}
+
+/* ── HERO ─────────────────────────────── */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:8rem 2rem 5rem;text-align:center;}
+.hero-inner{max-width:720px;}
+.badge{display:inline-block;background:color-mix(in srgb,var(--accent) 13%,transparent);border:1px solid color-mix(in srgb,var(--accent) 38%,transparent);color:var(--accent);font-size:.68rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:.38rem 1.3rem;border-radius:30px;margin-bottom:1.4rem;transition:all var(--tr);}
+.hero h1{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2.4rem,6.5vw,5rem);letter-spacing:-1.5px;line-height:1.05;margin-bottom:1rem;color:var(--text);transition:color var(--tr);}
+.hero h1 span{color:var(--accent);}
+.hero p{font-size:1rem;color:var(--text-muted);max-width:580px;margin:0 auto 2.2rem;transition:color var(--tr);}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:.55rem;}
+.chip{background:var(--surface);border:1.5px solid var(--border);border-radius:9px;padding:.4rem 1rem;font-size:.76rem;font-weight:600;color:var(--text-muted);text-decoration:none;transition:all .22s;}
+.chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-3px);box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 18%,transparent);}
+
+/* ── LAYOUT ───────────────────────────── */
+.container{max-width:1080px;margin:0 auto;padding:0 2rem;}
+section.topic{padding:5rem 0;border-top:1px solid var(--border);transition:border-color var(--tr);}
+.s-tag{font-size:.68rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:.45rem;transition:color var(--tr);}
+.s-title{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(1.7rem,3.8vw,2.5rem);line-height:1.08;margin-bottom:1.1rem;color:var(--text);transition:color var(--tr);}
+.s-intro{color:var(--text-muted);font-size:.96rem;max-width:820px;border-left:3px solid var(--accent);padding:.95rem 1.4rem;background:var(--surface);border-radius:0 12px 12px 0;margin-bottom:2.2rem;line-height:1.86;transition:all var(--tr);}
+.s-intro strong{color:var(--text);}
+h3.sh{font-family:'Playfair Display',serif;font-weight:700;font-size:1.12rem;color:var(--accent2);margin:2rem 0 .8rem;display:flex;align-items:center;gap:.6rem;transition:color var(--tr);}
+h3.sh::before{content:'';width:22px;height:3px;background:var(--accent2);border-radius:2px;flex-shrink:0;transition:background var(--tr);}
+h4.ssh{font-family:'Outfit',sans-serif;font-weight:700;font-size:.95rem;color:var(--accent4);margin:1.5rem 0 .6rem;transition:color var(--tr);}
+p.bd{color:var(--text-muted);font-size:.94rem;margin-bottom:.85rem;transition:color var(--tr);}
+p.bd strong{color:var(--text);}
+
+/* ── CARDS ────────────────────────────── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin:1.4rem 0 2.2rem;}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1.3rem;transition:all .25s;}
+.card:hover{transform:translateY(-5px);border-color:var(--accent);box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 16%,transparent);}
+.card .icon{font-size:1.75rem;margin-bottom:.7rem;}
+.card h4{font-family:'Playfair Display',serif;font-weight:700;font-size:.97rem;margin-bottom:.4rem;color:var(--text);transition:color var(--tr);}
+.card p{font-size:.84rem;color:var(--text-muted);line-height:1.62;transition:color var(--tr);}
+
+/* ── HIGHLIGHT BOXES ──────────────────── */
+.hl{background:color-mix(in srgb,var(--accent2) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent2) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);line-height:1.82;transition:all var(--tr);}
+.hl strong{color:var(--accent2);}
+.warn{background:color-mix(in srgb,var(--accent3) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent3) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);transition:all var(--tr);}
+.warn strong{color:var(--accent3);}
+.note{background:color-mix(in srgb,var(--accent4) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent4) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);transition:all var(--tr);}
+.note strong{color:var(--accent4);}
+
+/* ── TABLE ────────────────────────────── */
+.tw{overflow-x:auto;margin:1.4rem 0;border-radius:12px;border:1px solid var(--border);transition:border-color var(--tr);}
+table{width:100%;border-collapse:collapse;font-size:.86rem;}
+th{background:var(--surface2);color:var(--accent);font-weight:700;padding:.8rem 1.1rem;text-align:left;border-bottom:2px solid var(--border);font-family:'Playfair Display',serif;transition:all var(--tr);}
+td{padding:.72rem 1.1rem;border-bottom:1px solid var(--border);color:var(--text-muted);transition:all var(--tr);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface2);color:var(--text);}
+
+/* ── CODE BLOCKS ──────────────────────── */
+.cb{background:var(--code-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:1.4rem 0;box-shadow:0 4px 22px rgba(0,0,0,.18);transition:border-color var(--tr);}
+.cb-head{background:color-mix(in srgb,var(--code-bg) 85%,white 6%);padding:.6rem 1.1rem;display:flex;align-items:center;gap:.45rem;border-bottom:1px solid rgba(255,255,255,.05);}
+.cb-head .fn{font-size:.72rem;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace;margin-left:auto;}
+.d{width:10px;height:10px;border-radius:50%;}
+.d.r{background:#ff5f56;}.d.y{background:#ffbd2e;}.d.g{background:#27c93f;}
+pre{font-family:'DM Mono',monospace;font-size:.81rem;line-height:1.82;padding:1.4rem;overflow-x:auto;color:var(--code-text);}
+.kw{color:#ff9d6c;}.fn2{color:#82aaff;}.st{color:#c3e88d;}.cm{color:#4a5568;font-style:italic;}.nm{color:#f78c6c;}.cl{color:#ffcb6b;}.bi{color:#89ddff;}
+
+/* ── INFO GRID ────────────────────────── */
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1.4rem 0;}
+.ic{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.4rem;transition:all var(--tr);}
+.ic h4{font-size:.72rem;color:var(--accent2);margin-bottom:.65rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;}
+.ic ul{list-style:none;}
+.ic ul li{font-size:.86rem;color:var(--text-muted);padding:.2rem 0 .2rem 1.2rem;position:relative;transition:color var(--tr);}
+.ic ul li::before{content:'▸';position:absolute;left:0;color:var(--accent2);font-size:.76rem;}
+
+/* ── FLOWCHART (SVG-BASED) ────────────── */
+.flowchart-wrap{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:2rem;margin:1.5rem 0;overflow-x:auto;transition:all var(--tr);}
+.flowchart-wrap h4{font-family:'Playfair Display',serif;font-weight:700;font-size:1.05rem;color:var(--accent);text-align:center;margin-bottom:1.5rem;}
+svg text{font-family:'Outfit',sans-serif;}
+
+/* ── STEP BOXES ───────────────────────── */
+.steps{display:flex;flex-direction:column;gap:.7rem;margin:1.2rem 0;}
+.step{display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:1rem 1.3rem;transition:all var(--tr);}
+.step-num{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;font-family:'Playfair Display',serif;}
+.step-body h5{font-weight:600;font-size:.92rem;margin-bottom:.25rem;color:var(--text);transition:color var(--tr);}
+.step-body p{font-size:.85rem;color:var(--text-muted);transition:color var(--tr);}
+
+/* ── FORMULA BOX ──────────────────────── */
+.formula-box{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:1.4rem 1.6rem;margin:1.4rem 0;text-align:center;transition:all var(--tr);}
+.formula-box:hover{border-color:var(--accent);transform:translateY(-2px);}
+.formula-label{font-size:.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:.6rem;}
+.formula-eq{font-family:'DM Mono',monospace;font-size:1rem;background:var(--code-bg);color:var(--code-text);padding:.75rem 1.4rem;border-radius:10px;margin:.5rem 0;display:inline-block;}
+.formula-desc{font-size:.85rem;color:var(--text-muted);margin-top:.5rem;line-height:1.7;}
+
+/* ── NN TYPE CARDS ────────────────────── */
+.nn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2rem;margin:1.5rem 0;}
+.nn-card{border-radius:14px;padding:1.5rem;border:1.5px solid;transition:all .25s;position:relative;overflow:hidden;}
+.nn-card:hover{transform:translateY(-5px);}
+.nn-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.nn-card .nn-icon{font-size:2rem;margin-bottom:.7rem;}
+.nn-card .nn-tag{font-size:.62rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:.35rem;}
+.nn-card h4{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;margin-bottom:.5rem;}
+.nn-card p{font-size:.84rem;line-height:1.62;}
+.nn-card .nn-app{font-size:.79rem;margin-top:.7rem;padding:.4rem .8rem;border-radius:20px;display:inline-block;font-weight:600;}
+.nn-perceptron{background:color-mix(in srgb,#f59e0b 8%,var(--surface));border-color:color-mix(in srgb,#f59e0b 35%,var(--border));}
+.nn-perceptron::before{background:#f59e0b;}.nn-perceptron .nn-tag,.nn-perceptron h4{color:#d97706;}
+.nn-perceptron .nn-app{background:color-mix(in srgb,#f59e0b 14%,transparent);color:#d97706;}
+.nn-ffnn{background:color-mix(in srgb,#3b82f6 8%,var(--surface));border-color:color-mix(in srgb,#3b82f6 35%,var(--border));}
+.nn-ffnn::before{background:#3b82f6;}.nn-ffnn .nn-tag,.nn-ffnn h4{color:#2563eb;}
+.nn-ffnn .nn-app{background:color-mix(in srgb,#3b82f6 14%,transparent);color:#2563eb;}
+.nn-cnn{background:color-mix(in srgb,#10b981 8%,var(--surface));border-color:color-mix(in srgb,#10b981 35%,var(--border));}
+.nn-cnn::before{background:#10b981;}.nn-cnn .nn-tag,.nn-cnn h4{color:#059669;}
+.nn-cnn .nn-app{background:color-mix(in srgb,#10b981 14%,transparent);color:#059669;}
+.nn-rnn{background:color-mix(in srgb,#8b5cf6 8%,var(--surface));border-color:color-mix(in srgb,#8b5cf6 35%,var(--border));}
+.nn-rnn::before{background:#8b5cf6;}.nn-rnn .nn-tag,.nn-rnn h4{color:#7c3aed;}
+.nn-rnn .nn-app{background:color-mix(in srgb,#8b5cf6 14%,transparent);color:#7c3aed;}
+.nn-gan{background:color-mix(in srgb,#ec4899 8%,var(--surface));border-color:color-mix(in srgb,#ec4899 35%,var(--border));}
+.nn-gan::before{background:#ec4899;}.nn-gan .nn-tag,.nn-gan h4{color:#db2777;}
+.nn-gan .nn-app{background:color-mix(in srgb,#ec4899 14%,transparent);color:#db2777;}
+
+/* ── ACTIVITY BOX ─────────────────────── */
+.activity{background:color-mix(in srgb,var(--accent4) 7%,var(--surface));border:1.5px solid color-mix(in srgb,var(--accent4) 30%,var(--border));border-radius:14px;padding:1.4rem 1.6rem;margin:1.5rem 0;transition:all var(--tr);}
+.activity-hdr{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;}
+.activity-badge{background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:.28rem .75rem;border-radius:20px;}
+.activity-hdr span{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;color:var(--text);transition:color var(--tr);}
+.activity ol{padding-left:1.2rem;}
+.activity ol li{font-size:.88rem;color:var(--text-muted);padding:.35rem 0;transition:color var(--tr);}
+.activity ol li strong{color:var(--text);}
+
+/* ── CASE STUDY BOX ───────────────────── */
+.case-box{background:color-mix(in srgb,var(--accent) 6%,var(--surface));border:1.5px solid color-mix(in srgb,var(--accent) 28%,var(--border));border-radius:14px;padding:1.5rem 1.8rem;margin:1.5rem 0;transition:all var(--tr);}
+.case-box h4{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;color:var(--accent);margin-bottom:.8rem;}
+.case-box p{font-size:.9rem;color:var(--text-muted);margin-bottom:.5rem;}
+.case-table{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:1rem 0;}
+.case-cell{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.75rem;text-align:center;transition:all var(--tr);}
+.case-cell .cc-label{font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:.3rem;}
+.case-cell .cc-val{font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:var(--accent);}
+.case-cell .cc-sub{font-size:.72rem;color:var(--text-muted);margin-top:.2rem;}
+
+/* ── PIPELINE ─────────────────────────── */
+.pipeline{display:flex;flex-wrap:wrap;gap:0;margin:2rem 0;align-items:stretch;justify-content:center;}
+.pipe-module{flex:1;min-width:140px;max-width:200px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1.1rem .9rem;text-align:center;position:relative;transition:all .28s;margin:.3rem;}
+.pipe-module:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 10px 28px color-mix(in srgb,var(--accent) 18%,transparent);}
+.pipe-num{width:32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;font-weight:900;font-size:.85rem;display:flex;align-items:center;justify-content:center;margin:0 auto .7rem;font-family:'Playfair Display',serif;transition:background var(--tr);}
+.pipe-title{font-family:'Playfair Display',serif;font-weight:700;font-size:.85rem;color:var(--text);margin-bottom:.35rem;transition:color var(--tr);}
+.pipe-steps{font-size:.76rem;color:var(--text-muted);line-height:1.55;transition:color var(--tr);}
+.pipe-arrow{display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:1.3rem;flex-shrink:0;padding:0 .2rem;align-self:center;}
+
+/* ── COMPARISON ───────────────────────── */
+.comp{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.4rem 0;}
+.comp-col{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:1.2rem;}
+.comp-col h4{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;margin-bottom:.8rem;color:var(--accent);}
+.comp-col ul{list-style:none;}
+.comp-col ul li{font-size:.87rem;color:var(--text-muted);padding:.22rem 0 .22rem 1.2rem;position:relative;transition:color var(--tr);}
+.comp-col ul li::before{content:'•';position:absolute;left:0;color:var(--accent2);}
+
+/* ── ASSESSMENT ───────────────────────── */
+#assessment{padding:5rem 0 4rem;border-top:1px solid var(--border);}
+.aw{background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--accent) 7%,var(--surface)));border:1.5px solid color-mix(in srgb,var(--accent) 28%,var(--border));border-radius:22px;padding:2.8rem;transition:all var(--tr);}
+.a-title{font-family:'Playfair Display',serif;font-weight:900;font-size:2.1rem;letter-spacing:-.5px;margin-bottom:.35rem;color:var(--text);transition:color var(--tr);}
+.a-sub{color:var(--text-muted);font-size:.88rem;margin-bottom:2.2rem;}
+.qlabel{font-weight:700;font-size:.67rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent2);padding-bottom:.55rem;border-bottom:1px solid var(--border);margin:2.2rem 0 1.3rem;transition:all var(--tr);}
+.mcq{margin-bottom:1.8rem;}
+.mcq-q{font-size:.95rem;font-weight:500;margin-bottom:.85rem;color:var(--text);transition:color var(--tr);}
+.mcq-q em{color:var(--accent);font-style:normal;font-weight:700;font-family:'Playfair Display',serif;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;}
+.opt{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:.6rem .95rem;cursor:pointer;transition:all .2s;font-size:.86rem;color:var(--text-muted);display:flex;align-items:center;gap:.65rem;user-select:none;}
+.opt:hover{border-color:var(--accent);color:var(--text);}
+.opt.correct{background:color-mix(in srgb,var(--accent2) 12%,transparent);border-color:var(--accent2);color:var(--accent2);}
+.opt.wrong{background:color-mix(in srgb,var(--accent3) 9%,transparent);border-color:var(--accent3);color:var(--accent3);}
+.opt .ltr{width:21px;height:21px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;}
+.qa{margin-bottom:1.4rem;}
+.qa-q{font-size:.94rem;margin-bottom:.45rem;color:var(--text);transition:color var(--tr);}
+.qa-q em{color:var(--accent);font-style:normal;font-weight:700;font-family:'Playfair Display',serif;}
+.ans{background:var(--code-bg);border-left:3px solid var(--accent2);border-radius:0 9px 9px 0;padding:.95rem 1.2rem;font-size:.87rem;color:var(--code-text);line-height:1.82;display:none;margin-top:.45rem;transition:all var(--tr);}
+.ans.show{display:block;}
+.rbtn{background:transparent;border:1.5px solid var(--border);border-radius:7px;padding:.3rem .9rem;font-size:.74rem;color:var(--text-muted);cursor:pointer;font-weight:600;transition:all .2s;margin-top:.38rem;}
+.rbtn:hover{border-color:var(--accent2);color:var(--accent2);}
+.spanel{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:1.3rem 1.7rem;display:flex;align-items:center;justify-content:space-between;margin-top:1.8rem;flex-wrap:wrap;gap:1rem;transition:all var(--tr);}
+.snum{font-family:'Playfair Display',serif;font-weight:900;font-size:2.4rem;color:var(--accent);transition:color var(--tr);}
+.stxt{font-size:.84rem;color:var(--text-muted);}
+.sbtn{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 68%,var(--accent2)));border:none;border-radius:11px;padding:.85rem 2.4rem;font-weight:700;font-size:.88rem;color:#fff;cursor:pointer;transition:all .22s;font-family:'Outfit',sans-serif;margin-top:1.4rem;}
+.sbtn:hover{transform:translateY(-3px);box-shadow:0 12px 28px color-mix(in srgb,var(--accent) 38%,transparent);}
+
+footer{text-align:center;padding:3rem 2rem;color:var(--text-muted);font-size:.82rem;border-top:1px solid var(--border);transition:all var(--tr);}
+footer span{color:var(--accent);}
+.divider{height:1px;background:var(--border);margin:2rem 0;transition:background var(--tr);}
+
+@media(max-width:640px){
+  .opts,.comp,.nn-grid{grid-template-columns:1fr;}
+  .nav-links{display:none;}
+  .aw{padding:1.4rem;}
+  .tlabel{display:none;}
+  .case-table{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- SKY -->
+<div class="sky">
+  <div class="sky-grad"></div>
+  <div class="celestial"><div class="crater cr1"></div><div class="crater cr2"></div><div class="crater cr3"></div></div>
+  <div class="stars-wrap" id="stars"></div>
+  <div class="clouds"><div class="cloud cl1"></div><div class="cloud cl2"></div><div class="cloud cl3"></div></div>
+</div>
+
+<!-- NAV TOP BAR -->
+<div class="nav-top">
+  <a href="index.html" class="back-btn">← Home</a>
+  <div class="nav-logo">Unit 6 · Neural Networks</div>
+  <div class="toggle-wrap">
+    <span class="tlabel" id="tlbl">Day</span>
+    <div class="tbtn" onclick="toggleTheme()"></div>
+    <span id="tico">☀️</span>
+  </div>
+</div>
+
+<!-- SCROLLABLE NAV STRIP -->
+<nav>
+  <div class="nav-links">
+    <a href="#overview">Overview</a>
+    <a href="#what-is">What is a NN?</a>
+    <a href="#components">Components</a>
+    <a href="#working">How it Works</a>
+    <a href="#types">Types of NNs</a>
+    <a href="#future">Future & Society</a>
+    <a href="#activities">Activities</a>
+    <a href="#assessment">Assessment</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="badge">Unit 06 · Class XII AI · Subject Code 843</div>
+    <h1>Understanding<br><span>Neural Networks</span></h1>
+    <p>Explore the fundamentals of neural networks — their structure, components, types, and real-world impact. From perceptrons to deep learning, understand how machines learn like brains.</p>
+    <div class="chips">
+      <a href="#overview" class="chip">📋 Overview</a>
+      <a href="#what-is" class="chip">🧠 What is a NN?</a>
+      <a href="#components" class="chip">🔩 Components</a>
+      <a href="#working" class="chip">⚙️ How it Works</a>
+      <a href="#types" class="chip">🌐 Types of NNs</a>
+      <a href="#future" class="chip">🚀 Future & Society</a>
+      <a href="#activities" class="chip">🛠 Activities</a>
+      <a href="#assessment" class="chip">✅ Assessment</a>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION: OVERVIEW
+════════════════════════════════════════════ -->
+<section class="topic" id="overview">
+<div class="container">
+  <div class="s-tag">Unit 6 — Overview</div>
+  <div class="s-title">Chapter Summary & Learning Objectives</div>
+  <div class="s-intro">
+    This unit introduces students to the <strong>fundamentals of neural networks</strong>, including their structure, components, and types. Students will learn how neural networks are used in various real-world applications and explore their growing impact on society. Approach: Team Discussion, Web search, Case studies.
+  </div>
+
+  <div class="ig">
+    <div class="ic">
+      <h4>Learning Objectives</h4>
+      <ul>
+        <li>Understand the basic structure of a neural network and its components</li>
+        <li>Explore different types of neural networks and their applications</li>
+        <li>Analyse case studies of neural networks in real-world scenarios</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Key Concepts</h4>
+      <ul>
+        <li>Parts of a neural network</li>
+        <li>Components of a neural network</li>
+        <li>Working of a neural network</li>
+        <li>Types: Feedforward, Convolutional, Recurrent</li>
+        <li>Impact of neural networks on society</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Learning Outcomes</h4>
+      <ul>
+        <li>Explain the basic structure and components of a neural network</li>
+        <li>Identify different types of neural networks and their applications</li>
+        <li>Understand ML and NNs through hands-on projects, interactive tools, and Python programming</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Prerequisites</h4>
+      <ul>
+        <li>Basic understanding of machine learning concepts</li>
+        <li>Familiarity with Python programming</li>
+        <li>Understanding of functions and data structures</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="hl"><strong>📌 Why Neural Networks?</strong> Neural networks are at the heart of modern AI — from voice assistants and spam filters to self-driving cars and medical diagnosis. Understanding how they work empowers you to build the next generation of intelligent systems.</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 6.1 — WHAT IS A NEURAL NETWORK?
+════════════════════════════════════════════ -->
+<section class="topic" id="what-is">
+<div class="container">
+  <div class="s-tag">Section 6.1</div>
+  <div class="s-title">What is a Neural Network?</div>
+  <div class="s-intro">
+    A <strong>network of neurons</strong> is called a Neural Network. "Neural" comes from the word <em>neuron</em> of the human nervous system — the basic unit of the brain used to process and transmit information to all other nerve cells and muscles. Artificial Intelligence embeds a similar behaviour of neurons into a network called an <strong>Artificial Neural Network (ANN)</strong>.
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="icon">🧬</div><h4>Inspired by Biology</h4><p>ANNs mimic the way biological neurons work together to identify phenomena, weigh options, and arrive at conclusions — just like the human brain.</p></div>
+    <div class="card"><div class="icon">🔄</div><h4>Adaptive</h4><p>A neural network can adapt to changing inputs, generating the best possible outcome without any changes to the program — exactly as the human brain does.</p></div>
+    <div class="card"><div class="icon">🤖</div><h4>Automatic Feature Learning</h4><p>The main advantage of ANNs is that they can <strong>extract data features automatically</strong> without needing any manual input from the programmer.</p></div>
+    <div class="card"><div class="icon">🌐</div><h4>Real-World Applications</h4><p>Auto-reply emails, spam filtering, Facebook image tagging, e-shopping recommendations, chatbots, and Google's search algorithm all use neural networks.</p></div>
+  </div>
+
+  <h3 class="sh">6.1.1 Parts of a Neural Network</h3>
+  <p class="bd">Every neural network comprises <strong>layers of interconnected nodes</strong> — an input layer, hidden layer(s), and an output layer.</p>
+
+  <!-- FLOWCHART: Neural Network Architecture -->
+  <div class="flowchart-wrap">
+    <h4>Neural Network Architecture — Layer Structure</h4>
+    <svg viewBox="0 0 820 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:820px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0, 8 3, 0 6" fill="#d97b34" opacity=".7"/>
+        </marker>
+      </defs>
+      <!-- Input Layer -->
+      <rect x="30" y="20" width="150" height="260" rx="14" fill="none" stroke="#d97b34" stroke-width="1.5" stroke-dasharray="6,3" opacity=".5"/>
+      <text x="105" y="14" text-anchor="middle" font-size="11" fill="#d97b34" font-weight="700" letter-spacing="1">INPUT LAYER</text>
+      <circle cx="105" cy="70" r="26" fill="#fef3e2" stroke="#d97b34" stroke-width="2"/>
+      <text x="105" y="74" text-anchor="middle" font-size="11" fill="#2c1810" font-weight="600">X₁</text>
+      <circle cx="105" cy="150" r="26" fill="#fef3e2" stroke="#d97b34" stroke-width="2"/>
+      <text x="105" y="154" text-anchor="middle" font-size="11" fill="#2c1810" font-weight="600">X₂</text>
+      <circle cx="105" cy="230" r="26" fill="#fef3e2" stroke="#d97b34" stroke-width="2"/>
+      <text x="105" y="234" text-anchor="middle" font-size="11" fill="#2c1810" font-weight="600">X₃</text>
+      <!-- Hidden Layer 1 -->
+      <rect x="220" y="20" width="150" height="260" rx="14" fill="none" stroke="#2d8a4e" stroke-width="1.5" stroke-dasharray="6,3" opacity=".5"/>
+      <text x="295" y="14" text-anchor="middle" font-size="11" fill="#2d8a4e" font-weight="700" letter-spacing="1">HIDDEN L1</text>
+      <circle cx="295" cy="90" r="26" fill="#f0fdf4" stroke="#2d8a4e" stroke-width="2"/>
+      <text x="295" y="94" text-anchor="middle" font-size="10" fill="#2c1810" font-weight="600">H₁</text>
+      <circle cx="295" cy="170" r="26" fill="#f0fdf4" stroke="#2d8a4e" stroke-width="2"/>
+      <text x="295" y="174" text-anchor="middle" font-size="10" fill="#2c1810" font-weight="600">H₂</text>
+      <circle cx="295" cy="240" r="26" fill="#f0fdf4" stroke="#2d8a4e" stroke-width="2"/>
+      <text x="295" y="244" text-anchor="middle" font-size="10" fill="#2c1810" font-weight="600">H₃</text>
+      <!-- Hidden Layer 2 -->
+      <rect x="410" y="20" width="150" height="260" rx="14" fill="none" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="6,3" opacity=".5"/>
+      <text x="485" y="14" text-anchor="middle" font-size="11" fill="#8b5cf6" font-weight="700" letter-spacing="1">HIDDEN L2</text>
+      <circle cx="485" cy="110" r="26" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="485" y="114" text-anchor="middle" font-size="10" fill="#2c1810" font-weight="600">H₄</text>
+      <circle cx="485" cy="200" r="26" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="485" y="204" text-anchor="middle" font-size="10" fill="#2c1810" font-weight="600">H₅</text>
+      <!-- Output Layer -->
+      <rect x="600" y="20" width="150" height="260" rx="14" fill="none" stroke="#c94f27" stroke-width="1.5" stroke-dasharray="6,3" opacity=".5"/>
+      <text x="675" y="14" text-anchor="middle" font-size="11" fill="#c94f27" font-weight="700" letter-spacing="1">OUTPUT</text>
+      <circle cx="675" cy="155" r="30" fill="#fff5f5" stroke="#c94f27" stroke-width="2.5"/>
+      <text x="675" y="152" text-anchor="middle" font-size="11" fill="#2c1810" font-weight="700">ŷ</text>
+      <text x="675" y="167" text-anchor="middle" font-size="9" fill="#c94f27">Output</text>
+      <!-- Connections: Input to H1 -->
+      <line x1="131" y1="70" x2="269" y2="90" stroke="#d97b34" stroke-width="1" opacity=".35" marker-end="url(#arr)"/>
+      <line x1="131" y1="70" x2="269" y2="170" stroke="#d97b34" stroke-width="1" opacity=".25"/>
+      <line x1="131" y1="70" x2="269" y2="240" stroke="#d97b34" stroke-width="1" opacity=".2"/>
+      <line x1="131" y1="150" x2="269" y2="90" stroke="#d97b34" stroke-width="1" opacity=".25"/>
+      <line x1="131" y1="150" x2="269" y2="170" stroke="#d97b34" stroke-width="1" opacity=".35" marker-end="url(#arr)"/>
+      <line x1="131" y1="150" x2="269" y2="240" stroke="#d97b34" stroke-width="1" opacity=".2"/>
+      <line x1="131" y1="230" x2="269" y2="90" stroke="#d97b34" stroke-width="1" opacity=".2"/>
+      <line x1="131" y1="230" x2="269" y2="170" stroke="#d97b34" stroke-width="1" opacity=".25"/>
+      <line x1="131" y1="230" x2="269" y2="240" stroke="#d97b34" stroke-width="1" opacity=".35" marker-end="url(#arr)"/>
+      <!-- Connections: H1 to H2 -->
+      <line x1="321" y1="90" x2="459" y2="110" stroke="#2d8a4e" stroke-width="1" opacity=".3" marker-end="url(#arr)"/>
+      <line x1="321" y1="90" x2="459" y2="200" stroke="#2d8a4e" stroke-width="1" opacity=".2"/>
+      <line x1="321" y1="170" x2="459" y2="110" stroke="#2d8a4e" stroke-width="1" opacity=".2"/>
+      <line x1="321" y1="170" x2="459" y2="200" stroke="#2d8a4e" stroke-width="1" opacity=".3" marker-end="url(#arr)"/>
+      <line x1="321" y1="240" x2="459" y2="110" stroke="#2d8a4e" stroke-width="1" opacity=".2"/>
+      <line x1="321" y1="240" x2="459" y2="200" stroke="#2d8a4e" stroke-width="1" opacity=".25"/>
+      <!-- Connections: H2 to Output -->
+      <line x1="511" y1="110" x2="645" y2="155" stroke="#8b5cf6" stroke-width="1.5" opacity=".4" marker-end="url(#arr)"/>
+      <line x1="511" y1="200" x2="645" y2="155" stroke="#8b5cf6" stroke-width="1.5" opacity=".4" marker-end="url(#arr)"/>
+      <!-- Labels -->
+      <text x="180" y="145" text-anchor="middle" font-size="9" fill="#d97b34" opacity=".7">w·x</text>
+      <text x="370" y="145" text-anchor="middle" font-size="9" fill="#2d8a4e" opacity=".7">weights</text>
+      <text x="558" y="145" text-anchor="middle" font-size="9" fill="#8b5cf6" opacity=".7">activation</text>
+    </svg>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h5>Input Layer</h5>
+        <p>Consists of units representing the input fields. Each unit corresponds to a specific feature or attribute of the problem being solved (e.g., X₁, X₂, X₃).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h5>Hidden Layer(s)</h5>
+        <p>Located between the input and output layers. Each hidden layer contains nodes/artificial neurons which process the input data. Nodes are interconnected with associated weights. A network with 2+ hidden layers is called a <strong>Deep Neural Network</strong>.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h5>Output Layer</h5>
+        <p>Consists of one or more units representing the target field(s). The output units generate the final predictions or outputs of the neural network (e.g., ŷ = predicted value).</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="note"><strong>📘 Deep Learning:</strong> An ANN with two or more hidden layers is known as a <strong>Deep Neural Network</strong>. Training such networks is called <strong>Deep Learning</strong>. The term "deep" refers to the number of hidden layers. A network with more than 3 layers total (including input and output) is considered a deep learning algorithm.</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 6.2 — COMPONENTS
+════════════════════════════════════════════ -->
+<section class="topic" id="components">
+<div class="container">
+  <div class="s-tag">Section 6.2</div>
+  <div class="s-title">Components of a Neural Network</div>
+  <div class="s-intro">
+    The key components of a neural network work together to process information, learn patterns, and generate predictions. Understanding each component is essential to understanding how neural networks are trained and optimized.
+  </div>
+
+  <!-- FLOWCHART: Components diagram -->
+  <div class="flowchart-wrap">
+    <h4>Neural Network Components — Overview Diagram</h4>
+    <svg viewBox="0 0 780 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:780px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="arr2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#d97b34" opacity=".8"/></marker>
+      </defs>
+      <!-- Neurons -->
+      <rect x="10" y="60" width="100" height="80" rx="12" fill="#fef3e2" stroke="#d97b34" stroke-width="2"/>
+      <text x="60" y="93" text-anchor="middle" font-size="11" fill="#d97b34" font-weight="700">🔵 Neurons</text>
+      <text x="60" y="110" text-anchor="middle" font-size="9" fill="#7a5c42">Process inputs,</text>
+      <text x="60" y="124" text-anchor="middle" font-size="9" fill="#7a5c42">apply activation</text>
+      <!-- Weights -->
+      <rect x="130" y="20" width="100" height="70" rx="12" fill="#f0fdf4" stroke="#2d8a4e" stroke-width="2"/>
+      <text x="180" y="50" text-anchor="middle" font-size="11" fill="#2d8a4e" font-weight="700">⚖️ Weights</text>
+      <text x="180" y="67" text-anchor="middle" font-size="9" fill="#7a5c42">Strength of</text>
+      <text x="180" y="81" text-anchor="middle" font-size="9" fill="#7a5c42">connections</text>
+      <!-- Bias -->
+      <rect x="130" y="110" width="100" height="70" rx="12" fill="#fdf4ff" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="180" y="140" text-anchor="middle" font-size="11" fill="#8b5cf6" font-weight="700">➕ Bias</text>
+      <text x="180" y="157" text-anchor="middle" font-size="9" fill="#7a5c42">Constant offset,</text>
+      <text x="180" y="170" text-anchor="middle" font-size="9" fill="#7a5c42">shift activation</text>
+      <!-- Activation -->
+      <rect x="260" y="60" width="110" height="80" rx="12" fill="#fff7ed" stroke="#f59e0b" stroke-width="2"/>
+      <text x="315" y="90" text-anchor="middle" font-size="11" fill="#d97706" font-weight="700">⚡ Activation</text>
+      <text x="315" y="107" text-anchor="middle" font-size="9" fill="#7a5c42">Sigmoid, Tanh,</text>
+      <text x="315" y="121" text-anchor="middle" font-size="9" fill="#7a5c42">ReLU functions</text>
+      <!-- Forward Propagation -->
+      <rect x="400" y="20" width="120" height="70" rx="12" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+      <text x="460" y="48" text-anchor="middle" font-size="11" fill="#2563eb" font-weight="700">→ Forward</text>
+      <text x="460" y="65" text-anchor="middle" font-size="9" fill="#7a5c42">Prop. Input →</text>
+      <text x="460" y="79" text-anchor="middle" font-size="9" fill="#7a5c42">Output + Loss</text>
+      <!-- Back Propagation -->
+      <rect x="400" y="110" width="120" height="70" rx="12" fill="#fff1f2" stroke="#c94f27" stroke-width="2"/>
+      <text x="460" y="138" text-anchor="middle" font-size="11" fill="#c94f27" font-weight="700">← Back Prop.</text>
+      <text x="460" y="155" text-anchor="middle" font-size="9" fill="#7a5c42">Adjust weights,</text>
+      <text x="460" y="169" text-anchor="middle" font-size="9" fill="#7a5c42">reduce error</text>
+      <!-- Learning Rule -->
+      <rect x="550" y="60" width="120" height="80" rx="12" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+      <text x="610" y="88" text-anchor="middle" font-size="11" fill="#059669" font-weight="700">📚 Learning</text>
+      <text x="610" y="105" text-anchor="middle" font-size="9" fill="#7a5c42">Gradient Descent</text>
+      <text x="610" y="119" text-anchor="middle" font-size="9" fill="#7a5c42">optimize weights</text>
+      <!-- Trained Model -->
+      <rect x="695" y="60" width="78" height="80" rx="12" fill="#fef3e2" stroke="#d97b34" stroke-width="2.5"/>
+      <text x="734" y="88" text-anchor="middle" font-size="11" fill="#d97b34" font-weight="700">✅ Model</text>
+      <text x="734" y="105" text-anchor="middle" font-size="9" fill="#7a5c42">Trained &amp;</text>
+      <text x="734" y="119" text-anchor="middle" font-size="9" fill="#7a5c42">Ready</text>
+      <!-- Arrows -->
+      <line x1="110" y1="100" x2="128" y2="65" stroke="#d97b34" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <line x1="110" y1="100" x2="128" y2="140" stroke="#d97b34" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <line x1="230" y1="55" x2="258" y2="88" stroke="#2d8a4e" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <line x1="230" y1="145" x2="258" y2="115" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <line x1="370" y1="100" x2="398" y2="60" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <line x1="370" y1="100" x2="398" y2="140" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <line x1="520" y1="55" x2="548" y2="90" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <line x1="520" y1="145" x2="548" y2="115" stroke="#c94f27" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <line x1="670" y1="100" x2="693" y2="100" stroke="#10b981" stroke-width="1.5" marker-end="url(#arr2)"/>
+    </svg>
+  </div>
+
+  <div class="ig">
+    <div class="ic">
+      <h4>1. Neurons (Nodes)</h4>
+      <ul>
+        <li>Fundamental building blocks of a neural network</li>
+        <li>Receive inputs from other neurons or external sources</li>
+        <li>Compute weighted sum of inputs, apply activation function</li>
+        <li>Produce an output passed to the next layer</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>2. Weights</h4>
+      <ul>
+        <li>Represent the strength of connections between neurons</li>
+        <li>Each connection (synapse) has an associated weight</li>
+        <li>Convey the importance of that feature in predicting the output</li>
+        <li>Network learns optimal weights during training to minimize error</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>3. Activation Functions</h4>
+      <ul>
+        <li>Act as decision-makers for each neuron</li>
+        <li>Decide whether a neuron should activate (send signal)</li>
+        <li>Types: Sigmoid, Tanh, ReLU (Rectified Linear Unit)</li>
+        <li>Add non-linearities, allowing networks to learn complex patterns</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>4. Bias</h4>
+      <ul>
+        <li>Constants added to the weighted sum before activation</li>
+        <li>Allow the network to shift the activation function horizontally</li>
+        <li>Help account for any inherent bias in the data</li>
+        <li>Every neuron has an associated bias term</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>5. Connections</h4>
+      <ul>
+        <li>Represent the synapses between neurons</li>
+        <li>Each connection has an associated weight determining its influence</li>
+        <li>Biases (constants) are also associated with each neuron</li>
+        <li>Together they define the network's decision boundary</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>6. Learning Rule</h4>
+      <ul>
+        <li>Specifies how weights and biases are adjusted during training</li>
+        <li>Backpropagation computes gradients and updates weights</li>
+        <li>Goal: minimize the network's prediction error</li>
+        <li>Common optimizer: Gradient Descent</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>7. Propagation Functions</h4>
+      <ul>
+        <li><strong>Forward Propagation:</strong> Input data flows through layers, activations computed, output compared to target (loss)</li>
+        <li><strong>Back Propagation:</strong> Gradients propagated backward to update weights using optimization algorithms (e.g., gradient descent)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- FLOWCHART: Forward vs Back Propagation -->
+  <div class="flowchart-wrap">
+    <h4>Forward Propagation vs. Back Propagation</h4>
+    <svg viewBox="0 0 760 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="fwd" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3b82f6"/></marker>
+        <marker id="bwd" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto"><polygon points="8 0,0 3,8 6" fill="#c94f27"/></marker>
+      </defs>
+      <!-- Boxes -->
+      <rect x="10" y="55" width="110" height="70" rx="10" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+      <text x="65" y="84" text-anchor="middle" font-size="11" fill="#2563eb" font-weight="700">Input Data</text>
+      <text x="65" y="101" text-anchor="middle" font-size="9" fill="#7a5c42">X₁, X₂, ... Xₙ</text>
+      <rect x="165" y="55" width="110" height="70" rx="10" fill="#f0fdf4" stroke="#2d8a4e" stroke-width="2"/>
+      <text x="220" y="84" text-anchor="middle" font-size="11" fill="#2d8a4e" font-weight="700">Hidden Layers</text>
+      <text x="220" y="101" text-anchor="middle" font-size="9" fill="#7a5c42">w·x + b → f(z)</text>
+      <rect x="320" y="55" width="110" height="70" rx="10" fill="#fff7ed" stroke="#f59e0b" stroke-width="2"/>
+      <text x="375" y="84" text-anchor="middle" font-size="11" fill="#d97706" font-weight="700">Output (ŷ)</text>
+      <text x="375" y="101" text-anchor="middle" font-size="9" fill="#7a5c42">Predicted value</text>
+      <rect x="475" y="55" width="110" height="70" rx="10" fill="#fff1f2" stroke="#c94f27" stroke-width="2"/>
+      <text x="530" y="84" text-anchor="middle" font-size="11" fill="#c94f27" font-weight="700">Loss / Error</text>
+      <text x="530" y="101" text-anchor="middle" font-size="9" fill="#7a5c42">ŷ vs. actual y</text>
+      <rect x="630" y="55" width="110" height="70" rx="10" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="685" y="84" text-anchor="middle" font-size="11" fill="#7c3aed" font-weight="700">Update Weights</text>
+      <text x="685" y="101" text-anchor="middle" font-size="9" fill="#7a5c42">via grad. descent</text>
+      <!-- Forward arrows (top) -->
+      <line x1="120" y1="75" x2="163" y2="75" stroke="#3b82f6" stroke-width="2" marker-end="url(#fwd)"/>
+      <line x1="275" y1="75" x2="318" y2="75" stroke="#3b82f6" stroke-width="2" marker-end="url(#fwd)"/>
+      <line x1="430" y1="75" x2="473" y2="75" stroke="#3b82f6" stroke-width="2" marker-end="url(#fwd)"/>
+      <line x1="585" y1="75" x2="628" y2="75" stroke="#3b82f6" stroke-width="2" marker-end="url(#fwd)"/>
+      <!-- Back arrows (bottom) -->
+      <line x1="628" y1="107" x2="587" y2="107" stroke="#c94f27" stroke-width="2" marker-end="url(#bwd)"/>
+      <line x1="473" y1="107" x2="432" y2="107" stroke="#c94f27" stroke-width="2" marker-end="url(#bwd)"/>
+      <line x1="318" y1="107" x2="277" y2="107" stroke="#c94f27" stroke-width="2" marker-end="url(#bwd)"/>
+      <!-- Labels -->
+      <text x="380" y="23" text-anchor="middle" font-size="11" fill="#3b82f6" font-weight="700">→ FORWARD PROPAGATION</text>
+      <text x="380" y="165" text-anchor="middle" font-size="11" fill="#c94f27" font-weight="700">← BACK PROPAGATION (Adjusts Weights)</text>
+    </svg>
+  </div>
+
+  <div class="warn"><strong>⚡ Backpropagation:</strong> Backpropagation (short for "backward propagation of errors") is an optimization algorithm used during neural network training. It adjusts the weights of the network based on the error (loss) obtained in the previous iteration (epoch). Proper tuning ensures lower error rates, making the model more reliable.</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 6.3 — WORKING OF A NEURAL NETWORK
+════════════════════════════════════════════ -->
+<section class="topic" id="working">
+<div class="container">
+  <div class="s-tag">Section 6.3</div>
+  <div class="s-title">Working of a Neural Network</div>
+  <div class="s-intro">
+    Imagine each node as a <strong>simple calculator</strong>. It takes input numbers, multiplies them by certain values (weights), adds them together, adds an extra number (bias), and then gives an output. This output is used as input for the next node in the network.
+  </div>
+
+  <!-- Formula -->
+  <div class="formula-box">
+    <div class="formula-label">Neuron Output Formula</div>
+    <div class="formula-eq">∑wᵢxᵢ + bias = w₁x₁ + w₂x₂ + w₃x₃ + bias</div>
+    <div class="formula-eq" style="margin-top:.5rem;">f(x) = 1,  if ∑wᵢxᵢ + b ≥ 0  (Activated)</div>
+    <div class="formula-eq">f(x) = 0,  if ∑wᵢxᵢ + b &lt; 0  (Inactive)</div>
+    <div class="formula-desc">Each input is assigned a weight to show its importance. The total is passed through an activation function to decide if the node should "fire" and pass data to the next layer.</div>
+  </div>
+
+  <!-- FLOWCHART: Single Neuron Computation -->
+  <div class="flowchart-wrap">
+    <h4>Single Neuron Computation Flow</h4>
+    <svg viewBox="0 0 760 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="arr3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#d97b34"/></marker>
+      </defs>
+      <!-- Inputs -->
+      <rect x="10" y="10" width="80" height="36" rx="8" fill="#fef3e2" stroke="#d97b34" stroke-width="1.5"/>
+      <text x="50" y="32" text-anchor="middle" font-size="11" fill="#2c1810" font-weight="600">x₁ = input</text>
+      <rect x="10" y="62" width="80" height="36" rx="8" fill="#fef3e2" stroke="#d97b34" stroke-width="1.5"/>
+      <text x="50" y="84" text-anchor="middle" font-size="11" fill="#2c1810" font-weight="600">x₂ = input</text>
+      <rect x="10" y="114" width="80" height="36" rx="8" fill="#fef3e2" stroke="#d97b34" stroke-width="1.5"/>
+      <text x="50" y="136" text-anchor="middle" font-size="11" fill="#2c1810" font-weight="600">x₃ = input</text>
+      <!-- Weights -->
+      <text x="145" y="26" text-anchor="middle" font-size="9" fill="#2d8a4e" font-weight="700">w₁</text>
+      <text x="145" y="78" text-anchor="middle" font-size="9" fill="#2d8a4e" font-weight="700">w₂</text>
+      <text x="145" y="130" text-anchor="middle" font-size="9" fill="#2d8a4e" font-weight="700">w₃</text>
+      <line x1="90" y1="28" x2="195" y2="80" stroke="#d97b34" stroke-width="1.5" marker-end="url(#arr3)"/>
+      <line x1="90" y1="80" x2="195" y2="80" stroke="#d97b34" stroke-width="1.5" marker-end="url(#arr3)"/>
+      <line x1="90" y1="132" x2="195" y2="80" stroke="#d97b34" stroke-width="1.5" marker-end="url(#arr3)"/>
+      <!-- Summation Node -->
+      <circle cx="220" cy="80" r="28" fill="#f0fdf4" stroke="#2d8a4e" stroke-width="2.5"/>
+      <text x="220" y="76" text-anchor="middle" font-size="14" fill="#2d8a4e" font-weight="900">Σ</text>
+      <text x="220" y="95" text-anchor="middle" font-size="8" fill="#2d8a4e">+bias</text>
+      <!-- Arrow -->
+      <line x1="248" y1="80" x2="290" y2="80" stroke="#2d8a4e" stroke-width="1.5" marker-end="url(#arr3)"/>
+      <text x="269" y="73" text-anchor="middle" font-size="8" fill="#7a5c42">z = Σwx+b</text>
+      <!-- Activation -->
+      <rect x="293" y="52" width="120" height="56" rx="12" fill="#fff7ed" stroke="#f59e0b" stroke-width="2"/>
+      <text x="353" y="76" text-anchor="middle" font-size="11" fill="#d97706" font-weight="700">Activation f(z)</text>
+      <text x="353" y="95" text-anchor="middle" font-size="9" fill="#7a5c42">Sigmoid / ReLU / Tanh</text>
+      <!-- Arrow -->
+      <line x1="413" y1="80" x2="455" y2="80" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arr3)"/>
+      <!-- Threshold Decision -->
+      <rect x="458" y="52" width="120" height="56" rx="12" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="518" y="76" text-anchor="middle" font-size="11" fill="#7c3aed" font-weight="700">Threshold</text>
+      <text x="518" y="95" text-anchor="middle" font-size="9" fill="#7a5c42">f(z) ≥ 0 → Output=1</text>
+      <!-- Arrow -->
+      <line x1="578" y1="80" x2="620" y2="80" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#arr3)"/>
+      <!-- Output -->
+      <rect x="623" y="52" width="110" height="56" rx="12" fill="#fff1f2" stroke="#c94f27" stroke-width="2"/>
+      <text x="678" y="76" text-anchor="middle" font-size="11" fill="#c94f27" font-weight="700">Output</text>
+      <text x="678" y="93" text-anchor="middle" font-size="9" fill="#7a5c42">0 (Inactive) / 1 (Fire)</text>
+    </svg>
+  </div>
+
+  <h3 class="sh">Worked Example — Case I: Inactive Neuron</h3>
+  <div class="case-box">
+    <h4>Problem: Simple Neural Network Calculation</h4>
+    <p>Given 3 input features with weights and a bias, determine the output of the hidden layer neuron.</p>
+    <div class="case-table">
+      <div class="case-cell"><div class="cc-label">Feature x₁</div><div class="cc-val">2</div></div>
+      <div class="case-cell"><div class="cc-label">Feature x₂</div><div class="cc-val">3</div></div>
+      <div class="case-cell"><div class="cc-label">Feature x₃</div><div class="cc-val">1</div></div>
+      <div class="case-cell"><div class="cc-label">Weight w₁</div><div class="cc-val">0.4</div></div>
+      <div class="case-cell"><div class="cc-label">Weight w₂</div><div class="cc-val">0.2</div></div>
+      <div class="case-cell"><div class="cc-label">Weight w₃</div><div class="cc-val">0.6</div></div>
+    </div>
+    <p>Bias = 0.1, Threshold = 3.0</p>
+    <div class="cb">
+      <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">neuron_calculation.py</span></div>
+      <pre><span class="cm"># Case I: Hidden Layer Neuron</span>
+x1, x2, x3 = <span class="nm">2</span>, <span class="nm">3</span>, <span class="nm">1</span>
+w1, w2, w3 = <span class="nm">0.4</span>, <span class="nm">0.2</span>, <span class="nm">0.6</span>
+bias = <span class="nm">0.1</span>
+threshold = <span class="nm">3.0</span>
+
+output = w1*x1 + w2*x2 + w3*x3 + bias
+<span class="cm"># = (0.4*2) + (0.2*3) + (0.6*1) + 0.1</span>
+<span class="cm"># = 0.8  +  0.6  +  0.6  + 0.1 = 2.1</span>
+<span class="fn2">print</span>(<span class="st">f"Output = {output}"</span>)  <span class="cm"># 2.1</span>
+
+<span class="kw">if</span> output >= threshold:
+    <span class="fn2">print</span>(<span class="st">"Neuron: ACTIVE (output = 1)"</span>)
+<span class="kw">else</span>:
+    <span class="fn2">print</span>(<span class="st">"Neuron: INACTIVE (output = 0)"</span>)
+<span class="cm"># 2.1 &lt; 3.0 → Output = 0 (INACTIVE)</span></pre>
+    </div>
+  </div>
+
+  <h3 class="sh">Real-World Example — Should You Go Surfing?</h3>
+  <p class="bd">Using the neural network concept to make a real-life decision based on three input factors, weights, and a bias.</p>
+
+  <!-- FLOWCHART: Surfing Decision Neural Network -->
+  <div class="flowchart-wrap">
+    <h4>Surfing Decision Neural Network</h4>
+    <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="arr4" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3b82f6"/></marker>
+      </defs>
+      <!-- Inputs -->
+      <rect x="10" y="15" width="145" height="46" rx="9" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+      <text x="82" y="35" text-anchor="middle" font-size="10" fill="#2563eb" font-weight="700">🌊 Wave Quality</text>
+      <text x="82" y="52" text-anchor="middle" font-size="9" fill="#7a5c42">X₁ = 1 (Good) | w₁ = 5</text>
+      <rect x="10" y="77" width="145" height="46" rx="9" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+      <text x="82" y="97" text-anchor="middle" font-size="10" fill="#2563eb" font-weight="700">👥 Crowd Level</text>
+      <text x="82" y="114" text-anchor="middle" font-size="9" fill="#7a5c42">X₂ = 0 (Crowded) | w₂ = 2</text>
+      <rect x="10" y="139" width="145" height="46" rx="9" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+      <text x="82" y="159" text-anchor="middle" font-size="10" fill="#2563eb" font-weight="700">🦈 Shark Activity</text>
+      <text x="82" y="176" text-anchor="middle" font-size="9" fill="#7a5c42">X₃ = 1 (No Shark) | w₃ = 4</text>
+      <!-- Arrows to neuron -->
+      <line x1="155" y1="38" x2="255" y2="100" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr4)"/>
+      <line x1="155" y1="100" x2="255" y2="100" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr4)"/>
+      <line x1="155" y1="162" x2="255" y2="100" stroke="#3b82f6" stroke-width="2" marker-end="url(#arr4)"/>
+      <!-- Computation -->
+      <rect x="258" y="62" width="150" height="76" rx="12" fill="#f0fdf4" stroke="#2d8a4e" stroke-width="2"/>
+      <text x="333" y="85" text-anchor="middle" font-size="10" fill="#2d8a4e" font-weight="700">Σ w·x + bias</text>
+      <text x="333" y="102" text-anchor="middle" font-size="9" fill="#7a5c42">(1×5)+(0×2)+(1×4)−3</text>
+      <text x="333" y="119" text-anchor="middle" font-size="9" fill="#7a5c42">= 5 + 0 + 4 − 3 = 6</text>
+      <line x1="408" y1="100" x2="450" y2="100" stroke="#2d8a4e" stroke-width="2" marker-end="url(#arr4)"/>
+      <!-- Threshold -->
+      <rect x="453" y="62" width="130" height="76" rx="12" fill="#fff7ed" stroke="#f59e0b" stroke-width="2"/>
+      <text x="518" y="85" text-anchor="middle" font-size="10" fill="#d97706" font-weight="700">Threshold = 3</text>
+      <text x="518" y="102" text-anchor="middle" font-size="9" fill="#7a5c42">ŷ = 6 &gt; 3</text>
+      <text x="518" y="119" text-anchor="middle" font-size="9" fill="#2d8a4e" font-weight="700">→ Output = 1</text>
+      <line x1="583" y1="100" x2="625" y2="100" stroke="#f59e0b" stroke-width="2" marker-end="url(#arr4)"/>
+      <!-- Result -->
+      <rect x="628" y="62" width="82" height="76" rx="12" fill="#f0fdf4" stroke="#2d8a4e" stroke-width="2.5"/>
+      <text x="669" y="90" text-anchor="middle" font-size="20">🏄</text>
+      <text x="669" y="112" text-anchor="middle" font-size="10" fill="#2d8a4e" font-weight="700">GO SURF!</text>
+      <text x="669" y="128" text-anchor="middle" font-size="9" fill="#7a5c42">ŷ = 1</text>
+    </svg>
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Factor</th><th>Input (X)</th><th>Weight (W)</th><th>W × X</th></tr></thead>
+      <tbody>
+        <tr><td>Wave Quality (Good waves?)</td><td>1 (Yes)</td><td>5</td><td>5</td></tr>
+        <tr><td>Lineup Congestion (Empty?)</td><td>0 (No)</td><td>2</td><td>0</td></tr>
+        <tr><td>Shark Activity (No attack?)</td><td>1 (Yes)</td><td>4</td><td>4</td></tr>
+        <tr><td><strong>Total ŷ = ΣW·X + bias</strong></td><td colspan="2"><strong>Threshold = 3, Bias = −3</strong></td><td><strong>5+0+4−3 = 6 → Go!</strong></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="hl"><strong>📌 Note:</strong> ŷ (y-hat) represents the predicted outcome. Since 6 &gt; threshold (3), output = 1 → You should go surfing! Adjusting the weights or threshold changes the decision.</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 6.4 — TYPES OF NEURAL NETWORKS
+════════════════════════════════════════════ -->
+<section class="topic" id="types">
+<div class="container">
+  <div class="s-tag">Section 6.4</div>
+  <div class="s-title">Types of Neural Networks</div>
+  <div class="s-intro">
+    Neural networks can be classified into different types, used for different purposes. Here are the most common types you will encounter and their key use cases.
+  </div>
+
+  <!-- FLOWCHART: NN Types Overview -->
+  <div class="flowchart-wrap">
+    <h4>Neural Network Types — Classification Tree</h4>
+    <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto;">
+      <!-- Root -->
+      <rect x="295" y="8" width="170" height="44" rx="10" fill="#fef3e2" stroke="#d97b34" stroke-width="2.5"/>
+      <text x="380" y="26" text-anchor="middle" font-size="11" fill="#d97b34" font-weight="700">Neural Networks</text>
+      <text x="380" y="43" text-anchor="middle" font-size="9" fill="#7a5c42">All types &amp; architectures</text>
+      <!-- Branch lines from root -->
+      <line x1="340" y1="52" x2="80" y2="110" stroke="#d97b34" stroke-width="1.5"/>
+      <line x1="355" y1="52" x2="210" y2="110" stroke="#d97b34" stroke-width="1.5"/>
+      <line x1="380" y1="52" x2="380" y2="110" stroke="#d97b34" stroke-width="1.5"/>
+      <line x1="405" y1="52" x2="545" y2="110" stroke="#d97b34" stroke-width="1.5"/>
+      <line x1="420" y1="52" x2="680" y2="110" stroke="#d97b34" stroke-width="1.5"/>
+      <!-- Perceptron -->
+      <rect x="15" y="110" width="130" height="95" rx="10" fill="#fff7ed" stroke="#f59e0b" stroke-width="2"/>
+      <text x="80" y="132" text-anchor="middle" font-size="10" fill="#d97706" font-weight="700">Perceptron</text>
+      <text x="80" y="150" text-anchor="middle" font-size="8" fill="#7a5c42">Single layer, TLU</text>
+      <text x="80" y="165" text-anchor="middle" font-size="8" fill="#7a5c42">Binary classification</text>
+      <text x="80" y="180" text-anchor="middle" font-size="8" fill="#7a5c42">Created: 1958</text>
+      <text x="80" y="196" text-anchor="middle" font-size="8" fill="#d97706">Spam detection</text>
+      <!-- FFNN -->
+      <rect x="155" y="110" width="130" height="95" rx="10" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+      <text x="220" y="132" text-anchor="middle" font-size="10" fill="#2563eb" font-weight="700">FFNN / MLP</text>
+      <text x="220" y="150" text-anchor="middle" font-size="8" fill="#7a5c42">Multi-layer perceptron</text>
+      <text x="220" y="165" text-anchor="middle" font-size="8" fill="#7a5c42">Forward data flow only</text>
+      <text x="220" y="180" text-anchor="middle" font-size="8" fill="#7a5c42">Handles noisy data</text>
+      <text x="220" y="196" text-anchor="middle" font-size="8" fill="#2563eb">NLP, Image recognition</text>
+      <!-- CNN -->
+      <rect x="315" y="110" width="130" height="95" rx="10" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+      <text x="380" y="132" text-anchor="middle" font-size="10" fill="#059669" font-weight="700">CNN</text>
+      <text x="380" y="150" text-anchor="middle" font-size="8" fill="#7a5c42">Convolutional filters</text>
+      <text x="380" y="165" text-anchor="middle" font-size="8" fill="#7a5c42">3D neuron structure</text>
+      <text x="380" y="180" text-anchor="middle" font-size="8" fill="#7a5c42">Extract visual features</text>
+      <text x="380" y="196" text-anchor="middle" font-size="8" fill="#059669">Computer Vision</text>
+      <!-- RNN -->
+      <rect x="480" y="110" width="130" height="95" rx="10" fill="#fdf4ff" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="545" y="132" text-anchor="middle" font-size="10" fill="#7c3aed" font-weight="700">RNN</text>
+      <text x="545" y="150" text-anchor="middle" font-size="8" fill="#7a5c42">Feedback loops</text>
+      <text x="545" y="165" text-anchor="middle" font-size="8" fill="#7a5c42">Sequential data</text>
+      <text x="545" y="180" text-anchor="middle" font-size="8" fill="#7a5c42">Memory across time</text>
+      <text x="545" y="196" text-anchor="middle" font-size="8" fill="#7c3aed">NLP, Speech, Chatbots</text>
+      <!-- GAN -->
+      <rect x="615" y="110" width="130" height="95" rx="10" fill="#fff1f2" stroke="#ec4899" stroke-width="2"/>
+      <text x="680" y="132" text-anchor="middle" font-size="10" fill="#db2777" font-weight="700">GAN</text>
+      <text x="680" y="150" text-anchor="middle" font-size="8" fill="#7a5c42">Generator + Discriminator</text>
+      <text x="680" y="165" text-anchor="middle" font-size="8" fill="#7a5c42">Unsupervised learning</text>
+      <text x="680" y="180" text-anchor="middle" font-size="8" fill="#7a5c42">Creates new data</text>
+      <text x="680" y="196" text-anchor="middle" font-size="8" fill="#db2777">Image gen, Style transfer</text>
+    </svg>
+  </div>
+
+  <div class="nn-grid">
+    <!-- Perceptron -->
+    <div class="nn-card nn-perceptron">
+      <div class="nn-icon">⚡</div>
+      <div class="nn-tag">6.4.1 · Standard Neural Network</div>
+      <h4>Perceptron</h4>
+      <p>The perceptron, created by <strong>Frank Rosenblatt in 1958</strong>, is a simple neural network with a single layer of input nodes fully connected to a layer of output nodes. It uses <strong>Threshold Logic Units (TLUs)</strong> as artificial neurons.</p>
+      <div class="nn-app">🎯 Application: Binary classification, spam detection, basic decision-making</div>
+    </div>
+
+    <!-- FFNN -->
+    <div class="nn-card nn-ffnn">
+      <div class="nn-icon">→</div>
+      <div class="nn-tag">6.4.2 · Feed Forward Neural Network</div>
+      <h4>FFNN / Multi-Layer Perceptron (MLP)</h4>
+      <p>FFNNs have an input layer, one or more hidden layers, and an output layer. <strong>Data flows only in one direction</strong> — from input to output. They use activation functions and weights to process information forward. Efficient for handling noisy data and relatively straightforward to implement.</p>
+      <div class="nn-app">🎯 Application: Image recognition, NLP, regression tasks</div>
+    </div>
+
+    <!-- CNN -->
+    <div class="nn-card nn-cnn">
+      <div class="nn-icon">🔬</div>
+      <div class="nn-tag">6.4.3 · Convolutional Neural Network</div>
+      <h4>CNN</h4>
+      <p>CNNs utilize <strong>filters to extract features from images</strong>, enabling robust recognition of patterns and objects. They incorporate a <strong>three-dimensional arrangement of neurons</strong> particularly effective for processing visual data.</p>
+      <div class="nn-app">🎯 Application: Object detection, image recognition, style transfer, medical imaging</div>
+    </div>
+
+    <!-- RNN -->
+    <div class="nn-card nn-rnn">
+      <div class="nn-icon">🔁</div>
+      <div class="nn-tag">6.4.4 · Recurrent Neural Network</div>
+      <h4>RNN</h4>
+      <p>RNNs are designed for <strong>sequential data</strong> and feature feedback loops to allow <strong>information persistence across time steps</strong>. If the prediction is wrong, the learning rate makes small adjustments, gradually improving prediction during backpropagation.</p>
+      <div class="nn-app">🎯 Application: Language modeling, machine translation, chatbots, speech recognition, time series</div>
+    </div>
+
+    <!-- GAN -->
+    <div class="nn-card nn-gan">
+      <div class="nn-icon">🎨</div>
+      <div class="nn-tag">6.4.5 · Generative Adversarial Network</div>
+      <h4>GAN</h4>
+      <p>GANs consist of <strong>two neural networks</strong> — a <em>generator</em> (creates new data instances) and a <em>discriminator</em> (evaluates authenticity) — trained simultaneously. Used for unsupervised learning and generating realistic synthetic data.</p>
+      <div class="nn-app">🎯 Application: Image generation, style transfer, data augmentation</div>
+    </div>
+  </div>
+
+  <!-- FLOWCHART: CNN vs RNN comparison -->
+  <div class="flowchart-wrap">
+    <h4>CNN vs RNN — Architecture Comparison</h4>
+    <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:760px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="arr5" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#10b981"/></marker>
+        <marker id="arr6" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8b5cf6"/></marker>
+      </defs>
+      <!-- CNN side -->
+      <text x="185" y="18" text-anchor="middle" font-size="12" fill="#059669" font-weight="700">CNN (Spatial Data)</text>
+      <rect x="10" y="28" width="70" height="50" rx="8" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+      <text x="45" y="50" text-anchor="middle" font-size="9" fill="#059669" font-weight="700">Input</text>
+      <text x="45" y="65" text-anchor="middle" font-size="8" fill="#7a5c42">Image</text>
+      <line x1="80" y1="53" x2="100" y2="53" stroke="#10b981" stroke-width="2" marker-end="url(#arr5)"/>
+      <rect x="103" y="28" width="80" height="50" rx="8" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+      <text x="143" y="50" text-anchor="middle" font-size="9" fill="#059669" font-weight="700">Conv Layer</text>
+      <text x="143" y="65" text-anchor="middle" font-size="8" fill="#7a5c42">Filter features</text>
+      <line x1="183" y1="53" x2="203" y2="53" stroke="#10b981" stroke-width="2" marker-end="url(#arr5)"/>
+      <rect x="206" y="28" width="80" height="50" rx="8" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+      <text x="246" y="50" text-anchor="middle" font-size="9" fill="#059669" font-weight="700">Pooling</text>
+      <text x="246" y="65" text-anchor="middle" font-size="8" fill="#7a5c42">Downsample</text>
+      <line x1="286" y1="53" x2="306" y2="53" stroke="#10b981" stroke-width="2" marker-end="url(#arr5)"/>
+      <rect x="309" y="28" width="80" height="50" rx="8" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+      <text x="349" y="50" text-anchor="middle" font-size="9" fill="#059669" font-weight="700">FC Layer</text>
+      <text x="349" y="65" text-anchor="middle" font-size="8" fill="#7a5c42">Classify</text>
+      <line x1="389" y1="53" x2="409" y2="53" stroke="#10b981" stroke-width="2" marker-end="url(#arr5)"/>
+      <rect x="412" y="28" width="70" height="50" rx="8" fill="#f0fdf4" stroke="#10b981" stroke-width="2.5"/>
+      <text x="447" y="50" text-anchor="middle" font-size="9" fill="#059669" font-weight="700">Output</text>
+      <text x="447" y="65" text-anchor="middle" font-size="8" fill="#7a5c42">Label</text>
+      <!-- RNN side -->
+      <text x="185" y="118" text-anchor="middle" font-size="12" fill="#7c3aed" font-weight="700">RNN (Sequential Data)</text>
+      <rect x="10" y="128" width="70" height="50" rx="8" fill="#fdf4ff" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="45" y="150" text-anchor="middle" font-size="9" fill="#7c3aed" font-weight="700">Input t₁</text>
+      <text x="45" y="165" text-anchor="middle" font-size="8" fill="#7a5c42">Word/Token</text>
+      <line x1="80" y1="153" x2="100" y2="153" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arr6)"/>
+      <rect x="103" y="128" width="80" height="50" rx="8" fill="#fdf4ff" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="143" y="150" text-anchor="middle" font-size="9" fill="#7c3aed" font-weight="700">Hidden State</text>
+      <text x="143" y="165" text-anchor="middle" font-size="8" fill="#7a5c42">h₁ (memory)</text>
+      <line x1="183" y1="153" x2="203" y2="153" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arr6)"/>
+      <rect x="206" y="128" width="80" height="50" rx="8" fill="#fdf4ff" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="246" y="150" text-anchor="middle" font-size="9" fill="#7c3aed" font-weight="700">Hidden State</text>
+      <text x="246" y="165" text-anchor="middle" font-size="8" fill="#7a5c42">h₂ (memory)</text>
+      <line x1="286" y1="153" x2="306" y2="153" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arr6)"/>
+      <rect x="309" y="128" width="80" height="50" rx="8" fill="#fdf4ff" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="349" y="150" text-anchor="middle" font-size="9" fill="#7c3aed" font-weight="700">Hidden State</text>
+      <text x="349" y="165" text-anchor="middle" font-size="8" fill="#7a5c42">h₃ (memory)</text>
+      <line x1="389" y1="153" x2="409" y2="153" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arr6)"/>
+      <rect x="412" y="128" width="70" height="50" rx="8" fill="#fdf4ff" stroke="#8b5cf6" stroke-width="2.5"/>
+      <text x="447" y="150" text-anchor="middle" font-size="9" fill="#7c3aed" font-weight="700">Output</text>
+      <text x="447" y="165" text-anchor="middle" font-size="8" fill="#7a5c42">Prediction</text>
+      <!-- Feedback loop for RNN -->
+      <path d="M 143 178 Q 143 195 246 195 Q 349 195 349 178" stroke="#8b5cf6" stroke-width="1.5" fill="none" stroke-dasharray="5,3"/>
+      <text x="246" y="193" text-anchor="middle" font-size="8" fill="#7c3aed">feedback loop (memory)</text>
+    </svg>
+  </div>
+
+  <!-- FFNN vs RNN Comparison Table -->
+  <h3 class="sh">FFNN vs RNN — Key Differences</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Feature</th><th>Feedforward NN (FFNN)</th><th>Recurrent NN (RNN)</th></tr></thead>
+      <tbody>
+        <tr><td>Data Flow</td><td>One direction only (input → output)</td><td>Bidirectional (includes feedback loops)</td></tr>
+        <tr><td>Memory</td><td>No memory of previous inputs</td><td>Retains memory across time steps</td></tr>
+        <tr><td>Best For</td><td>Static data: images, tabular data</td><td>Sequential data: text, speech, time series</td></tr>
+        <tr><td>Architecture</td><td>Input → Hidden → Output layers</td><td>Loops allow data to persist over time</td></tr>
+        <tr><td>Applications</td><td>Image recognition, regression</td><td>Machine translation, chatbots, speech recognition</td></tr>
+        <tr><td>Complexity</td><td>Simpler to train</td><td>More complex, prone to vanishing gradient</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 6.5 — FUTURE & SOCIETY
+════════════════════════════════════════════ -->
+<section class="topic" id="future">
+<div class="container">
+  <div class="s-tag">Section 6.5</div>
+  <div class="s-title">Future of Neural Networks & Impact on Society</div>
+  <div class="s-intro">
+    The widespread integration of neural networks has <strong>revolutionized society across various domains</strong>. These sophisticated algorithms have significantly enhanced efficiency and productivity, personalized products and services, and spurred economic growth — while also raising important ethical concerns.
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="icon">🏭</div><h4>Industry Automation</h4><p>Neural networks automate tasks, streamline processes, and optimize resource allocation in industries ranging from manufacturing to finance, significantly enhancing efficiency and productivity.</p></div>
+    <div class="card"><div class="icon">🎯</div><h4>Personalization</h4><p>By analysing vast datasets, neural networks deliver tailored recommendations and experiences catering to individual preferences — from Netflix suggestions to personalized medicine.</p></div>
+    <div class="card"><div class="icon">📈</div><h4>Economic Growth</h4><p>Adoption of neural networks has spurred innovation, driven economic growth, and created new job opportunities in data science, AI engineering, and related fields.</p></div>
+    <div class="card"><div class="icon">⚠️</div><h4>Ethical Concerns</h4><p>Data privacy, algorithmic bias, and job displacement highlight the need for careful consideration and regulation to ensure neural networks serve the collective well-being of society.</p></div>
+  </div>
+
+  <!-- FLOWCHART: 4 ways NNs help AI grow -->
+  <div class="flowchart-wrap">
+    <h4>4 Ways Neural Networks Help AI Grow</h4>
+    <svg viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto;">
+      <!-- Center -->
+      <circle cx="360" cy="90" r="48" fill="#fef3e2" stroke="#d97b34" stroke-width="3"/>
+      <text x="360" y="85" text-anchor="middle" font-size="12" fill="#d97b34" font-weight="700">Neural</text>
+      <text x="360" y="102" text-anchor="middle" font-size="12" fill="#d97b34" font-weight="700">Networks</text>
+      <!-- 1 Pattern Recognition -->
+      <rect x="20" y="10" width="130" height="55" rx="10" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+      <text x="85" y="32" text-anchor="middle" font-size="10" fill="#2563eb" font-weight="700">1. Pattern</text>
+      <text x="85" y="48" text-anchor="middle" font-size="9" fill="#7a5c42">Recognition in vast</text>
+      <text x="85" y="62" text-anchor="middle" font-size="9" fill="#7a5c42">complex datasets</text>
+      <line x1="150" y1="37" x2="314" y2="76" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <!-- 2 Decision Making -->
+      <rect x="20" y="115" width="130" height="55" rx="10" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+      <text x="85" y="137" text-anchor="middle" font-size="10" fill="#059669" font-weight="700">2. Decision Making</text>
+      <text x="85" y="153" text-anchor="middle" font-size="9" fill="#7a5c42">Autonomous choices</text>
+      <text x="85" y="167" text-anchor="middle" font-size="9" fill="#7a5c42">from learned data</text>
+      <line x1="150" y1="142" x2="314" y2="104" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <!-- 3 Data Generation -->
+      <rect x="570" y="10" width="130" height="55" rx="10" fill="#fdf4ff" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="635" y="32" text-anchor="middle" font-size="10" fill="#7c3aed" font-weight="700">3. Data Generation</text>
+      <text x="635" y="48" text-anchor="middle" font-size="9" fill="#7a5c42">GANs create new</text>
+      <text x="635" y="62" text-anchor="middle" font-size="9" fill="#7a5c42">synthetic data</text>
+      <line x1="570" y1="37" x2="406" y2="76" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <!-- 4 Transfer Learning -->
+      <rect x="570" y="115" width="130" height="55" rx="10" fill="#fff1f2" stroke="#ec4899" stroke-width="2"/>
+      <text x="635" y="137" text-anchor="middle" font-size="10" fill="#db2777" font-weight="700">4. Transfer Learning</text>
+      <text x="635" y="153" text-anchor="middle" font-size="9" fill="#7a5c42">Reuse knowledge</text>
+      <text x="635" y="167" text-anchor="middle" font-size="9" fill="#7a5c42">across domains</text>
+      <line x1="570" y1="142" x2="406" y2="104" stroke="#ec4899" stroke-width="1.5" stroke-dasharray="4,3"/>
+    </svg>
+  </div>
+
+  <div class="warn"><strong>⚖️ Ethical Considerations:</strong> As neural networks become more powerful, issues like <strong>data privacy</strong> (who owns your data?), <strong>algorithmic bias</strong> (are models fair to all groups?), and <strong>job displacement</strong> (automation replacing human workers) require careful regulation and ethical AI development practices.</div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     SECTION 6.6 — PRACTICAL ACTIVITIES
+════════════════════════════════════════════ -->
+<section class="topic" id="activities">
+<div class="container">
+  <div class="s-tag">Section 6.6</div>
+  <div class="s-title">Practical Activities</div>
+  <div class="s-intro">
+    Hands-on activities to reinforce neural network concepts through interactive tools and Python programming. Activities range from beginner-friendly visual tools to advanced Python coding with TensorFlow.
+  </div>
+
+  <!-- Activity 1 -->
+  <div class="activity">
+    <div class="activity-hdr">
+      <span class="activity-badge">Activity 1</span>
+      <span>Machine Learning for Kids — Animal & Bird Identification</span>
+    </div>
+    <p class="bd">Visit: <strong>https://machinelearningforkids.co.uk/</strong></p>
+    <ol>
+      <li><strong>Create a project:</strong> Select "Identifying Animals & Birds" as your problem type</li>
+      <li><strong>Add Labels & Contents:</strong> Add training examples for each animal/bird category</li>
+      <li><strong>Train the content:</strong> Click Train and wait for the model to learn</li>
+      <li><strong>Test it:</strong> Try new images and see how well the model classifies them</li>
+      <li><strong>Explore Neural Network:</strong> Click "Describe your model" to view the neural network structure automatically generated</li>
+      <li><strong>Deep Learning steps:</strong> Click Next to see step-by-step how Deep Learning works behind the scenes</li>
+    </ol>
+  </div>
+
+  <!-- Activity 2 -->
+  <div class="activity">
+    <div class="activity-hdr">
+      <span class="activity-badge">Activity 2</span>
+      <span>TensorFlow — Celsius to Fahrenheit Conversion</span>
+    </div>
+    <p class="bd"><strong>Problem:</strong> Train a neural network to learn the formula f = c × 1.8 + 32 <em>without</em> explicitly programming it — only from example data.</p>
+  </div>
+
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">celsius_to_fahrenheit.py</span></div>
+    <pre><span class="cm"># Activity 2: Celsius → Fahrenheit with TensorFlow</span>
+<span class="kw">import</span> tensorflow <span class="kw">as</span> tf
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+<span class="cm"># ── Training Data ──────────────────────────────────</span>
+c = np.array([<span class="nm">-40</span>, <span class="nm">-10</span>, <span class="nm">0</span>, <span class="nm">8</span>, <span class="nm">15</span>, <span class="nm">22</span>, <span class="nm">38</span>], dtype=<span class="cl">float</span>)
+f = np.array([<span class="nm">-40</span>, <span class="nm">14</span>, <span class="nm">32</span>, <span class="nm">46</span>, <span class="nm">59</span>, <span class="nm">72</span>, <span class="nm">100</span>], dtype=<span class="cl">float</span>)
+
+<span class="cm"># ── Create Model ───────────────────────────────────</span>
+<span class="cm"># Single layer, single neuron — problem is simple</span>
+model = tf.keras.<span class="cl">Sequential</span>([
+    tf.keras.layers.<span class="cl">Dense</span>(
+        units=<span class="nm">1</span>,
+        input_shape=[<span class="nm">1</span>]   <span class="cm"># Single input value (Celsius)</span>
+    )
+])
+
+<span class="cm"># ── Compile Model ──────────────────────────────────</span>
+<span class="cm"># loss: measures how far predictions are from actual values</span>
+<span class="cm"># optimizer: adjusts weights to reduce the loss</span>
+model.<span class="fn2">compile</span>(
+    loss=<span class="st">'mean_squared_error'</span>,
+    optimizer=tf.keras.optimizers.<span class="cl">Adam</span>(<span class="nm">0.1</span>),
+    metrics=[<span class="st">'mean_squared_error'</span>]
+)
+
+<span class="cm"># ── Train Model ────────────────────────────────────</span>
+history = model.<span class="fn2">fit</span>(c, f, epochs=<span class="nm">500</span>, verbose=<span class="cl">False</span>)
+<span class="fn2">print</span>(<span class="st">"✅ Finished training the model"</span>)
+
+<span class="cm"># ── Training Loss Graph ─────────────────────────── </span>
+plt.<span class="fn2">xlabel</span>(<span class="st">'Epoch Number'</span>)
+plt.<span class="fn2">ylabel</span>(<span class="st">'Loss Magnitude'</span>)
+plt.<span class="fn2">plot</span>(history.history[<span class="st">'loss'</span>])
+plt.<span class="fn2">title</span>(<span class="st">'Training Loss over Epochs'</span>)
+plt.<span class="fn2">show</span>()
+
+<span class="cm"># ── Predict Values ──────────────────────────────── </span>
+predicted = model.<span class="fn2">predict</span>(np.array([<span class="nm">100.0</span>]))
+<span class="fn2">print</span>(<span class="st">f"NN prediction for 100°C: {predicted[0][0]:.2f}°F"</span>)
+
+<span class="cm"># ── Compare with Formula ────────────────────────── </span>
+f_formula = (<span class="nm">100</span> * <span class="nm">1.8</span>) + <span class="nm">32</span>
+<span class="fn2">print</span>(<span class="st">f"Formula result for 100°C: {f_formula}°F"</span>)  <span class="cm"># 212.0</span></pre>
+  </div>
+
+  <!-- Activity 3 -->
+  <div class="activity">
+    <div class="activity-hdr">
+      <span class="activity-badge">Activity 3 ★ Advanced</span>
+      <span>Full ANN with Python — Celsius to Fahrenheit from CSV</span>
+    </div>
+    <p class="bd">Create and train a multi-layer ANN using TensorFlow and Keras to predict Fahrenheit temperatures from a CSV dataset.</p>
+  </div>
+
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">ann_celsius_fahrenheit.py</span></div>
+    <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">import</span> tensorflow <span class="kw">as</span> tf
+
+<span class="cm"># ── Step 1: Load Dataset ────────────────────────── </span>
+temp_df = pd.<span class="fn2">read_csv</span>(<span class="st">'cel_fah.csv'</span>)
+<span class="fn2">print</span>(temp_df.<span class="fn2">head</span>())
+
+<span class="cm"># ── Step 2: Visualise Data ──────────────────────── </span>
+plt.<span class="fn2">scatter</span>(temp_df[<span class="st">'Celsius'</span>], temp_df[<span class="st">'Fahrenheit'</span>])
+plt.<span class="fn2">xlabel</span>(<span class="st">'Celsius'</span>); plt.<span class="fn2">ylabel</span>(<span class="st">'Fahrenheit'</span>)
+plt.<span class="fn2">title</span>(<span class="st">'Celsius vs Fahrenheit'</span>); plt.<span class="fn2">show</span>()
+
+<span class="cm"># ── Step 3: Assign Variables ────────────────────── </span>
+X_train = temp_df[<span class="st">'Celsius'</span>]
+y_train = temp_df[<span class="st">'Fahrenheit'</span>]
+
+<span class="cm"># ── Step 4: Define Sequential ANN ──────────────── </span>
+model = tf.keras.<span class="cl">Sequential</span>()
+<span class="cm"># Input layer → First hidden layer (32 nodes)</span>
+model.<span class="fn2">add</span>(tf.keras.layers.<span class="cl">Dense</span>(units=<span class="nm">32</span>, input_shape=(<span class="nm">1</span>,)))
+<span class="cm"># Second hidden layer (32 nodes)</span>
+model.<span class="fn2">add</span>(tf.keras.layers.<span class="cl">Dense</span>(units=<span class="nm">32</span>))
+<span class="cm"># Output layer (1 node)</span>
+model.<span class="fn2">add</span>(tf.keras.layers.<span class="cl">Dense</span>(units=<span class="nm">1</span>))
+
+<span class="cm"># ── Step 5: Model Summary ───────────────────────── </span>
+<span class="cm"># Shows: layer order, output shapes, number of parameters</span>
+model.<span class="fn2">summary</span>()
+
+<span class="cm"># ── Step 6: Compile ─────────────────────────────── </span>
+model.<span class="fn2">compile</span>(
+    optimizer=tf.keras.optimizers.<span class="cl">Adam</span>(<span class="nm">.1</span>),
+    loss=<span class="st">'mean_squared_error'</span>
+)
+
+<span class="cm"># ── Step 7: Train (30 epochs, 20% validation) ───── </span>
+epochs_hist = model.<span class="fn2">fit</span>(X_train, y_train,
+                        epochs=<span class="nm">30</span>,
+                        validation_split=<span class="nm">0.2</span>)
+
+<span class="cm"># ── Step 8: Predict (Deployment) ────────────────── </span>
+Temp_C = <span class="cl">float</span>(<span class="fn2">input</span>(<span class="st">"Enter temperature in Celsius: "</span>))
+Temp_F = model.<span class="fn2">predict</span>(np.array([Temp_C]))
+<span class="fn2">print</span>(<span class="st">f"Fahrenheit (ANN)  = {Temp_F[0][0]:.2f}"</span>)
+<span class="fn2">print</span>(<span class="st">f"Fahrenheit (formula) = {Temp_C * 1.8 + 32}"</span>)</pre>
+  </div>
+
+  <!-- FLOWCHART: ANN Architecture Activity 3 -->
+  <div class="flowchart-wrap">
+    <h4>ANN Architecture — Activity 3 (Celsius → Fahrenheit)</h4>
+    <svg viewBox="0 0 720 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:720px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="arr7" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#d97b34"/></marker>
+      </defs>
+      <rect x="10" y="45" width="100" height="60" rx="10" fill="#fef3e2" stroke="#d97b34" stroke-width="2"/>
+      <text x="60" y="68" text-anchor="middle" font-size="10" fill="#d97b34" font-weight="700">Input</text>
+      <text x="60" y="83" text-anchor="middle" font-size="9" fill="#7a5c42">1 neuron</text>
+      <text x="60" y="97" text-anchor="middle" font-size="8" fill="#7a5c42">Celsius value</text>
+      <line x1="110" y1="75" x2="148" y2="75" stroke="#d97b34" stroke-width="2" marker-end="url(#arr7)"/>
+      <rect x="151" y="25" width="140" height="100" rx="10" fill="#f0fdf4" stroke="#2d8a4e" stroke-width="2"/>
+      <text x="221" y="50" text-anchor="middle" font-size="10" fill="#2d8a4e" font-weight="700">Hidden Layer 1</text>
+      <text x="221" y="67" text-anchor="middle" font-size="9" fill="#7a5c42">32 neurons, Dense</text>
+      <text x="221" y="82" text-anchor="middle" font-size="8" fill="#7a5c42">input_shape=(1,)</text>
+      <text x="221" y="100" text-anchor="middle" font-size="8" fill="#7a5c42">ReLU activation</text>
+      <line x1="291" y1="75" x2="329" y2="75" stroke="#2d8a4e" stroke-width="2" marker-end="url(#arr7)"/>
+      <rect x="332" y="25" width="140" height="100" rx="10" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="402" y="50" text-anchor="middle" font-size="10" fill="#7c3aed" font-weight="700">Hidden Layer 2</text>
+      <text x="402" y="67" text-anchor="middle" font-size="9" fill="#7a5c42">32 neurons, Dense</text>
+      <text x="402" y="82" text-anchor="middle" font-size="8" fill="#7a5c42">Learns complex</text>
+      <text x="402" y="97" text-anchor="middle" font-size="8" fill="#7a5c42">relationships</text>
+      <line x1="472" y1="75" x2="510" y2="75" stroke="#8b5cf6" stroke-width="2" marker-end="url(#arr7)"/>
+      <rect x="513" y="45" width="100" height="60" rx="10" fill="#fff1f2" stroke="#c94f27" stroke-width="2"/>
+      <text x="563" y="68" text-anchor="middle" font-size="10" fill="#c94f27" font-weight="700">Output</text>
+      <text x="563" y="83" text-anchor="middle" font-size="9" fill="#7a5c42">1 neuron</text>
+      <text x="563" y="97" text-anchor="middle" font-size="8" fill="#7a5c42">Fahrenheit</text>
+      <line x1="613" y1="75" x2="653" y2="75" stroke="#c94f27" stroke-width="2" marker-end="url(#arr7)"/>
+      <rect x="656" y="45" width="54" height="60" rx="10" fill="#fef3e2" stroke="#d97b34" stroke-width="2.5"/>
+      <text x="683" y="72" text-anchor="middle" font-size="11">🌡️</text>
+      <text x="683" y="90" text-anchor="middle" font-size="8" fill="#d97b34" font-weight="700">°F Output</text>
+    </svg>
+  </div>
+
+  <!-- Activity 4 -->
+  <div class="activity">
+    <div class="activity-hdr">
+      <span class="activity-badge">Activity 4</span>
+      <span>TensorFlow Playground — Interactive Neural Network</span>
+    </div>
+    <p class="bd">Visit: <strong>https://playground.tensorflow.org</strong> — a JavaScript web app where a real neural network runs in your browser.</p>
+    <ol>
+      <li><strong>Select Dataset:</strong> Choose "Exclusive OR (XOR)" classification problem</li>
+      <li><strong>Set Ratio:</strong> Training/test data to 60% (60% train, 40% testing)</li>
+      <li><strong>Add Noise:</strong> Set noise to 5, batch size to 10</li>
+      <li><strong>Simple Features:</strong> Select only X₁ and X₂ — note the Training &amp; Test losses</li>
+      <li><strong>Add Feature:</strong> Add product (X₁×X₂) — observe how losses decrease and steps reduce</li>
+      <li><strong>Learning Rate:</strong> Set to 0.03 — observe how it affects training speed</li>
+      <li><strong>Hidden Layers:</strong> Add 2 hidden layers: 4 neurons in L1, 2 neurons in L2, then output</li>
+      <li><strong>Observe:</strong> The weights (line thickness) and how they pass through hidden layers to produce final output</li>
+    </ol>
+  </div>
+
+  <!-- TF Playground Key Terms Table -->
+  <h3 class="sh">TensorFlow Playground — Key Terms</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Term</th><th>Meaning</th><th>Available Options</th></tr></thead>
+      <tbody>
+        <tr><td>Data</td><td>6 pre-loaded datasets (Circle, XOR, Gaussian, Spiral, Plane, Multi-Gaussian). First 4 = classification; last 2 = regression</td><td>Classification / Regression</td></tr>
+        <tr><td>Features</td><td>7 inputs (X₁, X₂, X₁², X₂², X₁X₂, sin(X₁), sin(X₂)). Toggle on/off to compare importance</td><td>X₁, X₂, squares, products, sines</td></tr>
+        <tr><td>Weights</td><td>Blue lines = positive weight (use neuron output as-is). Orange lines = negative weight (inverted)</td><td>Visual: line color &amp; thickness</td></tr>
+        <tr><td>Epoch</td><td>One complete pass through the entire training dataset</td><td>Shown as counter</td></tr>
+        <tr><td>Learning Rate</td><td>Alpha (α) — controls speed of learning. Too high = unstable; too low = very slow</td><td>0.00001 to 10</td></tr>
+        <tr><td>Activation Fn.</td><td>Determines if a neuron should fire based on its input</td><td>Tanh, ReLU, Sigmoid, Linear</td></tr>
+        <tr><td>Regularization</td><td>L1 and L2 regularization reduce/remove overfitting by penalizing large weights</td><td>L1, L2, None</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<!-- ════════════════════════════════════════════
+     ASSESSMENT
+════════════════════════════════════════════ -->
+<section id="assessment">
+<div class="container">
+<div class="aw">
+  <div class="a-title">Assessment</div>
+  <div class="a-sub">Unit 6 · Understanding Neural Networks — Multiple Choice, Short Answer & Case Studies</div>
+
+  <!-- MCQ -->
+  <div class="qlabel">A · Multiple Choice Questions</div>
+
+  <div class="mcq">
+    <div class="mcq-q"><em>Q1.</em> What is a neural network?</div>
+    <div class="opts">
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">A</span>A biological network of neurons in the brain</div>
+      <div class="opt" onclick="chk(this,true)"><span class="ltr">B</span>A machine learning model inspired by the human brain</div>
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">C</span>A type of computer hardware used for complex calculations</div>
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">D</span>A mathematical equation for linear regression</div>
+    </div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-q"><em>Q2.</em> What are neurons in a neural network?</div>
+    <div class="opts">
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">A</span>Cells in the human brain</div>
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">B</span>Mathematical functions that process inputs and produce outputs</div>
+      <div class="opt" onclick="chk(this,true)"><span class="ltr">C</span>Nodes that make up the layers of a neural network</div>
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">D</span>None of the above</div>
+    </div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-q"><em>Q3.</em> What is the role of activation functions in neural networks?</div>
+    <div class="opts">
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">A</span>They determine the learning rate of the network</div>
+      <div class="opt" onclick="chk(this,true)"><span class="ltr">B</span>They introduce non-linearity, allowing the network to learn complex patterns</div>
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">C</span>They control the size of the neural network</div>
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">D</span>They define the input features of the network</div>
+    </div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-q"><em>Q4.</em> What is backpropagation in neural networks?</div>
+    <div class="opts">
+      <div class="opt" onclick="chk(this,true)"><span class="ltr">A</span>The process of adjusting weights and biases to minimize the error in the network</div>
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">B</span>The process of propagating signals from output layer to input layer</div>
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">C</span>The process of initializing the weights and biases of the network</div>
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">D</span>The process of defining the architecture of the neural network</div>
+    </div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-q"><em>Q5.</em> Which type of neural network is commonly used for image recognition?</div>
+    <div class="opts">
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">A</span>Feedforward neural network</div>
+      <div class="opt" onclick="chk(this,true)"><span class="ltr">B</span>Convolutional neural network (CNN)</div>
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">C</span>Recurrent neural network (RNN)</div>
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">D</span>Perceptron</div>
+    </div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-q"><em>Q6.</em> How do neural networks learn from data?</div>
+    <div class="opts">
+      <div class="opt" onclick="chk(this,true)"><span class="ltr">A</span>By adjusting their weights and biases based on the error in their predictions</div>
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">B</span>By memorizing the training data</div>
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">C</span>By using a fixed set of rules</div>
+      <div class="opt" onclick="chk(this,false)"><span class="ltr">D</span>By ignoring the input data</div>
+    </div>
+  </div>
+
+  <div class="spanel">
+    <div><div class="snum" id="score">0/6</div><div class="stxt">Score · MCQ Section</div></div>
+    <button class="sbtn" onclick="calcScore()">Calculate Score →</button>
+  </div>
+
+  <!-- Short Answer -->
+  <div class="qlabel">B · Short Answer Questions</div>
+
+  <div class="qa">
+    <div class="qa-q"><em>Q1.</em> What is the purpose of an activation function in a neural network?</div>
+    <button class="rbtn" onclick="tog(this)">Reveal Answer ↓</button>
+    <div class="ans">An activation function decides whether a neuron should be "activated" (send a signal) or not, based on the weighted sum of its inputs. It introduces <strong>non-linearity</strong> into the network, which allows the neural network to learn and model complex, non-linear relationships in the data. Common types include <strong>Sigmoid</strong>, <strong>Tanh</strong>, and <strong>ReLU</strong>.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><em>Q2.</em> How does backpropagation work in a neural network?</div>
+    <button class="rbtn" onclick="tog(this)">Reveal Answer ↓</button>
+    <div class="ans">Backpropagation works in two phases: (1) <strong>Forward pass</strong> — input data flows through the network, activations are computed, and the output is compared to the true value to calculate loss/error. (2) <strong>Backward pass</strong> — gradients of the loss are computed with respect to each weight, and the weights are updated using an optimization algorithm (e.g., gradient descent) to minimize the error. This process repeats over many epochs until the model converges.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><em>Q3.</em> What are the key components of a neural network?</div>
+    <button class="rbtn" onclick="tog(this)">Reveal Answer ↓</button>
+    <div class="ans">The key components are: (1) <strong>Neurons</strong> — basic computing units, (2) <strong>Weights</strong> — representing connection strengths, (3) <strong>Biases</strong> — constants that shift activation, (4) <strong>Activation Functions</strong> — introduce non-linearity, (5) <strong>Connections</strong> — synapses linking neurons, (6) <strong>Learning Rule</strong> — specifies how weights are updated, and (7) <strong>Propagation Functions</strong> — forward and backward propagation to train the network.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><em>Q4.</em> Describe the structure of a feedforward neural network.</div>
+    <button class="rbtn" onclick="tog(this)">Reveal Answer ↓</button>
+    <div class="ans">A feedforward neural network (FFNN) consists of: (1) <strong>Input Layer</strong> — receives raw features, (2) one or more <strong>Hidden Layers</strong> — process data using weights, biases, and activation functions, and (3) an <strong>Output Layer</strong> — produces the final prediction. Data flows in <strong>one direction only</strong> — from input to output — without any feedback loops. FFNNs are also known as <strong>Multi-Layer Perceptrons (MLPs)</strong>.</div>
+  </div>
+
+  <div class="qa">
+    <div class="qa-q"><em>Q5.</em> What are the differences between FFNN and RNN?</div>
+    <button class="rbtn" onclick="tog(this)">Reveal Answer ↓</button>
+    <div class="ans"><strong>FFNN:</strong> Data flows in one direction (input → output), no memory between inputs, suitable for static data like images. <strong>RNN:</strong> Has feedback loops allowing information to persist across time steps, maintains hidden state (memory), suitable for sequential data like text, speech, and time series. RNNs can relate current inputs to previous context, making them powerful for language modeling and machine translation.</div>
+  </div>
+
+  <!-- Competency Based -->
+  <div class="qlabel">D · Competency Based Questions</div>
+  <div class="qa">
+    <div class="qa-q"><em>CBQ 1.</em> You are a data scientist developing a neural network to predict heart attack risk. Which type of neural network model would you build and why?</div>
+    <button class="rbtn" onclick="tog(this)">Reveal Answer ↓</button>
+    <div class="ans"><strong>Model Choice: Feedforward Neural Network (MLP)</strong> — Because the dataset contains structured tabular features (age, gender, blood pressure, cholesterol, etc.) with no sequential or image data. Input layer: features like age, BP, cholesterol. Hidden layers: 2-3 layers to learn non-linear relationships between risk factors. Output layer: single neuron with Sigmoid activation → probability of heart attack (0 to 1). Activation: ReLU for hidden layers, Sigmoid for output. Loss: Binary Cross-Entropy. Optimizer: Adam.</div>
+  </div>
+  <div class="qa">
+    <div class="qa-q"><em>CBQ 2.</em> You are deciding between two restaurants considering: food quality, ambience, and distance. Using a neural network concept, determine the inputs and weights.</div>
+    <button class="rbtn" onclick="tog(this)">Reveal Answer ↓</button>
+    <div class="ans"><strong>Inputs:</strong> X₁ = Food Quality (rate 0-1), X₂ = Ambience (rate 0-1), X₃ = Distance (1 = close, 0 = far). <strong>Weights:</strong> W₁ = 5 (food quality is most important), W₂ = 3 (ambience is moderately important), W₃ = 2 (distance matters but less). Bias = −3 (threshold). Apply formula: ŷ = (X₁×5) + (X₂×3) + (X₃×2) − 3. If ŷ ≥ threshold → choose that restaurant (output = 1).</div>
+  </div>
+
+</div>
+</div>
+</section>
+
+<footer>
+  <p><span>Class XII · Artificial Intelligence · Subject Code 843 · CBSE</span></p>
+  <p style="margin-top:.4rem;color:var(--text-muted);">Unit 6 — Understanding Neural Networks · Interactive Student Handbook</p>
+</footer>
+
+<script>
+// ── Stars ──
+const sw = document.getElementById('stars');
+for(let i=0;i<180;i++){
+  const s=document.createElement('div');s.className='star';
+  const sz=Math.random()*2.4+0.5;
+  s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*4}s;--dl:${Math.random()*5}s;`;
+  sw.appendChild(s);
+}
+
+// ── Theme Toggle ──
+let isDay=true;
+function toggleTheme(){
+  isDay=!isDay;
+  document.documentElement.setAttribute('data-theme',isDay?'day':'night');
+  document.getElementById('tlbl').textContent=isDay?'Day':'Night';
+  document.getElementById('tico').textContent=isDay?'☀️':'🌙';
+}
+
+// ── Nav active link ──
+const sections=document.querySelectorAll('section[id]');
+const navLinks=document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  sections.forEach(s=>{if(window.scrollY>=s.offsetTop-100)cur=s.id;});
+  navLinks.forEach(a=>{a.classList.toggle('active',a.getAttribute('href')==='#'+cur);});
+});
+
+// ── MCQ ──
+function chk(el,correct){
+  const mcq=el.closest('.mcq');
+  if(mcq.querySelector('.correct')||mcq.querySelector('.wrong'))return;
+  el.classList.add(correct?'correct':'wrong');
+  if(!correct){
+    mcq.querySelectorAll('.opt').forEach(o=>{
+      const idx=Array.from(mcq.querySelectorAll('.opt')).indexOf(o);
+    });
+  }
+}
+
+// ── Score ──
+function calcScore(){
+  const total=document.querySelectorAll('.mcq').length;
+  const correct=document.querySelectorAll('.opt.correct').length;
+  document.getElementById('score').textContent=correct+'/'+total;
+}
+
+// ── Q&A Toggle ──
+function tog(btn){
+  const ans=btn.nextElementSibling;
+  ans.classList.toggle('show');
+  btn.textContent=ans.classList.contains('show')?'Hide Answer ↑':'Reveal Answer ↓';
+}
+</script>
+</body>
+</html>

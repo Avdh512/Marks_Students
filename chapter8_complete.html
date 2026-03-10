@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="day">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 8 — Data Storytelling | Class XII AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── THEMES ───────────────────────────────── */
+:root { --tr: 1.2s cubic-bezier(.4,0,.2,1); }
+
+[data-theme="day"] {
+  --sky-top:#74b9d8; --sky-mid:#b8dcf0; --sky-bot:#fde8c8;
+  --bg:#fdf6ec; --surface:#fffbf5; --surface2:#fef3e2;
+  --border:#e8d5b7; --text:#2c1810; --text-muted:#7a5c42;
+  --accent:#fbbf24; --accent2:#d97b34; --accent3:#c94f27;
+  --accent4:#8b5cf6; --code-bg:#1a1208; --code-text:#f0e4c0;
+  --nav-bg:rgba(253,246,236,0.94); --sun-bg:#fff176;
+  --sun-shadow:rgba(255,200,50,.7); --star-op:0; --cloud-op:1;
+}
+[data-theme="night"] {
+  --sky-top:#020818; --sky-mid:#0a1628; --sky-bot:#1a2a4a;
+  --bg:#080e1f; --surface:#0e1828; --surface2:#141f35;
+  --border:#1e2d4a; --text:#e8edf8; --text-muted:#7a90b8;
+  --accent:#fbbf24; --accent2:#f4a261; --accent3:#ff6b9d;
+  --accent4:#a78bfa; --code-bg:#030810; --code-text:#c9d8f0;
+  --nav-bg:rgba(8,14,31,0.95); --sun-bg:#e8eeff;
+  --sun-shadow:rgba(180,200,255,.55); --star-op:1; --cloud-op:0;
+}
+
+/* ── RESET ────────────────────────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.78;transition:background var(--tr),color var(--tr);overflow-x:hidden;}
+
+/* ── SKY ──────────────────────────────────── */
+.sky{position:fixed;inset:0;z-index:-2;pointer-events:none;}
+.sky-grad{position:absolute;inset:0;background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 55%,var(--sky-bot) 100%);opacity:.16;transition:background var(--tr),opacity var(--tr);}
+[data-theme="night"] .sky-grad{opacity:.38;}
+.celestial{position:absolute;top:55px;right:130px;width:66px;height:66px;border-radius:50%;background:var(--sun-bg);box-shadow:0 0 40px var(--sun-shadow),0 0 90px var(--sun-shadow);transition:all var(--tr);}
+[data-theme="night"] .celestial{width:54px;height:54px;top:75px;right:105px;}
+.crater{position:absolute;border-radius:50%;background:rgba(0,0,0,.08);opacity:0;transition:opacity var(--tr);}
+[data-theme="night"] .crater{opacity:1;}
+.cr1{width:13px;height:13px;top:17px;left:15px;}
+.cr2{width:8px;height:8px;top:31px;left:33px;}
+.cr3{width:10px;height:10px;top:11px;left:35px;}
+.stars{position:absolute;inset:0;opacity:var(--star-op);transition:opacity var(--tr);}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite var(--dl,0s);}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}
+.clouds{position:absolute;inset:0;opacity:var(--cloud-op);transition:opacity var(--tr);pointer-events:none;}
+.cloud{position:absolute;border-radius:60px;background:rgba(255,255,255,.8);}
+.cloud::before,.cloud::after{content:'';position:absolute;background:inherit;border-radius:50%;}
+.cl1{width:110px;height:34px;top:110px;left:7%;animation:drift 30s linear infinite;}
+.cl1::before{width:55px;height:46px;top:-20px;left:14px;}
+.cl1::after{width:42px;height:36px;top:-14px;left:50px;}
+.cl2{width:85px;height:28px;top:170px;left:54%;animation:drift 42s linear infinite 6s;}
+.cl2::before{width:46px;height:38px;top:-16px;left:11px;}
+.cl2::after{width:32px;height:26px;top:-10px;left:36px;}
+.cl3{width:65px;height:22px;top:85px;left:34%;animation:drift 55s linear infinite 14s;}
+.cl3::before{width:34px;height:28px;top:-12px;left:9px;}
+@keyframes drift{from{transform:translateX(-250px)}to{transform:translateX(110vw)}}
+
+/* ── TOGGLE ───────────────────────────────── */
+.toggle-wrap{display:flex;align-items:center;gap:9px;flex-shrink:0;margin-left:auto;}
+.tlabel{font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);transition:color var(--tr);user-select:none;}
+.tbtn{width:62px;height:30px;background:var(--surface2);border:2px solid var(--border);border-radius:99px;cursor:pointer;position:relative;transition:background var(--tr),border-color var(--tr);flex-shrink:0;}
+.tbtn::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--sun-bg);box-shadow:0 0 8px var(--sun-shadow);transition:transform .5s cubic-bezier(.4,0,.2,1),background .5s,box-shadow .5s;}
+[data-theme="night"] .tbtn::after{transform:translateX(32px);}
+
+/* ── NAV TOP BAR ─────────────────────────── */
+.nav-top{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--nav-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.4rem;height:50px;gap:.8rem;transition:background var(--tr),border-color var(--tr);}
+.nav-logo{font-family:'Playfair Display',serif;font-weight:900;font-size:1rem;color:var(--accent);white-space:nowrap;flex-shrink:0;transition:color var(--tr);}
+.back-btn{display:flex;align-items:center;gap:.4rem;text-decoration:none;color:var(--text-muted);font-size:.72rem;font-weight:700;letter-spacing:.5px;flex-shrink:0;transition:all .2s;border:1.5px solid var(--border);border-radius:20px;padding:.22rem .8rem;white-space:nowrap;}
+.back-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+/* ── SCROLLABLE NAV STRIP ─────────────────── */
+nav{position:fixed;top:50px;left:0;right:0;z-index:199;background:var(--nav-bg);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.2rem;height:36px;transition:background var(--tr),border-color var(--tr);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+.nav-links{display:flex;gap:.25rem;flex-shrink:0;align-items:center;}
+.nav-links a{font-size:.65rem;padding:.2rem .72rem;border-radius:20px;color:var(--text-muted);text-decoration:none;font-weight:600;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.nav-links a:hover,.nav-links a.active{background:var(--accent);color:#fff;}
+
+/* ── HERO ─────────────────────────────────── */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:8rem 2rem 5rem;text-align:center;}
+.hero-inner{max-width:700px;}
+.badge{display:inline-block;background:color-mix(in srgb,var(--accent) 13%,transparent);border:1px solid color-mix(in srgb,var(--accent) 38%,transparent);color:var(--accent);font-size:.68rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:.38rem 1.3rem;border-radius:30px;margin-bottom:1.4rem;transition:all var(--tr);}
+.hero h1{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2.6rem,7vw,5.2rem);letter-spacing:-1px;line-height:1.05;margin-bottom:1.1rem;color:var(--text);transition:color var(--tr);}
+.hero h1 span{color:var(--accent);}
+.hero p{font-size:1rem;color:var(--text-muted);max-width:540px;margin:0 auto 2.2rem;transition:color var(--tr);}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:.55rem;}
+.chip{background:var(--surface);border:1.5px solid var(--border);border-radius:9px;padding:.4rem 1rem;font-size:.76rem;font-weight:600;color:var(--text-muted);text-decoration:none;transition:all .22s;}
+.chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-3px);box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 18%,transparent);}
+
+/* ── SECTION WRAPPER ──────────────────────── */
+.container{max-width:1080px;margin:0 auto;padding:0 2rem;}
+section.topic{padding:5rem 0;border-top:1px solid var(--border);transition:border-color var(--tr);}
+
+.s-tag{font-size:.68rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:.45rem;transition:color var(--tr);}
+.s-title{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(1.7rem,3.8vw,2.5rem);line-height:1.08;margin-bottom:1.1rem;color:var(--text);transition:color var(--tr);}
+.s-intro{color:var(--text-muted);font-size:.96rem;max-width:820px;border-left:3px solid var(--accent);padding:.95rem 1.4rem;background:var(--surface);border-radius:0 12px 12px 0;margin-bottom:2.2rem;line-height:1.86;transition:all var(--tr);}
+.s-intro strong{color:var(--text);}
+
+h3.sh{font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:var(--accent2);margin:2rem 0 .8rem;display:flex;align-items:center;gap:.6rem;transition:color var(--tr);}
+h3.sh::before{content:'';width:22px;height:3px;background:var(--accent2);border-radius:2px;flex-shrink:0;transition:background var(--tr);}
+h4.ssh{font-family:'Outfit',sans-serif;font-weight:700;font-size:.95rem;color:var(--accent4);margin:1.5rem 0 .6rem;transition:color var(--tr);}
+p.bd{color:var(--text-muted);font-size:.94rem;margin-bottom:.85rem;transition:color var(--tr);}
+p.bd strong{color:var(--text);}
+
+/* ── CARDS ────────────────────────────────── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin:1.4rem 0 2.2rem;}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1.3rem;transition:all .25s;}
+.card:hover{transform:translateY(-5px);border-color:var(--accent);box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 16%,transparent);}
+.card .icon{font-size:1.75rem;margin-bottom:.7rem;}
+.card h4{font-family:'Playfair Display',serif;font-weight:700;font-size:.97rem;margin-bottom:.4rem;color:var(--text);transition:color var(--tr);}
+.card p{font-size:.84rem;color:var(--text-muted);line-height:1.62;transition:color var(--tr);}
+
+/* ── INFO GRID ────────────────────────────── */
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1.4rem 0;}
+.ic{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.4rem;transition:all var(--tr);}
+.ic h4{font-size:.72rem;color:var(--accent2);margin-bottom:.65rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;}
+.ic ul{list-style:none;}
+.ic ul li{font-size:.86rem;color:var(--text-muted);padding:.2rem 0 .2rem 1.2rem;position:relative;transition:color var(--tr);}
+.ic ul li::before{content:'▸';position:absolute;left:0;color:var(--accent2);font-size:.76rem;}
+
+/* ── TABLE ────────────────────────────────── */
+.tw{overflow-x:auto;margin:1.4rem 0;border-radius:12px;border:1px solid var(--border);transition:border-color var(--tr);}
+table{width:100%;border-collapse:collapse;font-size:.86rem;}
+th{background:var(--surface2);color:var(--accent);font-weight:700;padding:.8rem 1.1rem;text-align:left;border-bottom:2px solid var(--border);font-family:'Playfair Display',serif;transition:all var(--tr);}
+td{padding:.72rem 1.1rem;border-bottom:1px solid var(--border);color:var(--text-muted);transition:all var(--tr);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface2);color:var(--text);}
+
+/* ── HIGHLIGHT BOXES ──────────────────────── */
+.hl{background:color-mix(in srgb,var(--accent2) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent2) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);line-height:1.82;transition:all var(--tr);}
+.hl strong{color:var(--accent2);}
+.warn{background:color-mix(in srgb,var(--accent3) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent3) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);transition:all var(--tr);}
+.warn strong{color:var(--accent3);}
+.note{background:color-mix(in srgb,var(--accent4) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent4) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);transition:all var(--tr);}
+.note strong{color:var(--accent4);}
+.quote-block{background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);border-radius:11px;padding:1.2rem 1.6rem;margin:1.4rem 0;font-size:.96rem;color:var(--text-muted);font-style:italic;line-height:1.9;transition:all var(--tr);}
+.quote-block strong{color:var(--accent);font-style:normal;}
+
+/* ── STEP BOX ─────────────────────────────── */
+.steps{display:flex;flex-direction:column;gap:.7rem;margin:1.2rem 0;}
+.step{display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:1rem 1.3rem;transition:all var(--tr);}
+.step-num{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;font-family:'Playfair Display',serif;}
+.step-body h5{font-weight:600;font-size:.92rem;margin-bottom:.25rem;color:var(--text);transition:color var(--tr);}
+.step-body p{font-size:.85rem;color:var(--text-muted);transition:color var(--tr);}
+
+/* ── COMPARISON ───────────────────────────── */
+.comp{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.4rem 0;}
+.comp-col{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:1.2rem;}
+.comp-col h4{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;margin-bottom:.8rem;color:var(--accent);}
+.comp-col ul{list-style:none;}
+.comp-col ul li{font-size:.87rem;color:var(--text-muted);padding:.22rem 0 .22rem 1.2rem;position:relative;transition:color var(--tr);}
+.comp-col ul li::before{content:'•';position:absolute;left:0;color:var(--accent2);}
+
+/* ── SVG DIAGRAM ──────────────────────────── */
+.svg-diagram{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin:1.6rem 0;text-align:center;overflow-x:auto;transition:all var(--tr);}
+.svg-diagram svg{max-width:100%;height:auto;}
+
+/* ── 3 ELEMENTS DISPLAY ───────────────────── */
+.three-elements{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin:1.6rem 0;}
+.elem-card{background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:1.6rem 1.2rem;text-align:center;transition:all .25s;}
+.elem-card:hover{transform:translateY(-5px);}
+.elem-card:nth-child(1){border-color:color-mix(in srgb,var(--accent) 50%,transparent);}
+.elem-card:nth-child(2){border-color:color-mix(in srgb,var(--accent2) 50%,transparent);}
+.elem-card:nth-child(3){border-color:color-mix(in srgb,var(--accent4) 50%,transparent);}
+.elem-card:nth-child(1):hover{box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 18%,transparent);}
+.elem-card:nth-child(2):hover{box-shadow:0 12px 30px color-mix(in srgb,var(--accent2) 18%,transparent);}
+.elem-card:nth-child(3):hover{box-shadow:0 12px 30px color-mix(in srgb,var(--accent4) 18%,transparent);}
+.elem-icon{font-size:2.4rem;margin-bottom:.8rem;}
+.elem-card h4{font-family:'Playfair Display',serif;font-weight:900;font-size:1.1rem;margin-bottom:.6rem;color:var(--text);transition:color var(--tr);}
+.elem-card p{font-size:.84rem;color:var(--text-muted);line-height:1.65;transition:color var(--tr);}
+
+/* ── PYRAMID STAGES ───────────────────────── */
+.pyramid-wrap{margin:2rem 0;}
+.pyramid-stage{display:flex;gap:1rem;align-items:flex-start;margin-bottom:1rem;padding:1.1rem 1.4rem;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);transition:all .25s;}
+.pyramid-stage:hover{transform:translateX(6px);}
+.pyr-num{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;flex-shrink:0;font-family:'Playfair Display',serif;color:#fff;}
+.pyr-body h5{font-weight:700;font-size:.95rem;color:var(--text);margin-bottom:.25rem;transition:color var(--tr);}
+.pyr-body p{font-size:.85rem;color:var(--text-muted);transition:color var(--tr);}
+
+/* ── ASSESSMENT ───────────────────────────── */
+#assessment{padding:5rem 0 4rem;border-top:1px solid var(--border);}
+.aw{background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--accent) 7%,var(--surface)));border:1.5px solid color-mix(in srgb,var(--accent) 28%,var(--border));border-radius:22px;padding:2.8rem;transition:all var(--tr);}
+.a-title{font-family:'Playfair Display',serif;font-weight:900;font-size:2.1rem;letter-spacing:-.5px;margin-bottom:.35rem;color:var(--text);transition:color var(--tr);}
+.a-sub{color:var(--text-muted);font-size:.88rem;margin-bottom:2.2rem;}
+.qlabel{font-weight:700;font-size:.67rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent2);padding-bottom:.55rem;border-bottom:1px solid var(--border);margin:2.2rem 0 1.3rem;transition:all var(--tr);}
+
+.mcq{margin-bottom:1.8rem;}
+.mcq-q{font-size:.95rem;font-weight:500;margin-bottom:.85rem;color:var(--text);transition:color var(--tr);}
+.mcq-q em{color:var(--accent);font-style:normal;font-weight:700;font-family:'Playfair Display',serif;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;}
+.opt{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:.6rem .95rem;cursor:pointer;transition:all .2s;font-size:.86rem;color:var(--text-muted);display:flex;align-items:center;gap:.65rem;user-select:none;}
+.opt:hover{border-color:var(--accent);color:var(--text);background:color-mix(in srgb,var(--accent) 7%,var(--surface2));}
+.opt.correct{background:color-mix(in srgb,var(--accent2) 12%,transparent);border-color:var(--accent2);color:var(--accent2);}
+.opt.wrong{background:color-mix(in srgb,var(--accent3) 9%,transparent);border-color:var(--accent3);color:var(--accent3);}
+.opt .ltr{width:21px;height:21px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;transition:background var(--tr);}
+
+.qa{margin-bottom:1.4rem;}
+.qa-q{font-size:.94rem;margin-bottom:.45rem;color:var(--text);transition:color var(--tr);}
+.qa-q em{color:var(--accent);font-style:normal;font-weight:700;font-family:'Playfair Display',serif;}
+.ans{background:var(--code-bg);border-left:3px solid var(--accent2);border-radius:0 9px 9px 0;padding:.95rem 1.2rem;font-size:.87rem;color:var(--code-text);line-height:1.82;display:none;margin-top:.45rem;}
+.ans.show{display:block;}
+.rbtn{background:transparent;border:1.5px solid var(--border);border-radius:7px;padding:.3rem .9rem;font-size:.74rem;color:var(--text-muted);cursor:pointer;font-weight:600;transition:all .2s;margin-top:.38rem;}
+.rbtn:hover{border-color:var(--accent2);color:var(--accent2);}
+
+.spanel{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:1.3rem 1.7rem;display:flex;align-items:center;justify-content:space-between;margin-top:1.8rem;flex-wrap:wrap;gap:1rem;transition:all var(--tr);}
+.snum{font-family:'Playfair Display',serif;font-weight:900;font-size:2.4rem;color:var(--accent);transition:color var(--tr);}
+.stxt{font-size:.84rem;color:var(--text-muted);}
+.sbtn{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 68%,var(--accent2)));border:none;border-radius:11px;padding:.85rem 2.4rem;font-weight:700;font-size:.88rem;color:#fff;cursor:pointer;transition:all .22s;letter-spacing:.4px;font-family:'Outfit',sans-serif;margin-top:1.4rem;}
+.sbtn:hover{transform:translateY(-3px);box-shadow:0 12px 28px color-mix(in srgb,var(--accent) 38%,transparent);}
+
+footer{text-align:center;padding:3rem 2rem;color:var(--text-muted);font-size:.82rem;border-top:1px solid var(--border);transition:all var(--tr);}
+footer span{color:var(--accent);}
+
+@media(max-width:640px){
+  .opts{grid-template-columns:1fr;}
+  .aw{padding:1.4rem;}
+  .tlabel{display:none;}
+  .comp{grid-template-columns:1fr;}
+  .three-elements{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- SKY -->
+<div class="sky">
+  <div class="sky-grad"></div>
+  <div class="celestial">
+    <div class="crater cr1"></div><div class="crater cr2"></div><div class="crater cr3"></div>
+  </div>
+  <div class="stars" id="stars"></div>
+  <div class="clouds">
+    <div class="cloud cl1"></div><div class="cloud cl2"></div><div class="cloud cl3"></div>
+  </div>
+</div>
+
+<!-- TOP BAR -->
+<div class="nav-top">
+  <a href="index.html" class="back-btn">← Home</a>
+  <div class="nav-logo">Unit 8 · Data Storytelling</div>
+  <div class="toggle-wrap">
+    <span class="tlabel" id="tlbl">Day</span>
+    <div class="tbtn" onclick="toggleTheme()"></div>
+    <span id="tico">☀️</span>
+  </div>
+</div>
+
+<!-- SCROLLABLE NAV STRIP -->
+<nav>
+  <div class="nav-links">
+    <a href="#intro">Overview</a>
+    <a href="#storytelling">Storytelling</a>
+    <a href="#datastory">Data Storytelling</a>
+    <a href="#elements">3 Elements</a>
+    <a href="#freytag">Freytag's Pyramid</a>
+    <a href="#visuals">Visualisations</a>
+    <a href="#steps">Creating a Story</a>
+    <a href="#ethics">Ethics</a>
+    <a href="#assessment">Assessment</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="badge">Unit 08 · Class XII · Artificial Intelligence</div>
+    <h1>Data<br><span>Storytelling</span></h1>
+    <p>Where data meets narrative — combining data, visuals, and storytelling to communicate complex insights in a way that informs decisions and inspires change.</p>
+    <div class="chips">
+      <a href="#storytelling" class="chip">📖 Storytelling</a>
+      <a href="#datastory" class="chip">📊 Data Storytelling</a>
+      <a href="#elements" class="chip">🔺 3 Elements</a>
+      <a href="#freytag" class="chip">🏛️ Freytag's Pyramid</a>
+      <a href="#visuals" class="chip">📈 Visualisations</a>
+      <a href="#steps" class="chip">⚙️ Creating a Story</a>
+      <a href="#ethics" class="chip">⚖️ Ethics</a>
+      <a href="#assessment" class="chip">📝 Assessment</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     OVERVIEW
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="intro">
+<div class="container">
+  <div class="s-tag">Unit Overview</div>
+  <div class="s-title">Data Storytelling — The Big Picture</div>
+  <div class="s-intro">
+    <strong>Data Storytelling</strong> is the art and practice of translating complex data and analytics into a compelling narrative that is easily understandable and relatable to various audiences. Stories have been used for ages to share knowledge and experiences. In today's data-driven world, combining storytelling with data analysis bridges the gap between technology and people — turning raw numbers into insights that inspire action.
+  </div>
+
+  <div class="ig">
+    <div class="ic">
+      <h4>Topics Covered</h4>
+      <ul>
+        <li>Introduction to Storytelling and its elements</li>
+        <li>Introduction to Data Storytelling</li>
+        <li>Why is Data Storytelling powerful?</li>
+        <li>Essential Elements — Data, Narrative, Visuals</li>
+        <li>Narrative structure — Freytag's Pyramid</li>
+        <li>Types of data and matching visualisations</li>
+        <li>Steps to create a story through data</li>
+        <li>Ethics in Data Storytelling</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Learning Outcomes</h4>
+      <ul>
+        <li>Identify the difference between storytelling and data storytelling</li>
+        <li>Understand the key elements of data storytelling</li>
+        <li>Recognise the importance of data storytelling today</li>
+        <li>Use the appropriate type of visual for the data</li>
+        <li>Draw insights from data stories and write simple narratives based on visuals</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Approach &amp; Prerequisites</h4>
+      <ul>
+        <li>Team discussion and web search activities</li>
+        <li>Real-world case studies (Spotify, Uber)</li>
+        <li>Activity-based learning with actual datasets</li>
+        <li>Prerequisite: Understanding the concept of data</li>
+        <li>Reasonable fluency in English; ability to understand visual data</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="hl"><strong>📌 Why Data Storytelling matters:</strong> Data storytelling is filling a vital gap between technology and people. By combining an increasingly essential resource (data) with a familiar, time-tested form of communication (storytelling), this skill helps more people translate their insights into action. Brands like Spotify and Uber use data storytelling as a core communication strategy to engage audiences and build loyalty.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     8.1 — INTRODUCTION TO STORYTELLING
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="storytelling">
+<div class="container">
+  <div class="s-tag">Section 8.1</div>
+  <div class="s-title">Introduction to Storytelling</div>
+  <div class="s-intro">
+    <strong>"Once upon a time, there lived a King…" "On a dark night, when it was raining…" "Long long ago…"</strong> — these familiar sentences spark interest, enthusiasm, and curiosity in all of us. Stories have been a part of our lives since ancient times — from cave paintings to digital media. They are a way to share our imaginations, experiences, and thoughts with others.
+  </div>
+
+  <h3 class="sh">What Are Stories?</h3>
+  <p class="bd">Stories are a valuable form of human expression. They connect us closely with one another and transport us to different places and times. They can be folk tales, fairy tales, fables, and real-life stories. Each type creates a sense of connection — folk tales, in particular, strengthen our sense of belonging and help establish our identity.</p>
+  <p class="bd">According to the dictionary, a <strong>'story'</strong> is a <em>'factual or fictional narrative'</em> — meaning it tells about an event that can be true or made up, in a way that the listener experiences or learns something. Stories can be used to share information, experiences, or viewpoints.</p>
+
+  <h3 class="sh">Why is Storytelling a Powerful Tool?</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="icon">✨</div>
+      <h4>Captivates Audiences</h4>
+      <p>Storytelling generates interest and draws people to the narrative — keeping them engaged and focused throughout. Attention is the scarcest resource in the information age.</p>
+    </div>
+    <div class="card">
+      <div class="icon">💡</div>
+      <h4>Communicates Meaning</h4>
+      <p>Stories make <strong>complex ideas more accessible and understandable</strong> — packaging abstract concepts in a concrete, relatable form that the human brain naturally processes and remembers.</p>
+    </div>
+    <div class="card">
+      <div class="icon">❤️</div>
+      <h4>Evokes Emotion</h4>
+      <p>Stories inspire us, trigger emotions, and <strong>motivate us to take action</strong>. Emotional connection is what makes the difference between information that is heard and information that is acted upon.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🌍</div>
+      <h4>Builds Connection</h4>
+      <p>Stories connect us closely with one another across time, culture, and geography — creating <strong>shared understanding and community</strong> between storyteller and audience.</p>
+    </div>
+  </div>
+
+  <h3 class="sh">The 5 Elements of a Story</h3>
+  <p class="bd">Every well-crafted story contains five core elements that work together to create a complete, engaging narrative:</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h5>Characters</h5>
+        <p>The people, animals, or objects featured in the story. They <strong>perform the actions and drive the story forward</strong>. Without compelling characters, there is no story — characters give the audience someone to connect with and root for.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h5>Plot / Setting</h5>
+        <p><strong>Setting</strong> refers to the time or location in which the story takes place. <strong>Plot</strong> refers to the sequence of events of the story — the chain of cause and effect that carries the narrative from beginning to end.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h5>Conflict</h5>
+        <p>The problem or situation the characters are dealing with. Conflict <strong>drives the story forward</strong> — without conflict, there is no tension, no stakes, and no reason for the audience to remain engaged. It is the engine of every story.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h5>Resolution</h5>
+        <p>The end of the story where the characters arrive at a situation that resolves the conflict. It is the stage after the <strong>climax</strong> — the peak or height of any story — where loose ends are tied and the audience gains closure.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h5>Insights</h5>
+        <p>The ability to have a clear, deep, and sometimes sudden understanding of a complicated problem or situation. Insights are the <strong>takeaway</strong> — what the audience learns, understands, or feels differently about after experiencing the story.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="hl"><strong>🔑 Storytelling Forms:</strong> Storytelling can take many forms — <strong>oral</strong> (spoken word, podcasts), <strong>digital</strong> (video, social media, interactive web), and <strong>written</strong> (books, reports, articles). Each form uses the same five elements but adapts them to the medium and audience. In data storytelling, all three forms are often combined.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     DATA STORYTELLING
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="datastory">
+<div class="container">
+  <div class="s-tag">Section 8.2</div>
+  <div class="s-title">Introduction to Data Storytelling</div>
+  <div class="s-intro">
+    When we interpret logically related data in a systematic, narrative way, the concept is known as <strong>Data Storytelling</strong>. It is a practice used by analysts and data scientists to communicate their findings and observations from data to technical and non-technical business stakeholders — the audience. Data storytelling is the art and practice of translating complex data and analytics into a compelling narrative that is easily understandable and relatable to various audiences.
+  </div>
+
+  <h3 class="sh">From Raw Data → Data Story</h3>
+  <div class="svg-diagram">
+    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1.2rem;font-weight:600;">🔄 The Data Storytelling Transformation Pipeline</p>
+    <svg width="680" height="100" viewBox="0 0 680 100" xmlns="http://www.w3.org/2000/svg">
+      <!-- Box 1 -->
+      <rect x="10" y="22" width="120" height="56" rx="10" fill="color-mix(in srgb,#fbbf24 12%,#fffbf5)" stroke="#fbbf24" stroke-width="1.5"/>
+      <text x="70" y="46" text-anchor="middle" font-family="Outfit,sans-serif" font-size="12" fill="#2c1810" font-weight="700">Raw Data</text>
+      <text x="70" y="63" text-anchor="middle" font-family="Outfit,sans-serif" font-size="10" fill="#7a5c42">Numbers &amp; Facts</text>
+      <!-- Arrow -->
+      <text x="140" y="56" font-family="Outfit,sans-serif" font-size="20" fill="#d97b34">→</text>
+      <!-- Box 2 -->
+      <rect x="160" y="22" width="130" height="56" rx="10" fill="color-mix(in srgb,#d97b34 12%,#fffbf5)" stroke="#d97b34" stroke-width="1.5"/>
+      <text x="225" y="46" text-anchor="middle" font-family="Outfit,sans-serif" font-size="12" fill="#2c1810" font-weight="700">Data Visualisation</text>
+      <text x="225" y="63" text-anchor="middle" font-family="Outfit,sans-serif" font-size="10" fill="#7a5c42">Charts &amp; Graphs</text>
+      <!-- Arrow -->
+      <text x="300" y="56" font-family="Outfit,sans-serif" font-size="20" fill="#d97b34">→</text>
+      <!-- Box 3 -->
+      <rect x="320" y="22" width="130" height="56" rx="10" fill="color-mix(in srgb,#2d8a4e 12%,#fffbf5)" stroke="#2d8a4e" stroke-width="1.5"/>
+      <text x="385" y="46" text-anchor="middle" font-family="Outfit,sans-serif" font-size="12" fill="#2c1810" font-weight="700">Add Narrative</text>
+      <text x="385" y="63" text-anchor="middle" font-family="Outfit,sans-serif" font-size="10" fill="#7a5c42">Context &amp; Meaning</text>
+      <!-- Arrow -->
+      <text x="460" y="56" font-family="Outfit,sans-serif" font-size="20" fill="#d97b34">→</text>
+      <!-- Box 4 -->
+      <rect x="480" y="14" width="190" height="72" rx="10" fill="color-mix(in srgb,#8b5cf6 15%,#fffbf5)" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="575" y="46" text-anchor="middle" font-family="Outfit,sans-serif" font-size="13" fill="#2c1810" font-weight="700">Data Story</text>
+      <text x="575" y="63" text-anchor="middle" font-family="Outfit,sans-serif" font-size="10" fill="#7a5c42">Insights that Drive Action</text>
+    </svg>
+  </div>
+
+  <h3 class="sh">What Makes Data Storytelling Powerful?</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="icon">🧠</div>
+      <h4>Makes Insights Memorable</h4>
+      <p>Data presented in narrative format is better absorbed, retained, and understood compared to a collection of disjointed facts or figures. Stories stick in memory; raw statistics fade.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🤝</div>
+      <h4>Bridges Tech &amp; People</h4>
+      <p>Data storytelling <strong>connects analytics with decision-makers</strong> — translating complex technical findings into language that business stakeholders can understand and act upon.</p>
+    </div>
+    <div class="card">
+      <div class="icon">📣</div>
+      <h4>Persuasive Communication</h4>
+      <p>It is a persuasive way to communicate key insights to both business and technical stakeholders — presenting <strong>evidence-based insights</strong> in a form that compels action.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🎯</div>
+      <h4>Drives Better Decisions</h4>
+      <p>Engaging narratives and compelling visuals keep audiences engaged, increasing retention and attention. Storytelling with data <strong>empowers better decision-making</strong>.</p>
+    </div>
+  </div>
+
+  <h3 class="sh">Famous Brand Data Stories</h3>
+  <div class="comp">
+    <div class="comp-col">
+      <h4>🎵 Spotify Wrapped</h4>
+      <ul>
+        <li>Every year, Spotify creates a personalised data story for each user</li>
+        <li>Shows your top songs, artists, genres, and total listening minutes</li>
+        <li>Data is presented as a compelling visual narrative — shareable on social media</li>
+        <li>Generates massive organic marketing engagement each December</li>
+        <li>Turns raw listening data into a personal story users love to share</li>
+      </ul>
+    </div>
+    <div class="comp-col">
+      <h4>🚗 Uber Year in Review</h4>
+      <ul>
+        <li>Uber presents personalised annual data stories to riders</li>
+        <li>Total trips, cities visited, kilometres travelled, time saved</li>
+        <li>Data is contextualised with comparisons — e.g., "equivalent to X laps around the Earth"</li>
+        <li>Makes abstract numbers relatable and meaningful to individual users</li>
+        <li>Demonstrates how personal data can tell a personal story</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="quote-block">"Sometimes reality is too complex. Stories give it form." — <strong>Jean-Luc Godard</strong>, film director and screenwriter</div>
+
+  <div class="hl"><strong>📌 Need for Data Storytelling:</strong> Data when presented as a narrative is better absorbed, retained, and understood compared to a collection of disjointed facts. Companies and brands use data storytelling as an effective method of conveying their message and gaining client loyalty. It makes complex data more accessible — allowing audiences or stakeholders to grasp insights easily.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     3 ELEMENTS
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="elements">
+<div class="container">
+  <div class="s-tag">Section 8.3</div>
+  <div class="s-title">Essential Elements of Data Storytelling</div>
+  <div class="s-intro">
+    The three key elements of Data Storytelling are <strong>Data, Narrative, and Visuals</strong>. Each element is powerful on its own — but the real impact comes from skillfully blending all three together. When you combine the right visuals and narrative with the right data, you create a data story that can influence and drive change.
+  </div>
+
+  <div class="three-elements">
+    <div class="elem-card">
+      <div class="elem-icon">🔢</div>
+      <h4>Data</h4>
+      <p>Basic facts or raw facts about any entity. Data is the <strong>primary building block</strong> of every data story. It serves as the foundation for the narrative and visual elements. Without accurate, reliable data, the entire story collapses — no matter how compelling the visuals or narrative are.</p>
+    </div>
+    <div class="elem-card">
+      <div class="elem-icon">📝</div>
+      <h4>Narrative</h4>
+      <p>The <strong>structure or storyline</strong> crafted to present insights from data in a clear, engaging, and informative manner. It involves identifying and organising key information in a linear and coherent fashion — ensuring the storyline is crisp and contextual. A well-defined narrative allows the audience to understand the significance of insights.</p>
+    </div>
+    <div class="elem-card">
+      <div class="elem-icon">📊</div>
+      <h4>Visuals</h4>
+      <p>Pictorial representations of data using various graphs, charts, and diagrams. Visuals <strong>help convey complex information</strong> more clearly and effectively — enabling the audience to see trends, patterns, and anomalies that would be invisible in raw numbers, facilitating better understanding and interpretation.</p>
+    </div>
+  </div>
+
+  <h3 class="sh">How the Three Elements Interlink</h3>
+
+  <div class="svg-diagram">
+    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1.2rem;font-weight:600;">🔗 The Three Elements — Interaction &amp; Overlap</p>
+    <svg width="480" height="260" viewBox="0 0 480 260" xmlns="http://www.w3.org/2000/svg">
+      <!-- Three overlapping circles -->
+      <circle cx="240" cy="100" r="80" fill="#fbbf24" opacity=".18"/>
+      <circle cx="170" cy="190" r="80" fill="#d97b34" opacity=".18"/>
+      <circle cx="310" cy="190" r="80" fill="#8b5cf6" opacity=".18"/>
+      <!-- Circle borders -->
+      <circle cx="240" cy="100" r="80" fill="none" stroke="#fbbf24" stroke-width="2"/>
+      <circle cx="170" cy="190" r="80" fill="none" stroke="#d97b34" stroke-width="2"/>
+      <circle cx="310" cy="190" r="80" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+      <!-- Labels -->
+      <text x="240" y="60" text-anchor="middle" font-family="Playfair Display,serif" font-size="14" fill="#b45309" font-weight="700">Data</text>
+      <text x="110" y="215" text-anchor="middle" font-family="Playfair Display,serif" font-size="14" fill="#b45309" font-weight="700">Narrative</text>
+      <text x="370" y="215" text-anchor="middle" font-family="Playfair Display,serif" font-size="14" fill="#6d28d9" font-weight="700">Visuals</text>
+      <!-- Center label -->
+      <text x="240" y="153" text-anchor="middle" font-family="Playfair Display,serif" font-size="13" fill="#2c1810" font-weight="900">Data</text>
+      <text x="240" y="170" text-anchor="middle" font-family="Playfair Display,serif" font-size="13" fill="#2c1810" font-weight="900">Story</text>
+      <!-- Pair labels -->
+      <text x="196" y="132" text-anchor="middle" font-family="Outfit,sans-serif" font-size="9" fill="#7a5c42">Explained</text>
+      <text x="284" y="132" text-anchor="middle" font-family="Outfit,sans-serif" font-size="9" fill="#7a5c42">Visualised</text>
+      <text x="240" y="208" text-anchor="middle" font-family="Outfit,sans-serif" font-size="9" fill="#7a5c42">Engaging</text>
+    </svg>
+    <p style="font-size:.76rem;color:var(--text-muted);margin-top:.5rem;">The overlapping centre — where all three elements meet — is where a true Data Story is created.</p>
+  </div>
+
+  <div class="ig">
+    <div class="ic">
+      <h4>Data + Narrative</h4>
+      <ul>
+        <li>Explaining data observations helps the audience understand how the data behaves in different situations</li>
+        <li>Narrative gives context to why certain insights are generated</li>
+        <li>Without narrative, data is just numbers — hard to interpret or act on</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Data + Visuals</h4>
+      <ul>
+        <li>Visualising data through charts and graphs allows the audience to see the data from a different perspective</li>
+        <li>Helps stakeholders analyse and make the right decisions faster</li>
+        <li>Patterns and trends invisible in tables become obvious in a chart</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Narrative + Visuals</h4>
+      <ul>
+        <li>Combining narrative and visuals can engage or even entertain an audience</li>
+        <li>Visuals without narrative lack direction; narrative without visuals can be abstract</li>
+        <li>Together, they make data memorable and persuasive</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note"><strong>💡 Key Insight:</strong> Each element — data, narrative, or visuals — can be powerful on its own. You can achieve some success with a compelling story, an interesting statistic, or impressive data visualisation. However, the real impact comes from <strong>skillfully blending all three</strong> in a data story. When you combine the right visuals and narrative with the right data, you create a data story that can influence and drive change.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     FREYTAG'S PYRAMID
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="freytag">
+<div class="container">
+  <div class="s-tag">Section 8.4</div>
+  <div class="s-title">Narrative Structure — Freytag's Pyramid</div>
+  <div class="s-intro">
+    Most stories follow a common arc — a protagonist who faces a complication goes on a journey of resolving a difficulty before returning to normal life. Building on Aristotle's simple model, <strong>Gustav Freytag</strong> developed a more robust narrative framework — a pyramid-based dramatic structure with <strong>five key stages</strong> that captures the arc and progression of any story.
+  </div>
+
+  <!-- Pyramid SVG -->
+  <div class="svg-diagram">
+    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;font-weight:600;">🏛️ Freytag's Pyramid — The 5-Stage Dramatic Arc</p>
+    <svg width="620" height="220" viewBox="0 0 620 220" xmlns="http://www.w3.org/2000/svg">
+      <!-- Pyramid outline -->
+      <polyline points="30,190 200,40 310,20 420,40 590,190" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linejoin="round"/>
+      <!-- Stage markers -->
+      <circle cx="30" cy="190" r="8" fill="#fbbf24"/>
+      <circle cx="200" cy="40" r="8" fill="#d97b34"/>
+      <circle cx="310" cy="20" r="8" fill="#c94f27"/>
+      <circle cx="420" cy="40" r="8" fill="#d97b34"/>
+      <circle cx="590" cy="190" r="8" fill="#2d8a4e"/>
+      <!-- Vertical dashed line at climax -->
+      <line x1="310" y1="20" x2="310" y2="190" stroke="#c94f27" stroke-width="1" stroke-dasharray="4"/>
+      <!-- Stage labels -->
+      <text x="30" y="210" text-anchor="middle" font-family="Outfit,sans-serif" font-size="11" fill="#d97b34" font-weight="700">Introduction</text>
+      <text x="160" y="32" text-anchor="middle" font-family="Outfit,sans-serif" font-size="11" fill="#d97b34" font-weight="700">Rising</text>
+      <text x="160" y="45" text-anchor="middle" font-family="Outfit,sans-serif" font-size="11" fill="#d97b34" font-weight="700">Action</text>
+      <text x="310" y="10" text-anchor="middle" font-family="Outfit,sans-serif" font-size="12" fill="#c94f27" font-weight="700">CLIMAX</text>
+      <text x="460" y="32" text-anchor="middle" font-family="Outfit,sans-serif" font-size="11" fill="#d97b34" font-weight="700">Falling</text>
+      <text x="460" y="45" text-anchor="middle" font-family="Outfit,sans-serif" font-size="11" fill="#d97b34" font-weight="700">Action</text>
+      <text x="590" y="210" text-anchor="middle" font-family="Outfit,sans-serif" font-size="11" fill="#2d8a4e" font-weight="700">Conclusion</text>
+      <!-- Horizontal axis -->
+      <line x1="20" y1="190" x2="600" y2="190" stroke="#e8d5b7" stroke-width="1.5"/>
+      <text x="310" y="210" text-anchor="middle" font-family="Outfit,sans-serif" font-size="10" fill="#7a5c42">Story Progression →</text>
+    </svg>
+  </div>
+
+  <h3 class="sh">The 5 Stages Explained</h3>
+
+  <div class="pyramid-wrap">
+    <div class="pyramid-stage">
+      <div class="pyr-num" style="background:#2d8a4e;">1</div>
+      <div class="pyr-body">
+        <h5>Introduction (Exposition)</h5>
+        <p>The beginning of the story when the setting is established and main characters are introduced. It provides the audience with ample <strong>background information</strong> to understand what is going to happen. In data storytelling, this is where you introduce the context — the business problem, the dataset, and why this story matters.</p>
+      </div>
+    </div>
+    <div class="pyramid-stage">
+      <div class="pyr-num" style="background:#fbbf24;color:#2c1810;">2</div>
+      <div class="pyr-body">
+        <h5>Rising Action</h5>
+        <p>The series of events that <strong>build up to the climax</strong> of the story — increasing tension and complication. In data storytelling, this is where you present the data analysis — revealing trends, patterns, and anomalies that build toward the central insight. Each chart or finding adds to the momentum.</p>
+      </div>
+    </div>
+    <div class="pyramid-stage" style="border-color:color-mix(in srgb,#c94f27 40%,var(--border));">
+      <div class="pyr-num" style="background:#c94f27;">3</div>
+      <div class="pyr-body">
+        <h5>Climax — The Turning Point</h5>
+        <p>The <strong>most intense or important point</strong> within the story — an event in which the fortune of the protagonist turns for better or worse. In data storytelling, this is the most critical insight — the "aha moment" where the data reveals something surprising, significant, or actionable that reframes the audience's understanding.</p>
+      </div>
+    </div>
+    <div class="pyramid-stage">
+      <div class="pyr-num" style="background:#fbbf24;color:#2c1810;">4</div>
+      <div class="pyr-body">
+        <h5>Falling Action</h5>
+        <p>The rest of the events that <strong>unravel after the main conflict</strong> has occurred, but before the final outcome is decided. In data storytelling, this is where you interpret the implications of the key insight — exploring what the data means, what questions it raises, and what alternatives exist.</p>
+      </div>
+    </div>
+    <div class="pyramid-stage">
+      <div class="pyr-num" style="background:#8b5cf6;">5</div>
+      <div class="pyr-body">
+        <h5>Conclusion (Resolution)</h5>
+        <p>The conclusion of the story where <strong>all conflicts are resolved</strong> and outstanding details are explained. In data storytelling, this is your call to action — the recommendation, the decision, or the change you are proposing based on the data insights uncovered throughout the story.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sh">Freytag's Pyramid in Data Storytelling</h3>
+  <p class="bd">In the context of data storytelling, Freytag's Pyramid can be used as a framework to structure the presentation of data and insights in a way that <strong>captivates the audience's attention</strong> and guides them through the narrative journey. The "Data Storytelling Arc" applies these same five stages to real-world data presentations:</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Pyramid Stage</th><th>Data Storytelling Equivalent</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Introduction</strong></td><td>Set the scene — business context, dataset overview, the question being asked</td><td>"Our school dropout rates have been changing over the last decade. Here is the dataset we analysed."</td></tr>
+        <tr><td><strong>Rising Action</strong></td><td>Build with data — show trends, comparisons, supporting evidence</td><td>"Dropout rates declined sharply between 1995 and 2005. Here are three charts showing the pattern."</td></tr>
+        <tr><td><strong>Climax</strong></td><td>The key insight — the unexpected finding or critical takeaway</td><td>"The sharpest decline occurred precisely after the Mid-Day Meal Scheme launched in 1995."</td></tr>
+        <tr><td><strong>Falling Action</strong></td><td>Interpret — explore causes, implications, alternative explanations</td><td>"This correlation holds across states with higher scheme implementation rates."</td></tr>
+        <tr><td><strong>Conclusion</strong></td><td>Call to action — recommendation or decision based on insights</td><td>"Expanding the MDMS to more schools could further reduce dropout rates by an estimated 12%."</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     VISUALISATIONS
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="visuals">
+<div class="container">
+  <div class="s-tag">Section 8.5</div>
+  <div class="s-title">Types of Data &amp; Matching Visualisations</div>
+  <div class="s-intro">
+    Data visualisation is a powerful way to show context. Data charts can reveal crucial deviations or affinities in the data that lead to insights. The key is choosing the <strong>right chart for the right data type</strong> — using the wrong visualisation can obscure insights rather than reveal them.
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Data Type</th><th>Visualisation</th><th>Description &amp; When to Use</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Text Data</strong></td>
+          <td>📝 Word Cloud</td>
+          <td>Visual representation of word data where <strong>word size indicates frequency and importance</strong>. Use when you want to show which words, themes, or topics appear most often in a body of text — e.g., customer feedback analysis.</td>
+        </tr>
+        <tr>
+          <td><strong>Mixed Data</strong></td>
+          <td>🗃️ FacetGrid</td>
+          <td>A multi-axes grid with subplots to <strong>visualise distribution and relationships between variables</strong>. Use when you need to compare how a relationship changes across categories — e.g., sales patterns across different regions.</td>
+        </tr>
+        <tr>
+          <td rowspan="5"><strong>Numeric Data</strong></td>
+          <td>📈 Line Graph</td>
+          <td>Illustrates <strong>data changing over time</strong>, useful for trends. Best when showing continuous change — e.g., daily temperature readings, monthly revenue over years.</td>
+        </tr>
+        <tr>
+          <td>📊 Bar Chart</td>
+          <td><strong>Compares data between categories</strong> using vertical or horizontal bars. Use when comparing discrete groups — e.g., sales by product category, exam scores by subject.</td>
+        </tr>
+        <tr>
+          <td>🥧 Pie Chart</td>
+          <td>Circular chart illustrating <strong>numerical proportions</strong> as slices of a whole. Use only when comparing parts to a whole — e.g., market share breakdown, budget allocation.</td>
+        </tr>
+        <tr>
+          <td>⚫ Scatter Plot</td>
+          <td>Visualises <strong>relationships and trends between two variables</strong>. Use when exploring correlation — e.g., age vs. cholesterol level, advertising spend vs. revenue.</td>
+        </tr>
+        <tr>
+          <td>📉 Histogram</td>
+          <td>Represents <strong>distribution of continuous data</strong> through bars of varying heights. Use when showing how data is distributed — e.g., frequency of exam score ranges.</td>
+        </tr>
+        <tr>
+          <td><strong>Categorical/Heat</strong></td>
+          <td>🌡️ Heat Map</td>
+          <td><strong>Compares data across categories</strong> using colour intensity to identify strong and weak values. Use for dense multi-variable comparisons — e.g., correlation matrices, website click patterns.</td>
+        </tr>
+        <tr>
+          <td><strong>Stock / Financial</strong></td>
+          <td>🕯️ Candlestick Chart</td>
+          <td>A visual aid for decision-making in <strong>stock, forex, commodity, and option trading</strong>. Each "candle" shows opening, closing, high, and low prices for a time period.</td>
+        </tr>
+        <tr>
+          <td><strong>Geographic Data</strong></td>
+          <td>🗺️ Map Chart</td>
+          <td>Utilises geographical maps to <strong>display data points or statistical information associated with specific locations</strong>. Use for regional comparisons — e.g., population density, election results by state.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="sh">Choosing the Right Visualisation</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="icon">📅</div>
+      <h4>Time-Based Data</h4>
+      <p>Use <strong>Line Graphs</strong> for continuous change over time. They clearly show trends, seasonal patterns, and the rate of change — ideal for revenue, temperature, or user growth over months and years.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🆚</div>
+      <h4>Comparing Categories</h4>
+      <p>Use <strong>Bar Charts</strong> for comparing discrete groups. They are intuitive and easy to read — great for comparing sales by region, scores by subject, or performance across different products.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔗</div>
+      <h4>Relationships Between Variables</h4>
+      <p>Use <strong>Scatter Plots</strong> to reveal correlations. If you want to know whether two variables are related — e.g., does more study time lead to better grades? — scatter plots show this immediately.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🧩</div>
+      <h4>Parts of a Whole</h4>
+      <p>Use <strong>Pie Charts</strong> only when the proportional relationship to a whole matters. But use sparingly — human eyes struggle to accurately compare slice sizes. Bar charts often communicate the same information more clearly.</p>
+    </div>
+  </div>
+
+  <div class="warn"><strong>⚠️ Common Visualisation Mistakes:</strong> Using 3D charts (distorts proportion), starting bar chart axes at non-zero values (exaggerates differences), using too many colours (creates confusion), choosing pie charts with many categories (impossible to read), and using line charts for non-continuous categorical data. Always ask: "Does this visual make the insight clearer or more confusing?"</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     STEPS TO CREATE A DATA STORY
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="steps">
+<div class="container">
+  <div class="s-tag">Section 8.6</div>
+  <div class="s-title">Steps to Create a Story Through Data</div>
+  <div class="s-intro">
+    If data collected is represented in just a series of graphs and charts, it will not serve the purpose of any organisation. It should be communicated with proper <strong>narrative, context, meaning, relevance, and clarity</strong>. The narrative should take the focus of the audience to the correct spot and not miss out on important facts. To find compelling stories in datasets, four steps must be followed.
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h5>Collect the Data and Organise It</h5>
+        <p>Gather relevant, reliable data from appropriate sources. Organise it systematically — clean missing values, remove duplicates, and ensure the data is accurate and complete. <strong>The quality of your story depends entirely on the quality of your data.</strong> Define the question your story will answer before collecting data.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h5>Use Proper Visualisation Tools to Visualise the Data</h5>
+        <p>Select the right chart or graph type for your data (refer to Section 8.5). Use tools like <strong>MS Excel, Tableau, Power BI, or Python (matplotlib/seaborn)</strong> to create clear, clean visualisations. Ensure your visualisation is accurate, properly labelled, and does not mislead.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h5>Observe the Relationships Between the Data</h5>
+        <p>Analyse the visualisations — look for <strong>trends, patterns, correlations, outliers, and anomalies</strong>. Ask: What is changing over time? Are two variables correlated? Where is the surprise in the data? This analytical step is where the key insight — the heart of your story — is discovered.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h5>Create a Simple Narrative Hidden in the Data</h5>
+        <p>Craft a clear, concise narrative that communicates the insight to your audience. Structure it using <strong>Freytag's Pyramid</strong> — introduce context, build with supporting data, reveal the key insight, interpret its implications, and end with a call to action. The narrative should be crisp, contextual, and tailored to your audience's level of data literacy.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sh">Case Study — Mid-Day Meal Scheme &amp; Dropout Rates</h3>
+  <div class="s-intro" style="border-left-color:var(--accent2);">
+    <strong>Example:</strong> Using available data on student enrolment, attendance, and dropout rates, create a compelling data story that explores the impact of the Mid-Day Meal Scheme (MDMS) since its launch in 1995.
+  </div>
+
+  <div class="ig">
+    <div class="ic">
+      <h4>Step 1 — Collect &amp; Organise</h4>
+      <ul>
+        <li>Gather state-wise dropout rate data from 1985–2020</li>
+        <li>Collect MDMS implementation dates and coverage data per state</li>
+        <li>Include enrolment and attendance figures as supporting data</li>
+        <li>Clean data — handle missing years, standardise formats</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Step 2 — Visualise</h4>
+      <ul>
+        <li>Line graph: Dropout rate over time (1985–2020) — shows trend clearly</li>
+        <li>Bar chart: Compare dropout rates before vs. after MDMS by state</li>
+        <li>Scatter plot: MDMS coverage % vs. dropout rate reduction</li>
+        <li>Map chart: Geographic visualisation of MDMS impact across states</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Steps 3 &amp; 4 — Observe &amp; Narrate</h4>
+      <ul>
+        <li>Key insight: Dropout rates declined most sharply post-1995 in states with high MDMS adoption</li>
+        <li>Correlation between MDMS coverage and attendance improvement</li>
+        <li>Narrative: "The Mid-Day Meal Scheme didn't just feed students — it kept them in school"</li>
+        <li>Call to action: Expand scheme coverage to increase enrolment further</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="sh">Case Study — Covid Vaccine Data Story</h3>
+  <p class="bd">A second classic example: using vaccination rate data and COVID-19 case numbers over time, create a data story showing the impact of the vaccine rollout.</p>
+
+  <div class="ig">
+    <div class="ic">
+      <h4>Step 1 — Prepare Data in MS Excel</h4>
+      <ul>
+        <li>Date column, daily new cases column, cumulative vaccination % column</li>
+        <li>Organise chronologically from vaccine launch date</li>
+        <li>Include multiple waves of the pandemic for full context</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Step 2 — Visualise with Line Chart</h4>
+      <ul>
+        <li>Dual-axis line chart: Cases on left axis, vaccination % on right axis</li>
+        <li>Time on x-axis spanning pre-vaccine to post-vaccine period</li>
+        <li>Visual clearly shows the inverse relationship as vaccination rises</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Step 3 — Narrative</h4>
+      <ul>
+        <li><strong>"Covid Vaccine — Gives a Ray of Hope"</strong></li>
+        <li>Introduction: pandemic context and challenge</li>
+        <li>Climax: the turning point when cases begin declining as vaccination rates cross key thresholds</li>
+        <li>Conclusion: clear evidence that vaccination drives case reduction</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     ETHICS
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="ethics">
+<div class="container">
+  <div class="s-tag">Section 8.7</div>
+  <div class="s-title">Ethics in Data Storytelling</div>
+  <div class="s-intro">
+    Data storytelling is a powerful tool — and with great power comes great responsibility. Each of the three key elements of data storytelling (Data, Narrative, and Visuals) presents unique <strong>ethical challenges</strong> that must be addressed to ensure responsible and trustworthy storytelling. A misleading data story can cause real harm — to individuals, organisations, and society.
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="icon">✅</div>
+      <h4>Accuracy</h4>
+      <p>Ensure that the data is <strong>accurate, reliable, and truthful</strong>. Avoid manipulating data to support a predetermined narrative. Present all relevant data — not just the subset that supports your conclusion. Cherry-picking data points is a form of deception.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔍</div>
+      <h4>Transparency</h4>
+      <p>Clearly <strong>cite the sources of the data</strong>, methods used for analysis, and any limitations or biases in the dataset. Be transparent about the story's purpose and potential conflicts of interest. The audience deserves to know how the data was collected and interpreted.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔐</div>
+      <h4>Respect for Privacy</h4>
+      <p>Protect the <strong>privacy of individuals and groups</strong> represented in the data. Avoid sharing personal or sensitive information without consent. Anonymise individual data before including it in a public-facing data story. Follow data protection regulations (GDPR, DPDP Act 2023).</p>
+    </div>
+  </div>
+
+  <h3 class="sh">Ethical Pitfalls to Avoid</h3>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Ethical Issue</th><th>What It Looks Like</th><th>How to Avoid It</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Misleading Visualisations</strong></td><td>Starting a bar chart y-axis at a non-zero value to exaggerate differences; using a 3D pie chart that distorts proportions</td><td>Always start axes at zero; use 2D charts; include proper scale labels</td></tr>
+        <tr><td><strong>Cherry-Picking Data</strong></td><td>Only showing the time period or subset of data that supports your conclusion, ignoring contradicting evidence</td><td>Present the full dataset; acknowledge anomalies; show all relevant trends</td></tr>
+        <tr><td><strong>Correlation ≠ Causation</strong></td><td>Claiming that two correlated variables have a direct causal relationship without evidence (e.g., "ice cream sales cause drowning")</td><td>Use careful language — "associated with" rather than "causes"; acknowledge confounding variables</td></tr>
+        <tr><td><strong>Privacy Violation</strong></td><td>Displaying individual-level data that identifies specific people without consent; using personal health or financial data publicly</td><td>Aggregate data; anonymise individuals; obtain informed consent; follow data protection law</td></tr>
+        <tr><td><strong>Biased Narrative</strong></td><td>Framing the narrative to lead the audience to a predetermined conclusion that serves the storyteller's interests rather than the truth</td><td>Present multiple perspectives; acknowledge uncertainty; let the data guide the narrative, not vice versa</td></tr>
+        <tr><td><strong>Missing Context</strong></td><td>Presenting a data point without the context needed to interpret it correctly — e.g., "crime increased by 100%" (from 1 case to 2)</td><td>Always provide baseline numbers, sample sizes, and relevant context for all statistics</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="warn"><strong>⚠️ Remember:</strong> A data story does not just happen on its own — it must be curated and prepared by someone for the benefit of other people. The person crafting the story holds significant power over how the audience perceives reality. With that power comes the ethical obligation to represent data honestly, completely, and in a way that respects both the data subjects and the audience.</div>
+
+  <h3 class="sh">Conclusion — The Power of Data Stories</h3>
+  <p class="bd">When we effectively combine the right insights with the right narratives and visuals, we can communicate data in a manner that can <strong>inspire change</strong>. Data stories help other people understand a problem, risk, or opportunity in a meaningful way that compels them to act on it.</p>
+
+  <div class="hl"><strong>📌 Data Storytelling Defined:</strong> Data storytelling is a <em>persuasive, structured approach</em> for communicating insights using narrative elements and explanatory visuals to inform decisions and drive changes. It is not just a technical skill — it is a communication skill, a design skill, and above all, an ethical responsibility.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     ASSESSMENT
+════════════════════════════════════════════════════════ -->
+<section id="assessment">
+<div class="container">
+  <div class="aw">
+    <div class="a-title">Unit 8 Assessment</div>
+    <div class="a-sub">Data Storytelling — test your understanding across all topics covered in this unit</div>
+
+    <!-- MCQ -->
+    <div class="qlabel">Section A — Multiple Choice Questions</div>
+
+    <div class="mcq" id="q1">
+      <div class="mcq-q"><em>Q1.</em> Which of the following best describes Data Storytelling?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q1','a','b')"><div class="ltr">A</div> Presenting raw data without any analysis</div>
+        <div class="opt" onclick="chk('q1','b','b')"><div class="ltr">B</div> Communicating insights through data in a compelling narrative format</div>
+        <div class="opt" onclick="chk('q1','c','b')"><div class="ltr">C</div> Creating colourful charts and graphs only</div>
+        <div class="opt" onclick="chk('q1','d','b')"><div class="ltr">D</div> Analysing data without any visual aids</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q2">
+      <div class="mcq-q"><em>Q2.</em> What is the primary goal of Data Storytelling?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q2','a','c')"><div class="ltr">A</div> To confuse the audience with complex charts</div>
+        <div class="opt" onclick="chk('q2','b','c')"><div class="ltr">B</div> To entertain the audience with anecdotes only</div>
+        <div class="opt" onclick="chk('q2','c','c')"><div class="ltr">C</div> To communicate insights and findings effectively using data</div>
+        <div class="opt" onclick="chk('q2','d','c')"><div class="ltr">D</div> To hide information from the audience</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q3">
+      <div class="mcq-q"><em>Q3.</em> Which of the following is NOT a component of effective Data Storytelling?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q3','a','c')"><div class="ltr">A</div> Compelling visuals</div>
+        <div class="opt" onclick="chk('q3','b','c')"><div class="ltr">B</div> Clear narrative structure</div>
+        <div class="opt" onclick="chk('q3','c','c')"><div class="ltr">C</div> Overcomplicating the message</div>
+        <div class="opt" onclick="chk('q3','d','c')"><div class="ltr">D</div> Insightful data analysis</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q4">
+      <div class="mcq-q"><em>Q4.</em> Which visualisation type is best for showing how a value changes over time?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q4','a','b')"><div class="ltr">A</div> Pie Chart</div>
+        <div class="opt" onclick="chk('q4','b','b')"><div class="ltr">B</div> Line Graph</div>
+        <div class="opt" onclick="chk('q4','c','b')"><div class="ltr">C</div> Word Cloud</div>
+        <div class="opt" onclick="chk('q4','d','b')"><div class="ltr">D</div> Heat Map</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q5">
+      <div class="mcq-q"><em>Q5.</em> In Freytag's Pyramid, which stage represents the most intense or important point of the story?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q5','a','c')"><div class="ltr">A</div> Introduction</div>
+        <div class="opt" onclick="chk('q5','b','c')"><div class="ltr">B</div> Rising Action</div>
+        <div class="opt" onclick="chk('q5','c','c')"><div class="ltr">C</div> Climax</div>
+        <div class="opt" onclick="chk('q5','d','c')"><div class="ltr">D</div> Conclusion</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q6">
+      <div class="mcq-q"><em>Q6.</em> A Word Cloud is most suitable for which type of data?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q6','a','b')"><div class="ltr">A</div> Stock price data</div>
+        <div class="opt" onclick="chk('q6','b','b')"><div class="ltr">B</div> Text data showing word frequency</div>
+        <div class="opt" onclick="chk('q6','c','b')"><div class="ltr">C</div> Geographic location data</div>
+        <div class="opt" onclick="chk('q6','d','b')"><div class="ltr">D</div> Data changing over time</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q7">
+      <div class="mcq-q"><em>Q7.</em> Why is it important to know your audience when creating a data story?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q7','a','b')"><div class="ltr">A</div> To impress them with your technical knowledge</div>
+        <div class="opt" onclick="chk('q7','b','b')"><div class="ltr">B</div> To tailor the message and visuals to their level of understanding and interests</div>
+        <div class="opt" onclick="chk('q7','c','b')"><div class="ltr">C</div> To exclude certain data points that might confuse them</div>
+        <div class="opt" onclick="chk('q7','d','b')"><div class="ltr">D</div> To ignore their feedback and preferences</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q8">
+      <div class="mcq-q"><em>Q8.</em> Which ethical principle requires clearly citing data sources, analysis methods, and limitations?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q8','a','b')"><div class="ltr">A</div> Accuracy</div>
+        <div class="opt" onclick="chk('q8','b','b')"><div class="ltr">B</div> Transparency</div>
+        <div class="opt" onclick="chk('q8','c','b')"><div class="ltr">C</div> Privacy</div>
+        <div class="opt" onclick="chk('q8','d','b')"><div class="ltr">D</div> Variability</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q9">
+      <div class="mcq-q"><em>Q9.</em> Which element of a story is described as "the ability to have a clear, deep, and sometimes sudden understanding of a complicated problem"?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q9','a','d')"><div class="ltr">A</div> Conflict</div>
+        <div class="opt" onclick="chk('q9','b','d')"><div class="ltr">B</div> Resolution</div>
+        <div class="opt" onclick="chk('q9','c','d')"><div class="ltr">C</div> Characters</div>
+        <div class="opt" onclick="chk('q9','d','d')"><div class="ltr">D</div> Insights</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q10">
+      <div class="mcq-q"><em>Q10.</em> What does a Scatter Plot primarily help to visualise?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q10','a','c')"><div class="ltr">A</div> Proportions of a whole</div>
+        <div class="opt" onclick="chk('q10','b','c')"><div class="ltr">B</div> Word frequency in text</div>
+        <div class="opt" onclick="chk('q10','c','c')"><div class="ltr">C</div> Relationships and trends between two variables</div>
+        <div class="opt" onclick="chk('q10','d','c')"><div class="ltr">D</div> Stock price movements over time</div>
+      </div>
+    </div>
+
+    <button class="sbtn" onclick="submitQ()">Submit &amp; See Score</button>
+    <div class="spanel" id="spanel" style="display:none;">
+      <div><div class="snum" id="sval">—</div><div class="stxt" id="smsg"></div></div>
+    </div>
+
+    <!-- TRUE / FALSE -->
+    <div class="qlabel">Section B — True or False</div>
+
+    <div class="qa"><div class="qa-q"><em>TF 1.</em> The main purpose of data visualisation is to hide the data from the audience. <strong>(True / False)</strong></div>
+    <button class="rbtn" onclick="tog('tf1')">Show Answer</button>
+    <div class="ans" id="tf1"><strong>False.</strong> The main purpose of data visualisation is the opposite — to reveal and communicate data clearly to the audience. Visualisation transforms complex numerical data into intuitive visual forms (charts, graphs, maps) that make trends, patterns, and relationships visible and understandable. Hiding data would be an ethical violation, not the purpose of the tool.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>TF 2.</em> Data storytelling involves presenting insights and findings in a compelling narrative format. <strong>(True / False)</strong></div>
+    <button class="rbtn" onclick="tog('tf2')">Show Answer</button>
+    <div class="ans" id="tf2"><strong>True.</strong> This is the core definition of data storytelling. It is the practice of translating complex data and analytics into a compelling narrative that is easily understandable and relatable to various audiences — combining data, visuals, and narrative to communicate insights effectively.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>TF 3.</em> Data storytelling involves presenting raw data without any analysis or interpretation. <strong>(True / False)</strong></div>
+    <button class="rbtn" onclick="tog('tf3')">Show Answer</button>
+    <div class="ans" id="tf3"><strong>False.</strong> Data storytelling is fundamentally about interpretation, not just presentation. Presenting raw data without analysis would simply be data reporting. Data storytelling requires analysing the data, identifying insights, crafting a narrative, and selecting appropriate visualisations — the entire process of turning numbers into meaning.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>TF 4.</em> In Freytag's Pyramid, the Climax comes before the Rising Action. <strong>(True / False)</strong></div>
+    <button class="rbtn" onclick="tog('tf4')">Show Answer</button>
+    <div class="ans" id="tf4"><strong>False.</strong> In Freytag's Pyramid, the correct order is: Introduction → Rising Action → Climax → Falling Action → Conclusion. The Climax is the peak of the pyramid and comes after Rising Action has built up the tension and stakes. The Rising Action is the series of events that leads to the climax — not the other way around.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>TF 5.</em> Combining data, narrative, and visuals creates a more impactful data story than using just one element alone. <strong>(True / False)</strong></div>
+    <button class="rbtn" onclick="tog('tf5')">Show Answer</button>
+    <div class="ans" id="tf5"><strong>True.</strong> Each element — data, narrative, or visuals — can be powerful on its own. However, the real impact comes from skillfully blending all three. When you combine the right visuals and narrative with the right data, you create a data story that can influence and drive change in a way that no single element can achieve alone.</div></div>
+
+    <!-- SHORT ANSWER -->
+    <div class="qlabel">Section C — Short Answer Questions</div>
+
+    <div class="qa"><div class="qa-q"><em>SQ 1.</em> Define Data Storytelling. How does it differ from regular data visualisation?</div>
+    <button class="rbtn" onclick="tog('s1')">Show Answer</button>
+    <div class="ans" id="s1">
+      <strong>Data Storytelling</strong> is the art and practice of translating complex data and analytics into a compelling narrative that is easily understandable and relatable to various audiences. It is a persuasive, structured approach for communicating insights using narrative elements and explanatory visuals to inform decisions and drive changes.<br><br>
+      <strong>Difference from Data Visualisation:</strong><br><br>
+      Data Visualisation is the pictorial representation of data using charts, graphs, and diagrams. It is only ONE of the three elements of data storytelling — the visual component.<br><br>
+      Data Storytelling goes further by combining three elements together: (1) Data — the factual foundation, (2) Visuals — the graphical representation, and (3) Narrative — the structured storyline that provides context, meaning, and a call to action. A chart alone shows "what" — a data story explains "what, why, and what to do about it." Visualisation is a tool; data storytelling is a complete communication strategy.
+    </div></div>
+
+    <div class="qa"><div class="qa-q"><em>SQ 2.</em> Name and explain the three essential elements of Data Storytelling.</div>
+    <button class="rbtn" onclick="tog('s2')">Show Answer</button>
+    <div class="ans" id="s2">
+      The three essential elements of Data Storytelling are:<br><br>
+      <strong>1. Data:</strong> Basic facts or raw facts about any entity. Data is the primary building block of every data story — it serves as the foundation for the narrative and visual elements. Without accurate, reliable data, the story has no credibility. Data can be qualitative or quantitative, from any number of sources.<br><br>
+      <strong>2. Narrative:</strong> The structure or storyline crafted to present insights derived from data in a clear, engaging, and informative manner. It involves identifying and organising key information in a linear and coherent fashion — ensuring the storyline is crisp and contextual. A well-defined narrative allows the audience to understand the significance of insights and how they relate to the broader context of the analysis.<br><br>
+      <strong>3. Visuals:</strong> Pictorial representations of data using various graphs, charts, and diagrams. They help convey complex information more clearly and effectively — enabling the audience to see trends, patterns, and anomalies in the data. Visuals serve as a scene of the data presented in graphical format, facilitating better understanding and interpretation of the insights being communicated.
+    </div></div>
+
+    <div class="qa"><div class="qa-q"><em>SQ 3.</em> Describe Freytag's Pyramid and its application in Data Storytelling.</div>
+    <button class="rbtn" onclick="tog('s3')">Show Answer</button>
+    <div class="ans" id="s3">
+      <strong>Freytag's Pyramid</strong> is a narrative framework developed by Gustav Freytag, building on Aristotle's simple model. It describes the arc or progression of a story through five key stages using a pyramid shape: Introduction → Rising Action → Climax → Falling Action → Conclusion.<br><br>
+      <strong>The Five Stages:</strong><br>
+      1. Introduction: Setting and characters established; background provided<br>
+      2. Rising Action: Series of events building tension toward the climax<br>
+      3. Climax: The most intense point; fortune of the protagonist turns<br>
+      4. Falling Action: Events unravel after the conflict; heading toward resolution<br>
+      5. Conclusion: All conflicts resolved; outstanding details explained<br><br>
+      <strong>Application in Data Storytelling:</strong><br>
+      Freytag's Pyramid is used to structure data presentations — Introduction sets the business context and question; Rising Action presents the data analysis and evidence; Climax reveals the key insight or "aha moment" in the data; Falling Action interprets the implications; and Conclusion delivers the recommendation or call to action. This structure captivates audience attention and guides them through the narrative journey from problem to insight to action.
+    </div></div>
+
+    <div class="qa"><div class="qa-q"><em>SQ 4.</em> Name the correct graph type for each data situation: (a) word frequency in customer reviews, (b) stock price movements, (c) sales comparison across 5 regions, (d) relationship between study hours and exam scores.</div>
+    <button class="rbtn" onclick="tog('s4')">Show Answer</button>
+    <div class="ans" id="s4">
+      <strong>(a) Word frequency in customer reviews → Word Cloud</strong><br>
+      A Word Cloud visually represents text data where word size indicates frequency and importance. It immediately shows which words appear most often — making it perfect for analysing customer feedback, social media posts, or any text corpus.<br><br>
+      <strong>(b) Stock price movements → Candlestick Chart</strong><br>
+      A Candlestick Chart is specifically designed for financial data — showing opening, closing, high, and low prices for each time period. It is the standard visualisation for stock, forex, commodity, and option trading analysis.<br><br>
+      <strong>(c) Sales comparison across 5 regions → Bar Chart</strong><br>
+      A Bar Chart compares data between discrete categories using bars. It is the ideal choice for comparing values across a fixed number of groups — making the relative size of each region's sales immediately apparent.<br><br>
+      <strong>(d) Relationship between study hours and exam scores → Scatter Plot</strong><br>
+      A Scatter Plot visualises the relationship and trends between two variables. Each point represents one student (their study hours and their score) — the pattern of points reveals whether there is a positive correlation between the two variables.
+    </div></div>
+
+    <!-- LONG ANSWER -->
+    <div class="qlabel">Section D — Long Answer Questions</div>
+
+    <div class="qa"><div class="qa-q"><em>LQ 1.</em> Why has Data Storytelling become very powerful nowadays? Discuss with reference to the changing data landscape and business needs.</div>
+    <button class="rbtn" onclick="tog('l1')">Show Answer</button>
+    <div class="ans" id="l1">
+      Data storytelling has become extremely powerful today for several interconnected reasons rooted in both technological change and evolving business needs:<br><br>
+      <strong>1. Explosion of Data:</strong> We now generate approximately 328.77 million terabytes of data every day. Organisations are drowning in data but starving for insights. Data storytelling is the bridge that translates overwhelming quantities of data into meaningful, actionable insights that decision-makers can actually use.<br><br>
+      <strong>2. Non-Technical Decision-Makers:</strong> Most business decisions are made by leaders who are not data scientists. Data storytelling packages complex analytical findings in accessible narrative and visual forms that non-technical stakeholders can understand, trust, and act upon — without needing to understand the underlying methodology.<br><br>
+      <strong>3. Information Overload:</strong> In today's information-saturated environment, attention is scarce. A well-crafted data story cuts through the noise by making insights memorable. Research shows that data presented in narrative format is retained far better than raw statistics alone.<br><br>
+      <strong>4. Three Key Characteristics Make It Powerful:</strong><br>
+      — It makes insights and key findings memorable to the audience<br>
+      — It is a persuasive way of communicating key insights to both business and technical stakeholders<br>
+      — It creates engagement — the story keeps the audience invested in the data's outcome<br><br>
+      <strong>5. Bridging Technology and People:</strong> Data storytelling is filling a vital gap in business and in the technical analytics process between technology and people. By combining an increasingly essential resource (data) with a familiar, time-tested form of communication (storytelling), this skill helps more people translate their insights into action.<br><br>
+      <strong>6. Brand and Customer Engagement:</strong> Companies like Spotify (Wrapped) and Uber (Year in Review) have demonstrated that personalised data stories generate massive engagement — turning dry usage statistics into emotional, shareable personal narratives. This has elevated data storytelling from an internal analytical skill to a consumer-facing marketing strategy.<br><br>
+      <strong>Conclusion:</strong> From a data literacy perspective, once an organisation's people are comfortable with reading and working with data, they must also learn to communicate insights effectively. Data storytelling is no longer optional — it is an essential skill for anyone working with data in any professional context.
+    </div></div>
+
+    <div class="qa"><div class="qa-q"><em>LQ 2.</em> Explain the steps to create a Data Story. Use an example to illustrate each step.</div>
+    <button class="rbtn" onclick="tog('l2')">Show Answer</button>
+    <div class="ans" id="l2">
+      Creating an effective data story follows four key steps. Using the example of <strong>analysing student exam performance</strong> across a school year:<br><br>
+      <strong>Step 1 — Collect the Data and Organise It</strong><br>
+      Gather relevant, reliable data from appropriate sources and organise it systematically. Remove duplicates, clean missing values, and ensure accuracy. The quality of your story depends entirely on the quality of your data.<br>
+      Example: Collect term-by-term exam scores for each subject across all students. Organise into a spreadsheet with columns: Student ID, Subject, Term 1 Score, Term 2 Score, Term 3 Score, Attendance %.<br><br>
+      <strong>Step 2 — Use Proper Visualisation Tools to Visualise the Data</strong><br>
+      Select the right chart type for your data and create clear, labelled visualisations using appropriate tools (MS Excel, Tableau, Power BI).<br>
+      Example: Create a Line Graph showing average scores by subject across three terms. Create a Scatter Plot of Attendance % vs. Final Score. Create a Bar Chart comparing subject-wise average scores. Each visualisation reveals a different aspect of the data.<br><br>
+      <strong>Step 3 — Observe the Relationships Between the Data</strong><br>
+      Analyse the visualisations for trends, patterns, correlations, and anomalies. Ask what is changing, what is correlated, and where the surprise is in the data.<br>
+      Example: The scatter plot shows a strong positive correlation — students with higher attendance consistently scored higher. The line graph shows that Science scores declined sharply in Term 2. These observations are the raw insights that will power the narrative.<br><br>
+      <strong>Step 4 — Create a Simple Narrative Hidden in the Data</strong><br>
+      Craft a clear, structured narrative using Freytag's Pyramid framework, tailored to your audience's data literacy level.<br>
+      Example Narrative: "Our students began the year strong, but a concerning dip in Science performance in Term 2 — driven by a period of low attendance during the rainy season — suggests that attendance directly impacts academic outcomes. Schools that implemented additional catch-up sessions recovered their scores in Term 3. Our recommendation: introduce a structured attendance intervention programme for at-risk students each monsoon term."<br><br>
+      <strong>Key Principle:</strong> The narrative should communicate the insight, provide context, and end with a clear call to action. It should be crisp, factual, and tailored to the audience — avoiding technical jargon when presenting to non-technical stakeholders.
+    </div></div>
+
+    <!-- CASE STUDY -->
+    <div class="qlabel">Section E — Case Study Questions</div>
+
+    <div class="qa"><div class="qa-q"><em>CS 1.</em> A city government collected data on traffic accidents at intersections to identify high-risk areas and prioritise safety improvements. They developed a data storytelling report to present their findings to city officials. What is the primary purpose of this data storytelling report, and what elements should it include?</div>
+    <button class="rbtn" onclick="tog('c1')">Show Answer</button>
+    <div class="ans" id="c1">
+      <strong>Primary Purpose:</strong> The primary purpose of the city government's data storytelling report is to identify high-risk areas for traffic accidents and propose targeted interventions to improve road safety — Option B from the original case study.<br><br>
+      <strong>What the Report Should Include:</strong><br><br>
+      <strong>Data Element:</strong><br>
+      — Accident frequency data by intersection (last 3–5 years)<br>
+      — Severity data (minor, major, fatal)<br>
+      — Time-of-day and day-of-week patterns<br>
+      — Road conditions, speed limits, and traffic volume at each intersection<br><br>
+      <strong>Visual Element:</strong><br>
+      — Map Chart: geographic visualisation of accident hotspots (colour-coded by frequency/severity) — immediately shows city officials where the problem areas are<br>
+      — Bar Chart: top 10 most dangerous intersections by accident count<br>
+      — Line Graph: accident trends over time (are they increasing or decreasing?)<br>
+      — Heat Map: accidents by time-of-day and day-of-week<br><br>
+      <strong>Narrative Element (using Freytag's Pyramid):</strong><br>
+      — Introduction: Context — road safety challenge and data collected<br>
+      — Rising Action: Evidence — showing the patterns and concentrations of accidents<br>
+      — Climax: The key insight — e.g., "3 intersections account for 40% of all serious accidents, and 80% occur between 5–8pm on weekdays"<br>
+      — Falling Action: Interpretation — cost of inaction, comparison with similar cities that improved safety<br>
+      — Conclusion: Specific recommendations — install traffic signals, reduce speed limits, add pedestrian crossings at the top 3 intersections<br><br>
+      <strong>Ethics to Consider:</strong> Ensure no individual accident victims are identifiable in the data; cite sources clearly; be transparent about any data limitations (e.g., underreporting).
+    </div></div>
+
+  </div>
+</div>
+</section>
+
+<footer>
+  <p>Class XII · Artificial Intelligence · Subject Code 843 · CBSE</p>
+  <p style="margin-top:.4rem;">Unit 8 — Data Storytelling &nbsp;·&nbsp; <span>Storytelling · 3 Elements · Freytag's Pyramid · Visualisations · Ethics</span></p>
+</footer>
+
+<script>
+/* STARS */
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 180; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const sz = Math.random() * 2.4 + 0.5;
+  s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*4}s;--dl:${Math.random()*5}s;`;
+  starsEl.appendChild(s);
+}
+
+/* THEME */
+let isDay = true;
+function toggleTheme() {
+  isDay = !isDay;
+  document.documentElement.setAttribute('data-theme', isDay ? 'day' : 'night');
+  document.getElementById('tlbl').textContent = isDay ? 'Day' : 'Night';
+  document.getElementById('tico').textContent = isDay ? '☀️' : '🌙';
+}
+
+/* MCQ */
+const answered = {};
+const correctMap = {q1:'b',q2:'c',q3:'c',q4:'b',q5:'c',q6:'b',q7:'b',q8:'b',q9:'d',q10:'c'};
+function chk(qid, chosen, right) {
+  if (answered[qid]) return;
+  answered[qid] = chosen;
+  const c = document.getElementById(qid);
+  const opts = c.querySelectorAll('.opt');
+  ['a','b','c','d'].forEach((l,i) => {
+    opts[i].style.pointerEvents = 'none';
+    if (l === right) opts[i].classList.add('correct');
+    else if (l === chosen && chosen !== right) opts[i].classList.add('wrong');
+  });
+}
+function submitQ() {
+  let score = 0;
+  Object.keys(correctMap).forEach(qid => {
+    if (!answered[qid]) {
+      chk(qid, '?', correctMap[qid]);
+      answered[qid] = '?';
+    }
+    if (answered[qid] === correctMap[qid]) score++;
+  });
+  const p = document.getElementById('spanel');
+  p.style.display = 'flex';
+  document.getElementById('sval').textContent = score+'/10';
+  const msgs = ['Keep practising — review the notes! 💪','Getting there, a bit more revision 📖','Good effort, almost there 👍','Great job, well done! 🎉','Perfect score — outstanding! 🏆'];
+  document.getElementById('smsg').textContent = msgs[Math.min(Math.floor(score/2.5),4)];
+  p.scrollIntoView({behavior:'smooth'});
+}
+function tog(id) {
+  const b = document.getElementById(id);
+  const btn = b.previousElementSibling;
+  b.classList.toggle('show');
+  btn.textContent = b.classList.contains('show') ? 'Hide Answer' : 'Show Answer';
+}
+
+/* NAV highlight */
+const secs = document.querySelectorAll('section[id]');
+const nls = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  secs.forEach(s => { if (window.scrollY >= s.offsetTop - 90) cur = s.id; });
+  nls.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#'+cur));
+});
+</script>
+</body>
+</html>

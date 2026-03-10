@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="day">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 5 — Introduction to Big Data & Data Analytics | Class XII AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── THEMES ───────────────────────────────── */
+:root { --tr: 1.2s cubic-bezier(.4,0,.2,1); }
+
+[data-theme="day"] {
+  --sky-top:#74b9d8; --sky-mid:#b8dcf0; --sky-bot:#fde8c8;
+  --bg:#fdf6ec; --surface:#fffbf5; --surface2:#fef3e2;
+  --border:#e8d5b7; --text:#2c1810; --text-muted:#7a5c42;
+  --accent:#d97b34; --accent2:#2d8a4e; --accent3:#c94f27;
+  --accent4:#8b5cf6; --code-bg:#1a1410; --code-text:#f0e0c8;
+  --nav-bg:rgba(253,246,236,0.94); --sun-bg:#fff176;
+  --sun-shadow:rgba(255,200,50,.7); --star-op:0; --cloud-op:1;
+}
+[data-theme="night"] {
+  --sky-top:#020818; --sky-mid:#0a1628; --sky-bot:#1a2a4a;
+  --bg:#080e1f; --surface:#0e1828; --surface2:#141f35;
+  --border:#1e2d4a; --text:#e8edf8; --text-muted:#7a90b8;
+  --accent:#f4a261; --accent2:#00d4aa; --accent3:#ff6b9d;
+  --accent4:#a78bfa; --code-bg:#030810; --code-text:#c9d8f0;
+  --nav-bg:rgba(8,14,31,0.95); --sun-bg:#e8eeff;
+  --sun-shadow:rgba(180,200,255,.55); --star-op:1; --cloud-op:0;
+}
+
+/* ── RESET ────────────────────────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.78;transition:background var(--tr),color var(--tr);overflow-x:hidden;}
+
+/* ── SKY ──────────────────────────────────── */
+.sky{position:fixed;inset:0;z-index:-2;pointer-events:none;}
+.sky-grad{position:absolute;inset:0;background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 55%,var(--sky-bot) 100%);opacity:.16;transition:background var(--tr),opacity var(--tr);}
+[data-theme="night"] .sky-grad{opacity:.38;}
+.celestial{position:absolute;top:55px;right:130px;width:66px;height:66px;border-radius:50%;background:var(--sun-bg);box-shadow:0 0 40px var(--sun-shadow),0 0 90px var(--sun-shadow);transition:all var(--tr);}
+[data-theme="night"] .celestial{width:54px;height:54px;top:75px;right:105px;}
+.crater{position:absolute;border-radius:50%;background:rgba(0,0,0,.08);opacity:0;transition:opacity var(--tr);}
+[data-theme="night"] .crater{opacity:1;}
+.cr1{width:13px;height:13px;top:17px;left:15px;}
+.cr2{width:8px;height:8px;top:31px;left:33px;}
+.cr3{width:10px;height:10px;top:11px;left:35px;}
+.stars{position:absolute;inset:0;opacity:var(--star-op);transition:opacity var(--tr);}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite var(--dl,0s);}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}
+.clouds{position:absolute;inset:0;opacity:var(--cloud-op);transition:opacity var(--tr);pointer-events:none;}
+.cloud{position:absolute;border-radius:60px;background:rgba(255,255,255,.8);}
+.cloud::before,.cloud::after{content:'';position:absolute;background:inherit;border-radius:50%;}
+.cl1{width:110px;height:34px;top:110px;left:7%;animation:drift 30s linear infinite;}
+.cl1::before{width:55px;height:46px;top:-20px;left:14px;}
+.cl1::after{width:42px;height:36px;top:-14px;left:50px;}
+.cl2{width:85px;height:28px;top:170px;left:54%;animation:drift 42s linear infinite 6s;}
+.cl2::before{width:46px;height:38px;top:-16px;left:11px;}
+.cl2::after{width:32px;height:26px;top:-10px;left:36px;}
+.cl3{width:65px;height:22px;top:85px;left:34%;animation:drift 55s linear infinite 14s;}
+.cl3::before{width:34px;height:28px;top:-12px;left:9px;}
+@keyframes drift{from{transform:translateX(-250px)}to{transform:translateX(110vw)}}
+
+/* ── TOGGLE ───────────────────────────────── */
+.toggle-wrap{display:flex;align-items:center;gap:9px;flex-shrink:0;margin-left:auto;}
+.tlabel{font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);transition:color var(--tr);user-select:none;}
+.tbtn{width:62px;height:30px;background:var(--surface2);border:2px solid var(--border);border-radius:99px;cursor:pointer;position:relative;transition:background var(--tr),border-color var(--tr);flex-shrink:0;}
+.tbtn::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--sun-bg);box-shadow:0 0 8px var(--sun-shadow);transition:transform .5s cubic-bezier(.4,0,.2,1),background .5s,box-shadow .5s;}
+[data-theme="night"] .tbtn::after{transform:translateX(32px);}
+
+/* ── NAV TOP BAR ─────────────────────────── */
+.nav-top{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--nav-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.4rem;height:50px;gap:.8rem;transition:background var(--tr),border-color var(--tr);}
+.nav-logo{font-family:'Playfair Display',serif;font-weight:900;font-size:1rem;color:var(--accent);white-space:nowrap;flex-shrink:0;transition:color var(--tr);}
+.back-btn{display:flex;align-items:center;gap:.4rem;text-decoration:none;color:var(--text-muted);font-size:.72rem;font-weight:700;letter-spacing:.5px;flex-shrink:0;transition:all .2s;border:1.5px solid var(--border);border-radius:20px;padding:.22rem .8rem;white-space:nowrap;}
+.back-btn:hover{color:var(--accent);border-color:var(--accent);}
+
+/* ── SCROLLABLE NAV STRIP ─────────────────── */
+nav{position:fixed;top:50px;left:0;right:0;z-index:199;background:var(--nav-bg);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.2rem;height:36px;transition:background var(--tr),border-color var(--tr);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+.nav-links{display:flex;gap:.25rem;flex-shrink:0;align-items:center;}
+.nav-links a{font-size:.65rem;padding:.2rem .72rem;border-radius:20px;color:var(--text-muted);text-decoration:none;font-weight:600;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.nav-links a:hover,.nav-links a.active{background:var(--accent);color:#fff;}
+
+/* ── HERO ─────────────────────────────────── */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:8rem 2rem 5rem;text-align:center;}
+.hero-inner{max-width:700px;}
+.badge{display:inline-block;background:color-mix(in srgb,var(--accent) 13%,transparent);border:1px solid color-mix(in srgb,var(--accent) 38%,transparent);color:var(--accent);font-size:.68rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:.38rem 1.3rem;border-radius:30px;margin-bottom:1.4rem;transition:all var(--tr);}
+.hero h1{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2.6rem,7vw,5.2rem);letter-spacing:-1px;line-height:1.05;margin-bottom:1.1rem;color:var(--text);transition:color var(--tr);}
+.hero h1 span{color:var(--accent);}
+.hero p{font-size:1rem;color:var(--text-muted);max-width:540px;margin:0 auto 2.2rem;transition:color var(--tr);}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:.55rem;}
+.chip{background:var(--surface);border:1.5px solid var(--border);border-radius:9px;padding:.4rem 1rem;font-size:.76rem;font-weight:600;color:var(--text-muted);text-decoration:none;transition:all .22s;}
+.chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-3px);box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 18%,transparent);}
+
+/* ── SECTION WRAPPER ──────────────────────── */
+.container{max-width:1080px;margin:0 auto;padding:0 2rem;}
+section.topic{padding:5rem 0;border-top:1px solid var(--border);transition:border-color var(--tr);}
+
+/* section labels */
+.s-tag{font-size:.68rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:.45rem;transition:color var(--tr);}
+.s-title{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(1.7rem,3.8vw,2.5rem);line-height:1.08;margin-bottom:1.1rem;color:var(--text);transition:color var(--tr);}
+.s-intro{color:var(--text-muted);font-size:.96rem;max-width:820px;border-left:3px solid var(--accent);padding:.95rem 1.4rem;background:var(--surface);border-radius:0 12px 12px 0;margin-bottom:2.2rem;line-height:1.86;transition:all var(--tr);}
+.s-intro strong{color:var(--text);}
+
+/* sub-headings */
+h3.sh{font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:var(--accent2);margin:2rem 0 .8rem;display:flex;align-items:center;gap:.6rem;transition:color var(--tr);}
+h3.sh::before{content:'';width:22px;height:3px;background:var(--accent2);border-radius:2px;flex-shrink:0;transition:background var(--tr);}
+h4.ssh{font-family:'Outfit',sans-serif;font-weight:700;font-size:.95rem;color:var(--accent4);margin:1.5rem 0 .6rem;transition:color var(--tr);}
+p.bd{color:var(--text-muted);font-size:.94rem;margin-bottom:.85rem;transition:color var(--tr);}
+p.bd strong{color:var(--text);}
+
+/* ── CARDS ────────────────────────────────── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin:1.4rem 0 2.2rem;}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1.3rem;transition:all .25s;}
+.card:hover{transform:translateY(-5px);border-color:var(--accent);box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 16%,transparent);}
+.card .icon{font-size:1.75rem;margin-bottom:.7rem;}
+.card h4{font-family:'Playfair Display',serif;font-weight:700;font-size:.97rem;margin-bottom:.4rem;color:var(--text);transition:color var(--tr);}
+.card p{font-size:.84rem;color:var(--text-muted);line-height:1.62;transition:color var(--tr);}
+
+/* ── INFO GRID ────────────────────────────── */
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1.4rem 0;}
+.ic{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.4rem;transition:all var(--tr);}
+.ic h4{font-size:.72rem;color:var(--accent2);margin-bottom:.65rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;}
+.ic ul{list-style:none;}
+.ic ul li{font-size:.86rem;color:var(--text-muted);padding:.2rem 0 .2rem 1.2rem;position:relative;transition:color var(--tr);}
+.ic ul li::before{content:'▸';position:absolute;left:0;color:var(--accent2);font-size:.76rem;}
+
+/* ── TABLE ────────────────────────────────── */
+.tw{overflow-x:auto;margin:1.4rem 0;border-radius:12px;border:1px solid var(--border);transition:border-color var(--tr);}
+table{width:100%;border-collapse:collapse;font-size:.86rem;}
+th{background:var(--surface2);color:var(--accent);font-weight:700;padding:.8rem 1.1rem;text-align:left;border-bottom:2px solid var(--border);font-family:'Playfair Display',serif;transition:all var(--tr);}
+td{padding:.72rem 1.1rem;border-bottom:1px solid var(--border);color:var(--text-muted);transition:all var(--tr);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface2);color:var(--text);}
+
+/* ── HIGHLIGHT BOXES ──────────────────────── */
+.hl{background:color-mix(in srgb,var(--accent2) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent2) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);line-height:1.82;transition:all var(--tr);}
+.hl strong{color:var(--accent2);}
+.warn{background:color-mix(in srgb,var(--accent3) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent3) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);transition:all var(--tr);}
+.warn strong{color:var(--accent3);}
+.note{background:color-mix(in srgb,var(--accent4) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent4) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);transition:all var(--tr);}
+.note strong{color:var(--accent4);}
+
+/* ── STEP BOX ─────────────────────────────── */
+.steps{display:flex;flex-direction:column;gap:.7rem;margin:1.2rem 0;}
+.step{display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:1rem 1.3rem;transition:all var(--tr);}
+.step-num{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;font-family:'Playfair Display',serif;}
+.step-body h5{font-weight:600;font-size:.92rem;margin-bottom:.25rem;color:var(--text);transition:color var(--tr);}
+.step-body p{font-size:.85rem;color:var(--text-muted);transition:color var(--tr);}
+
+/* ── COMPARISON ───────────────────────────── */
+.comp{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.4rem 0;}
+.comp-col{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:1.2rem;}
+.comp-col h4{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;margin-bottom:.8rem;color:var(--accent);}
+.comp-col ul{list-style:none;}
+.comp-col ul li{font-size:.87rem;color:var(--text-muted);padding:.22rem 0 .22rem 1.2rem;position:relative;transition:color var(--tr);}
+.comp-col ul li::before{content:'•';position:absolute;left:0;color:var(--accent2);}
+
+/* ── FLOWCHART ────────────────────────────── */
+.flowchart{display:flex;flex-direction:column;align-items:center;gap:0;margin:2rem 0;}
+.fc-node{background:var(--surface);border:2px solid var(--accent);border-radius:12px;padding:.8rem 2rem;font-size:.88rem;font-weight:600;color:var(--text);text-align:center;min-width:240px;max-width:420px;width:100%;transition:all var(--tr);position:relative;}
+.fc-node:hover{transform:scale(1.02);box-shadow:0 8px 24px color-mix(in srgb,var(--accent) 22%,transparent);}
+.fc-node.start{background:var(--accent);color:#fff;border-color:var(--accent);border-radius:30px;font-weight:700;}
+.fc-node.process{background:color-mix(in srgb,var(--accent) 8%,var(--surface));}
+.fc-node.diamond{background:color-mix(in srgb,var(--accent2) 10%,var(--surface));border-color:var(--accent2);}
+.fc-node.decision{background:color-mix(in srgb,var(--accent3) 8%,var(--surface));border-color:var(--accent3);}
+.fc-node.output{background:color-mix(in srgb,var(--accent4) 8%,var(--surface));border-color:var(--accent4);border-radius:24px;}
+.fc-arrow{font-size:1.4rem;color:var(--accent);line-height:1;padding:.1rem 0;transition:color var(--tr);}
+
+/* ── SVG DIAGRAM ──────────────────────────── */
+.svg-diagram{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem;margin:1.6rem 0;text-align:center;overflow-x:auto;transition:all var(--tr);}
+.svg-diagram svg{max-width:100%;height:auto;}
+
+/* ── ASSESSMENT ───────────────────────────── */
+#assessment{padding:5rem 0 4rem;border-top:1px solid var(--border);}
+.aw{background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--accent) 7%,var(--surface)));border:1.5px solid color-mix(in srgb,var(--accent) 28%,var(--border));border-radius:22px;padding:2.8rem;transition:all var(--tr);}
+.a-title{font-family:'Playfair Display',serif;font-weight:900;font-size:2.1rem;letter-spacing:-.5px;margin-bottom:.35rem;color:var(--text);transition:color var(--tr);}
+.a-sub{color:var(--text-muted);font-size:.88rem;margin-bottom:2.2rem;}
+.qlabel{font-weight:700;font-size:.67rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent2);padding-bottom:.55rem;border-bottom:1px solid var(--border);margin:2.2rem 0 1.3rem;transition:all var(--tr);}
+
+/* MCQ */
+.mcq{margin-bottom:1.8rem;}
+.mcq-q{font-size:.95rem;font-weight:500;margin-bottom:.85rem;color:var(--text);transition:color var(--tr);}
+.mcq-q em{color:var(--accent);font-style:normal;font-weight:700;font-family:'Playfair Display',serif;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;}
+.opt{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:.6rem .95rem;cursor:pointer;transition:all .2s;font-size:.86rem;color:var(--text-muted);display:flex;align-items:center;gap:.65rem;user-select:none;}
+.opt:hover{border-color:var(--accent);color:var(--text);background:color-mix(in srgb,var(--accent) 7%,var(--surface2));}
+.opt.correct{background:color-mix(in srgb,var(--accent2) 12%,transparent);border-color:var(--accent2);color:var(--accent2);}
+.opt.wrong{background:color-mix(in srgb,var(--accent3) 9%,transparent);border-color:var(--accent3);color:var(--accent3);}
+.opt .ltr{width:21px;height:21px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;transition:background var(--tr);}
+
+/* Q&A */
+.qa{margin-bottom:1.4rem;}
+.qa-q{font-size:.94rem;margin-bottom:.45rem;color:var(--text);transition:color var(--tr);}
+.qa-q em{color:var(--accent);font-style:normal;font-weight:700;font-family:'Playfair Display',serif;}
+.ans{background:var(--code-bg);border-left:3px solid var(--accent2);border-radius:0 9px 9px 0;padding:.95rem 1.2rem;font-size:.87rem;color:var(--code-text);line-height:1.82;display:none;margin-top:.45rem;transition:all var(--tr);}
+.ans.show{display:block;}
+.rbtn{background:transparent;border:1.5px solid var(--border);border-radius:7px;padding:.3rem .9rem;font-size:.74rem;color:var(--text-muted);cursor:pointer;font-weight:600;transition:all .2s;margin-top:.38rem;}
+.rbtn:hover{border-color:var(--accent2);color:var(--accent2);}
+
+/* Score */
+.spanel{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:1.3rem 1.7rem;display:flex;align-items:center;justify-content:space-between;margin-top:1.8rem;flex-wrap:wrap;gap:1rem;transition:all var(--tr);}
+.snum{font-family:'Playfair Display',serif;font-weight:900;font-size:2.4rem;color:var(--accent);transition:color var(--tr);}
+.stxt{font-size:.84rem;color:var(--text-muted);}
+.sbtn{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 68%,var(--accent2)));border:none;border-radius:11px;padding:.85rem 2.4rem;font-weight:700;font-size:.88rem;color:#fff;cursor:pointer;transition:all .22s;letter-spacing:.4px;font-family:'Outfit',sans-serif;margin-top:1.4rem;}
+.sbtn:hover{transform:translateY(-3px);box-shadow:0 12px 28px color-mix(in srgb,var(--accent) 38%,transparent);}
+
+footer{text-align:center;padding:3rem 2rem;color:var(--text-muted);font-size:.82rem;border-top:1px solid var(--border);transition:all var(--tr);}
+footer span{color:var(--accent);}
+.divider{height:1px;background:var(--border);margin:2rem 0;transition:background var(--tr);}
+
+/* ── 6Vs GRID ─────────────────────────────── */
+.vs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin:1.4rem 0 2rem;}
+.vs-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1.3rem 1.4rem;display:flex;gap:1rem;align-items:flex-start;transition:all .25s;}
+.vs-card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 10px 28px color-mix(in srgb,var(--accent) 14%,transparent);}
+.vs-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+.vs-body h4{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;margin-bottom:.3rem;color:var(--text);transition:color var(--tr);}
+.vs-body p{font-size:.85rem;color:var(--text-muted);line-height:1.6;transition:color var(--tr);}
+
+@media(max-width:640px){
+  .opts{grid-template-columns:1fr;}
+  .aw{padding:1.4rem;}
+  .tlabel{display:none;}
+  .comp{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- SKY -->
+<div class="sky">
+  <div class="sky-grad"></div>
+  <div class="celestial">
+    <div class="crater cr1"></div><div class="crater cr2"></div><div class="crater cr3"></div>
+  </div>
+  <div class="stars" id="stars"></div>
+  <div class="clouds">
+    <div class="cloud cl1"></div><div class="cloud cl2"></div><div class="cloud cl3"></div>
+  </div>
+</div>
+
+<!-- TOP BAR -->
+<div class="nav-top">
+  <a href="index.html" class="back-btn">← Home</a>
+  <div class="nav-logo">Unit 5 · Big Data &amp; Data Analytics</div>
+  <div class="toggle-wrap">
+    <span class="tlabel" id="tlbl">Day</span>
+    <div class="tbtn" onclick="toggleTheme()"></div>
+    <span id="tico">☀️</span>
+  </div>
+</div>
+
+<!-- SCROLLABLE NAV STRIP -->
+<nav>
+  <div class="nav-links">
+    <a href="#intro">Overview</a>
+    <a href="#bigdata">What is Big Data?</a>
+    <a href="#types">Types of Data</a>
+    <a href="#advdis">Pros &amp; Cons</a>
+    <a href="#sixvs">6Vs Framework</a>
+    <a href="#analytics">Data Analytics</a>
+    <a href="#working">Working Process</a>
+    <a href="#streams">Data Streams</a>
+    <a href="#future">Future</a>
+    <a href="#assessment">Assessment</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="badge">Unit 05 · Class XII · Artificial Intelligence</div>
+    <h1>Introduction to<br><span>Big Data &amp; Analytics</span></h1>
+    <p>Exploring the world of Big Data — its types, the 6Vs framework, analytics techniques, real-world applications, and the future of data-driven decision making.</p>
+    <div class="chips">
+      <a href="#bigdata" class="chip">📦 Big Data</a>
+      <a href="#types" class="chip">🗂️ Data Types</a>
+      <a href="#sixvs" class="chip">📐 6Vs Framework</a>
+      <a href="#analytics" class="chip">🔬 Analytics</a>
+      <a href="#working" class="chip">⚙️ Working Process</a>
+      <a href="#streams" class="chip">🌊 Data Streams</a>
+      <a href="#future" class="chip">🚀 Future Trends</a>
+      <a href="#assessment" class="chip">📝 Assessment</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     OVERVIEW
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="intro">
+<div class="container">
+  <div class="s-tag">Unit Overview</div>
+  <div class="s-title">Big Data &amp; Analytics — The Big Picture</div>
+  <div class="s-intro">
+    <strong>Big Data</strong> refers to extremely large and complex datasets that cannot be managed or analysed by traditional database systems. In today's digital age, data is generated at an unprecedented rate — every click, search, purchase, and social media post adds to a growing ocean of information. Understanding this data and extracting value from it is the foundation of modern AI and Data Science.
+  </div>
+
+  <div class="ig">
+    <div class="ic">
+      <h4>Topics Covered</h4>
+      <ul>
+        <li>What is Big Data? Small vs. Big Data</li>
+        <li>Types: Structured, Semi-structured, Unstructured</li>
+        <li>Advantages and Disadvantages of Big Data</li>
+        <li>Characteristics — the 6Vs framework</li>
+        <li>Big Data Analytics — types and global trends</li>
+        <li>Working process: Gather → Process → Clean → Analyse</li>
+        <li>Hands-on with Orange Data Mining</li>
+        <li>Mining Data Streams</li>
+        <li>Future of Big Data Analytics</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Learning Outcomes</h4>
+      <ul>
+        <li>Define Big Data and identify its various types</li>
+        <li>Evaluate advantages and disadvantages of Big Data</li>
+        <li>Recognise the characteristics — the 6Vs framework</li>
+        <li>Explain Big Data Analytics and its significance</li>
+        <li>Describe how Big Data Analytics works step-by-step</li>
+        <li>Apply analytics using Orange Data Mining tool</li>
+        <li>Understand data stream mining concepts</li>
+        <li>Explore future trends in Big Data Analytics</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Approach &amp; Prerequisites</h4>
+      <ul>
+        <li>Team discussion and web search activities</li>
+        <li>Case studies (OnDemandDrama OTT platform)</li>
+        <li>Hands-on with Orange Data Mining tool</li>
+        <li>Prerequisite: Basic understanding of data and AI concepts</li>
+        <li>Reasonable fluency in English language</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="hl"><strong>📌 Why Big Data matters:</strong> We generate approximately 328.77 million terabytes of data every single day. Companies like Amazon, Netflix, and Google use Big Data to personalise recommendations, optimise supply chains, and make better decisions — faster. Understanding Big Data is no longer optional; it's a fundamental literacy for the digital age.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     5.1 — WHAT IS BIG DATA
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="bigdata">
+<div class="container">
+  <div class="s-tag">Section 5.1</div>
+  <div class="s-title">What is Big Data?</div>
+  <div class="s-intro">
+    <strong>Big Data</strong> refers to extremely large and complex datasets that regular computer programs and databases cannot handle. It comes from three main sources: <strong>transactional data</strong> (e.g., online purchases), <strong>machine data</strong> (e.g., sensor readings), and <strong>social data</strong> (e.g., social media posts). To analyse and use Big Data effectively, special tools and techniques are required.
+  </div>
+
+  <h3 class="sh">Small Data vs. Big Data</h3>
+  <p class="bd">To understand Big Data, we must first understand Small Data. The contrast between them helps clarify what makes Big Data a unique challenge.</p>
+
+  <div class="comp">
+    <div class="comp-col">
+      <h4>📊 Small Data</h4>
+      <ul>
+        <li>Easily comprehensible by people</li>
+        <li>Accessible, informative, and actionable</li>
+        <li>Ideal for individuals and small businesses</li>
+        <li>Can be managed with standard tools (Excel, RDBMS)</li>
+        <li>Used for everyday decision making</li>
+        <li>Example: A small store tracking daily sales to decide which products to restock</li>
+      </ul>
+    </div>
+    <div class="comp-col">
+      <h4>🌐 Big Data</h4>
+      <ul>
+        <li>Extremely large and complex datasets</li>
+        <li>Cannot be handled by traditional database systems</li>
+        <li>Requires special tools like Hadoop, Spark</li>
+        <li>Sources: transactional, machine, and social data</li>
+        <li>Enables innovation and better decision-making at scale</li>
+        <li>Example: Amazon &amp; Netflix recommendations based on millions of user interactions</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="sh">Sources of Big Data</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="icon">🛒</div>
+      <h4>Transactional Data</h4>
+      <p>Data from business operations — online purchases, banking transactions, point-of-sale records, and customer orders. Generated continuously at enormous volume.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🤖</div>
+      <h4>Machine Data</h4>
+      <p>Data produced automatically by machines — sensor readings from IoT devices, server logs, industrial equipment metrics, GPS data, and medical devices.</p>
+    </div>
+    <div class="card">
+      <div class="icon">📱</div>
+      <h4>Social Data</h4>
+      <p>Data from human interactions on digital platforms — social media posts, comments, likes, shares, images, videos, and online conversations.</p>
+    </div>
+    <div class="card">
+      <div class="icon">📡</div>
+      <h4>Streaming Data</h4>
+      <p>Continuous real-time data flows from websites, apps, clickstreams, and live event feeds. Requires stream processing rather than batch processing.</p>
+    </div>
+  </div>
+
+  <div class="hl"><strong>📌 Scale of Big Data Today:</strong> According to latest estimates, approximately <strong>328.77 million terabytes</strong> of data are created each day globally. Google alone handles over 40,000 search queries per second. Facebook processes over 100 billion messages per day. This scale is precisely why traditional tools fail and specialised Big Data technologies are needed.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     5.2 — TYPES OF BIG DATA
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="types">
+<div class="container">
+  <div class="s-tag">Section 5.2</div>
+  <div class="s-title">Types of Big Data</div>
+  <div class="s-intro">
+    Big Data is not uniform — it exists in three distinct forms based on structure, organisation, and how easily it can be processed. Understanding these types is essential for choosing the right tools and techniques for analysis.
+  </div>
+
+  <div class="tw">
+    <table>
+      <thead>
+        <tr><th>Aspect</th><th>Structured Data</th><th>Semi-Structured Data</th><th>Unstructured Data</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Definition</strong></td><td>Quantitative data with a defined structure</td><td>Mix of quantitative and qualitative properties</td><td>No inherent structure or formal rules</td></tr>
+        <tr><td><strong>Data Model</strong></td><td>Dedicated, predefined data model</td><td>May lack a specific data model</td><td>Lacks a consistent data model entirely</td></tr>
+        <tr><td><strong>Organisation</strong></td><td>Organised in clearly defined rows and columns</td><td>Less organised than structured data</td><td>No organisation; exhibits variability over time</td></tr>
+        <tr><td><strong>Accessibility</strong></td><td>Easily accessible and searchable via SQL</td><td>Accessible but may be harder to analyse</td><td>Depends on specific data format used</td></tr>
+        <tr><td><strong>Examples</strong></td><td>Customer information, transaction records, product directories, spreadsheets</td><td>XML files, CSV files, JSON files, HTML files</td><td>Audio files, images, video files, emails, PDFs, social media posts</td></tr>
+        <tr><td><strong>Storage</strong></td><td>Relational databases (RDBMS) — MySQL, PostgreSQL</td><td>NoSQL databases, document stores</td><td>Data lakes, object storage, Hadoop HDFS</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 class="sh">Deep Dive — Each Data Type</h3>
+
+  <h4 class="ssh">1. Structured Data</h4>
+  <p class="bd">Structured data is the most organised form — it fits neatly into rows and columns of a relational database. Every record follows the same format, making it easy to query using SQL. However, structured data represents only a small fraction (around 20%) of all data generated globally.</p>
+
+  <h4 class="ssh">2. Semi-Structured Data</h4>
+  <p class="bd">Semi-structured data has some organisational properties (like tags or markers) but does not conform fully to a relational model. JSON and XML are classic examples — they have a self-describing structure, but the fields and nesting can vary between records. Most modern web APIs exchange data in JSON format.</p>
+
+  <h4 class="ssh">3. Unstructured Data</h4>
+  <p class="bd">Unstructured data — the largest and fastest-growing category, making up approximately <strong>80% of all data</strong> — has no predefined format. Text documents, images, audio recordings, and video files fall here. While difficult to process, unstructured data often holds the richest insights. Natural Language Processing (NLP) and Computer Vision are AI techniques specifically designed to extract value from this data.</p>
+
+  <div class="svg-diagram">
+    <p style="font-size:.8rem;color:var(--text-muted);margin-bottom:1rem;font-weight:600;">📊 Distribution of Global Data by Type</p>
+    <svg width="480" height="200" viewBox="0 0 480 200" xmlns="http://www.w3.org/2000/svg">
+      <!-- Unstructured bar -->
+      <rect x="60" y="30" width="336" height="44" rx="6" fill="#d97b34" opacity=".85"/>
+      <text x="228" y="58" text-anchor="middle" font-family="Outfit,sans-serif" font-size="14" fill="white" font-weight="700">Unstructured Data — ~80%</text>
+      <!-- Semi-structured bar -->
+      <rect x="60" y="90" width="84" height="44" rx="6" fill="#2d8a4e" opacity=".85"/>
+      <text x="102" y="118" text-anchor="middle" font-family="Outfit,sans-serif" font-size="12" fill="white" font-weight="700">Semi — ~20%</text>
+      <!-- Wait, let's just do a cleaner proportional bar chart -->
+      <!-- Actually draw as a horizontal stacked bar -->
+      <text x="240" y="175" text-anchor="middle" font-family="Outfit,sans-serif" font-size="10" fill="#7a5c42">Proportional breakdown of global data types (approximate)</text>
+      <!-- Full bar -->
+      <rect x="40" y="148" width="400" height="16" rx="4" fill="#e8d5b7"/>
+      <!-- Structured 20% -->
+      <rect x="40" y="148" width="80" height="16" rx="4" fill="#8b5cf6" opacity=".85"/>
+      <!-- Semi 10% -->
+      <rect x="120" y="148" width="40" height="16" fill="#2d8a4e" opacity=".85"/>
+      <!-- Unstructured 80% (remaining 280px of 400) -->
+      <rect x="160" y="148" width="280" height="16" rx="0" fill="#d97b34" opacity=".75"/>
+      <!-- Labels -->
+      <text x="60" y="143" text-anchor="middle" font-family="Outfit,sans-serif" font-size="9.5" fill="#8b5cf6" font-weight="700">Structured</text>
+      <text x="140" y="143" text-anchor="middle" font-family="Outfit,sans-serif" font-size="9.5" fill="#2d8a4e" font-weight="700">Semi</text>
+      <text x="300" y="143" text-anchor="middle" font-family="Outfit,sans-serif" font-size="9.5" fill="#c94f27" font-weight="700">Unstructured (~80%)</text>
+    </svg>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     5.3 — ADVANTAGES & DISADVANTAGES
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="advdis">
+<div class="container">
+  <div class="s-tag">Section 5.3</div>
+  <div class="s-title">Advantages &amp; Disadvantages of Big Data</div>
+  <div class="s-intro">
+    Big Data is a key driver of modern innovation — it has changed how organisations analyse and use information. While it offers significant benefits, it also comes with challenges that affect its responsible adoption across industries.
+  </div>
+
+  <h3 class="sh">Advantages of Big Data</h3>
+
+  <div class="cards">
+    <div class="card">
+      <div class="icon">🎯</div>
+      <h4>Enhanced Decision Making</h4>
+      <p>Big Data analytics empowers organisations to make <strong>data-driven decisions</strong> based on insights derived from large and diverse datasets — reducing guesswork and improving accuracy.</p>
+    </div>
+    <div class="card">
+      <div class="icon">⚡</div>
+      <h4>Improved Efficiency</h4>
+      <p>By analysing vast data, businesses identify inefficiencies, streamline processes, and optimise resource allocation — leading to <strong>increased productivity</strong> and reduced waste.</p>
+    </div>
+    <div class="card">
+      <div class="icon">👥</div>
+      <h4>Better Customer Insights</h4>
+      <p>Organisations gain deeper understanding of customer behaviour, preferences, and needs — enabling <strong>personalised marketing strategies</strong> and improved customer experiences.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🏆</div>
+      <h4>Competitive Advantage</h4>
+      <p>Leveraging Big Data analytics provides a <strong>competitive edge</strong> by enabling organisations to uncover market trends, identify opportunities, and stay ahead of competitors.</p>
+    </div>
+    <div class="card">
+      <div class="icon">💡</div>
+      <h4>Innovation &amp; Growth</h4>
+      <p>Big Data fosters innovation by facilitating <strong>new products, services, and business models</strong> based on insights from data analysis, driving business growth and expansion.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🏥</div>
+      <h4>Healthcare Improvements</h4>
+      <p>In healthcare, Big Data enables <strong>early disease detection</strong>, personalised treatments, drug discovery, and better management of patient records and outcomes.</p>
+    </div>
+  </div>
+
+  <h3 class="sh">Disadvantages of Big Data</h3>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">⚠</div>
+      <div class="step-body">
+        <h5>Privacy &amp; Security Concerns</h5>
+        <p>The collection, storage, and analysis of large volumes of data raise significant privacy and security risks — including unauthorised access, data breaches, and misuse of personal information. Individuals often have little awareness of how their data is collected and used.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">⚠</div>
+      <div class="step-body">
+        <h5>Data Quality Issues</h5>
+        <p>Ensuring the accuracy, reliability, and completeness of Big Data is challenging. Data often comes from unstructured and heterogeneous sources, leading to potential errors, duplicates, and biases in analysis — producing misleading insights.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">⚠</div>
+      <div class="step-body">
+        <h5>Technical Complexity</h5>
+        <p>Implementing and managing Big Data infrastructure and analytics tools requires specialised skills and expertise. This creates significant technical challenges and resource constraints, especially for small and medium organisations.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">⚠</div>
+      <div class="step-body">
+        <h5>Regulatory Compliance</h5>
+        <p>Organisations must comply with data protection laws like <strong>GDPR</strong> (General Data Protection Regulation) and India's <strong>Digital Personal Data Protection Act, 2023</strong>. These require strict handling of personal data — compliance failures can result in heavy penalties.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">⚠</div>
+      <div class="step-body">
+        <h5>Cost &amp; Resource Intensiveness</h5>
+        <p>The cost of acquiring, storing, processing, and analysing Big Data — along with hiring skilled data professionals — can be enormous. This is particularly challenging for smaller organisations with limited budgets and technical resources.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="warn"><strong>⚠️ Key Concern — Data Privacy:</strong> The DPDP Act 2023 (India) and GDPR (EU) both establish that individuals have rights over their personal data — including the right to know what is collected, the right to correct it, and the right to have it deleted. Any organisation collecting and processing Big Data must design its systems with these rights built in from the start, not added as an afterthought.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     5.4 — 6Vs FRAMEWORK
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="sixvs">
+<div class="container">
+  <div class="s-tag">Section 5.4</div>
+  <div class="s-title">Characteristics of Big Data — The 6Vs</div>
+  <div class="s-intro">
+    The characteristics of Big Data refer to the defining attributes that distinguish large and complex datasets from traditional data. Originally described using the <strong>"3Vs" framework</strong> (Volume, Velocity, Variety), this has expanded to the <strong>"6Vs" framework</strong> to provide a more holistic view — adding Veracity, Value, and Variability.
+  </div>
+
+  <!-- 3Vs vs 6Vs intro -->
+  <div class="comp">
+    <div class="comp-col">
+      <h4>🔺 The Original 3Vs</h4>
+      <ul>
+        <li><strong>Volume</strong> — the sheer scale of data generated</li>
+        <li><strong>Velocity</strong> — the speed of data creation and processing</li>
+        <li><strong>Variety</strong> — the diversity of data formats and types</li>
+        <li>Introduced by Doug Laney (Gartner) in 2001</li>
+        <li>Still the foundation of any Big Data discussion</li>
+      </ul>
+    </div>
+    <div class="comp-col">
+      <h4>🔷 The Extended 6Vs</h4>
+      <ul>
+        <li>3Vs + <strong>Veracity</strong> — data quality and trustworthiness</li>
+        <li>3Vs + <strong>Value</strong> — the business insight extracted</li>
+        <li>3Vs + <strong>Variability</strong> — inconsistency in data streams</li>
+        <li>Provides a complete framework for Big Data management</li>
+        <li>Helps organisations address all dimensions systematically</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="sh">Detailed Explanation of All 6 Vs</h3>
+
+  <div class="vs-grid">
+    <div class="vs-card">
+      <div class="vs-icon" style="background:color-mix(in srgb,var(--accent) 15%,transparent);">📦</div>
+      <div class="vs-body">
+        <h4>Volume</h4>
+        <p>The <strong>enormous amount of data</strong> generated every day. As more people use online platforms, data volumes have grown exponentially. Typically, if data volume exceeds gigabytes — ranging to petabytes, terabytes, or exabytes — it falls into the realm of Big Data. According to latest estimates, <strong>328.77 million terabytes</strong> are created globally each day.</p>
+      </div>
+    </div>
+    <div class="vs-card">
+      <div class="vs-icon" style="background:color-mix(in srgb,var(--accent3) 15%,transparent);">⚡</div>
+      <div class="vs-body">
+        <h4>Velocity</h4>
+        <p>The <strong>speed at which data is generated, delivered, and analysed</strong>. In today's world, data is created and must be processed at tremendous speed. <strong>Google alone generates more than 40,000 search queries per second</strong>. Social media platforms receive millions of posts, likes, and interactions every minute, demanding real-time or near-real-time processing.</p>
+      </div>
+    </div>
+    <div class="vs-card">
+      <div class="vs-icon" style="background:color-mix(in srgb,var(--accent2) 15%,transparent);">🎨</div>
+      <div class="vs-body">
+        <h4>Variety</h4>
+        <p>Big Data encompasses data in <strong>various formats</strong> — structured, unstructured, semi-structured, or highly complex. These range from simple numerical data to text, images, audio, and video. Storing and processing unstructured data through traditional RDBMS is challenging, yet this is where the richest insights often lie.</p>
+      </div>
+    </div>
+    <div class="vs-card">
+      <div class="vs-icon" style="background:color-mix(in srgb,var(--accent4) 15%,transparent);">✅</div>
+      <div class="vs-body">
+        <h4>Veracity</h4>
+        <p>Veracity refers to the <strong>consistency, accuracy, quality, and trustworthiness</strong> of data. Not all data that undergoes processing holds value. It is essential to clean data effectively before storing or processing it — especially when dealing with massive volumes. Veracity addresses whether the data source is reliable and suitable for analytical models.</p>
+      </div>
+    </div>
+    <div class="vs-card">
+      <div class="vs-icon" style="background:color-mix(in srgb,#e8a020 15%,transparent);">💎</div>
+      <div class="vs-body">
+        <h4>Value</h4>
+        <p>The goal of Big Data analysis is <strong>extracting business value</strong>. This is perhaps the most critical characteristic. Without obtaining valuable insights, the other characteristics hold little significance. Value refers to the tangible and intangible benefits that Big Data provides — improved decisions, new products, cost savings, and competitive advantage.</p>
+      </div>
+    </div>
+    <div class="vs-card">
+      <div class="vs-icon" style="background:color-mix(in srgb,#028090 15%,transparent);">🔄</div>
+      <div class="vs-body">
+        <h4>Variability</h4>
+        <p>Variability refers to establishing that the <strong>contextualising structure of the data stream is regular and dependable</strong>, even under conditions of extreme unpredictability. It defines the need to derive meaningful data considering all possible circumstances — accounting for inconsistencies, changing meanings, and irregular patterns in data flows.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Case Study -->
+  <h3 class="sh">Case Study — OnDemandDrama: 3V &amp; 6V in Action</h3>
+  <div class="s-intro" style="border-left-color:var(--accent2);">
+    <strong>Company: OnDemandDrama — An OTT Streaming Platform</strong><br>
+    This case study illustrates how a fictional streaming platform applies both the 3V and 6V frameworks to manage its Big Data.
+  </div>
+
+  <h4 class="ssh">3V Framework Application</h4>
+  <div class="ig">
+    <div class="ic">
+      <h4>Volume</h4>
+      <ul>
+        <li>Processes huge amounts of data from millions of users</li>
+        <li>Includes watch history, ratings, searches, and preferences</li>
+        <li>Data used to offer personalised content recommendations</li>
+        <li>Petabytes of video content stored and delivered daily</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Velocity</h4>
+      <ul>
+        <li>Data processed in real-time as users interact</li>
+        <li>Immediately adjusts recommendations based on activity</li>
+        <li>Tracks user patterns live during viewing sessions</li>
+        <li>Offers trending content based on real-time engagement data</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Variety</h4>
+      <ul>
+        <li>Handles diverse data: user profiles, watch lists, reviews</li>
+        <li>Structured: subscription records, viewing timestamps</li>
+        <li>Semi-structured: user preferences in JSON format</li>
+        <li>Unstructured: video content, images, user comments</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4 class="ssh">Extended 6V Framework</h4>
+  <div class="ig">
+    <div class="ic">
+      <h4>Veracity</h4>
+      <ul>
+        <li>Filters out irrelevant or low-quality data</li>
+        <li>Removes incomplete profiles from recommendation engine</li>
+        <li>Ensures accurate, trustworthy content recommendations</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Value</h4>
+      <ul>
+        <li>Personalises user experiences to drive engagement</li>
+        <li>Increases retention by recommending relevant content</li>
+        <li>Drives business decisions — which shows to produce next</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Variability</h4>
+      <ul>
+        <li>Handles changes in user preferences over time</li>
+        <li>Accounts for regional, seasonal, and trend-driven shifts</li>
+        <li>Adapts recommendations when external events influence viewing</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="hl"><strong>📌 Key Insight:</strong> By applying the 3V and 6V frameworks, OnDemandDrama can manage, process, and derive valuable insights from its Big Data — enhancing customer satisfaction and driving better business decisions. This demonstrates how abstract Big Data concepts translate into real, measurable competitive advantages.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     5.5 — BIG DATA ANALYTICS
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="analytics">
+<div class="container">
+  <div class="s-tag">Section 5.5</div>
+  <div class="s-title">Big Data Analytics</div>
+  <div class="s-intro">
+    <strong>Big Data Analytics</strong> uses advanced analytic techniques against huge, diverse datasets — including structured, semi-structured, and unstructured data from different sources ranging from terabytes to zettabytes. It covers methodologies, tools, and practices for data collection, organisation, storage, and analysis to uncover patterns and address challenges.
+  </div>
+
+  <h3 class="sh">Data Analytics vs. Big Data Analytics</h3>
+  <div class="comp">
+    <div class="comp-col">
+      <h4>📊 Data Analytics</h4>
+      <ul>
+        <li>Analyses datasets of any size (small to moderate)</li>
+        <li>Uses statistical analysis software</li>
+        <li>Data visualisation tools (Tableau, Power BI)</li>
+        <li>Relational Database Management Systems (RDBMS)</li>
+        <li>Suitable for structured, well-organised data</li>
+        <li>Example: Monthly sales analysis in Excel</li>
+      </ul>
+    </div>
+    <div class="comp-col">
+      <h4>🌐 Big Data Analytics</h4>
+      <ul>
+        <li>Advanced techniques for massive, diverse datasets</li>
+        <li>Distributed computing frameworks (Hadoop, Spark)</li>
+        <li>NoSQL databases (MongoDB, Cassandra)</li>
+        <li>Machine learning and AI integration</li>
+        <li>Handles all three data types simultaneously</li>
+        <li>Example: Netflix's recommendation algorithm</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="sh">Types of Big Data Analytics</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="icon">📋</div>
+      <h4>Descriptive Analytics</h4>
+      <p><strong>"What happened?"</strong> — Summarises historical data to understand past events. Uses data aggregation and mining. Example: Monthly sales reports, website traffic summaries.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔍</div>
+      <h4>Diagnostic Analytics</h4>
+      <p><strong>"Why did it happen?"</strong> — Examines data to understand the cause of outcomes. Uses drill-down, correlations, and data discovery. Example: Why did sales drop in Q3?</p>
+    </div>
+    <div class="card">
+      <div class="icon">📈</div>
+      <h4>Predictive Analytics</h4>
+      <p><strong>"What will happen?"</strong> — Uses statistical models and machine learning to forecast future outcomes. Example: Predicting customer churn, weather forecasting, fraud detection.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🎯</div>
+      <h4>Prescriptive Analytics</h4>
+      <p><strong>"What should we do?"</strong> — Recommends actions based on predictive insights. Uses simulation and optimisation. Example: Supply chain optimisation, personalised treatment plans.</p>
+    </div>
+  </div>
+
+  <h3 class="sh">4 Global Trends Driving Big Data Analytics</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h5>Moore's Law — Exponential Computing Power</h5>
+        <p>The exponential growth of computing power, as per Moore's Law, has enabled the handling and analysis of massive datasets. Processing power that once required supercomputers is now available on consumer hardware, driving the evolution of Big Data Analytics.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h5>Mobile Computing — Data at Your Fingertips</h5>
+        <p>With the widespread adoption of smartphones and mobile devices, access to vast amounts of data is now available everywhere. Mobile usage enables real-time connectivity and continuous data collection from users across the globe — 24/7.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h5>Social Networking — User-Generated Data at Scale</h5>
+        <p>Platforms such as Facebook, Instagram, YouTube, and Pinterest facilitate extensive networks of user-generated content, interactions, and data sharing — leading to the generation of massive datasets perfect for analysis and insight extraction.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h5>Cloud Computing — On-Demand Infrastructure</h5>
+        <p>This paradigm shift in technology infrastructure allows organisations to access hardware and software resources remotely via the Internet on a pay-as-you-go basis — eliminating the need for extensive on-premises investments and enabling instant scale-up for Big Data workloads.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="note"><strong>💡 Key Tools for Big Data Analytics:</strong> Apache <strong>Hadoop</strong> (distributed file system and processing), Apache <strong>Spark</strong> (in-memory fast processing), <strong>Cassandra</strong> and <strong>MongoDB</strong> (NoSQL databases for unstructured data), <strong>Tableau</strong> (data visualisation), and <strong>SAS</strong> (statistical analysis). Each tool is optimised for a specific aspect of the Big Data pipeline.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     5.6 — WORKING PROCESS
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="working">
+<div class="container">
+  <div class="s-tag">Section 5.6</div>
+  <div class="s-title">Working Process of Big Data Analytics</div>
+  <div class="s-intro">
+    Big Data analytics involves a systematic, multi-step process: collecting, processing, cleaning, and analysing enormous datasets to improve organisational operations. Each step is critical — errors at any stage propagate forward and compromise the final insights.
+  </div>
+
+  <div class="flowchart">
+    <div class="fc-node start">📥 Step 1 — Gather Data</div>
+    <div class="fc-arrow">↓</div>
+    <div class="fc-node process">⚙️ Step 2 — Process Data<br><small style="font-weight:400;font-size:.78rem;">Batch Processing · Stream Processing · Normalisation</small></div>
+    <div class="fc-arrow">↓</div>
+    <div class="fc-node diamond">🧹 Step 3 — Clean Data<br><small style="font-weight:400;font-size:.78rem;">Handle missing values · Remove duplicates · Correct formatting</small></div>
+    <div class="fc-arrow">↓</div>
+    <div class="fc-node output">🔬 Step 4 — Analyse Data<br><small style="font-weight:400;font-size:.78rem;">ML models · Clustering · Classification · Visualisation</small></div>
+  </div>
+
+  <h3 class="sh">Step 1 — Gather Data</h3>
+  <p class="bd">Each company has a unique approach to data collection. Organisations can now collect structured and unstructured data from various sources, including <strong>cloud storage, mobile applications, IoT sensors, social media platforms, and transactional systems</strong>. The challenge at this step is identifying which data sources are relevant to the business question being investigated.</p>
+
+  <h3 class="sh">Step 2 — Process Data</h3>
+  <p class="bd">Once data is collected and stored, it must be processed properly to get accurate results on analytical queries, especially when it is large and unstructured. Two main processing approaches exist:</p>
+
+  <div class="ig">
+    <div class="ic">
+      <h4>Batch Processing</h4>
+      <ul>
+        <li>Processes large blocks of data over a scheduled time period</li>
+        <li>Suitable for non-time-sensitive analysis</li>
+        <li>Used for end-of-day reports, monthly trend analysis</li>
+        <li>Tools: Apache Hadoop MapReduce, Hive</li>
+        <li>Lower cost but higher latency</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Stream Processing</h4>
+      <ul>
+        <li>Processes small batches of data in near-real time</li>
+        <li>Shortens delay between data collection and analysis</li>
+        <li>Used for fraud detection, live dashboards, IoT monitoring</li>
+        <li>Tools: Apache Spark Streaming, Apache Kafka</li>
+        <li>Higher cost but lower latency — faster decision-making</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Normalisation</h4>
+      <ul>
+        <li>Scales numerical values to a specific range (e.g., 0–1 or –1–1)</li>
+        <li>Makes values comparable across different scales</li>
+        <li>Improves the performance of machine learning algorithms</li>
+        <li>Essential before applying models like KNN, SVM, Neural Networks</li>
+        <li>Applied in Orange using the Preprocess widget</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="sh">Step 3 — Clean Data</h3>
+  <p class="bd">Scrubbing all data, regardless of size, improves quality and yields better results. Correct formatting and elimination of duplicate or irrelevant data are essential. <strong>Erroneous and missing data can lead to inaccurate insights</strong> — the famous "garbage in, garbage out" principle. Data cleaning methods include:</p>
+
+  <div class="cards">
+    <div class="card">
+      <div class="icon">📊</div>
+      <h4>Average (Mean) Imputation</h4>
+      <p>Replace missing numerical values with the <strong>mean</strong> of the available values in that column. Simple and effective for data with a normal distribution.</p>
+    </div>
+    <div class="card">
+      <div class="icon">📈</div>
+      <h4>Mode Imputation</h4>
+      <p>Replace missing values with the <strong>most frequently occurring value</strong> (mode). Best suited for categorical variables where mean is not applicable.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔢</div>
+      <h4>Fixed Value</h4>
+      <p>Replace missing values with a <strong>specific constant</strong> (e.g., 0, "Unknown"). Appropriate when domain knowledge justifies using a particular default value.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🎲</div>
+      <h4>Random Value</h4>
+      <p>Replace missing values with a <strong>random value</strong> drawn from the column's distribution. Preserves statistical properties while filling gaps.</p>
+    </div>
+  </div>
+
+  <h3 class="sh">Step 4 — Analyse Data</h3>
+  <p class="bd">Once data is in a clean, usable state, advanced analytics processes can turn Big Data into actionable insights. Common analytical techniques include:</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Technique</th><th>Type</th><th>Purpose</th><th>Example Use</th></tr></thead>
+      <tbody>
+        <tr><td><strong>K-Means Clustering</strong></td><td>Unsupervised ML</td><td>Segment data into groups of similar records</td><td>Customer segmentation for targeted marketing</td></tr>
+        <tr><td><strong>Logistic Regression</strong></td><td>Supervised ML</td><td>Predict binary outcomes using labelled data</td><td>Predict heart disease risk (yes/no)</td></tr>
+        <tr><td><strong>Decision Tree</strong></td><td>Supervised ML</td><td>Rule-based classification with visual interpretability</td><td>Loan approval decisions</td></tr>
+        <tr><td><strong>Scatter Plot</strong></td><td>Visualisation</td><td>Explore relationships between two variables</td><td>Age vs. cholesterol level in patient data</td></tr>
+        <tr><td><strong>Box Plot</strong></td><td>Visualisation</td><td>Show data distribution, median, and outliers</td><td>Compare blood pressure across patient groups</td></tr>
+        <tr><td><strong>Heat Map</strong></td><td>Visualisation</td><td>Show magnitude of values across a grid of data</td><td>Correlation matrix of dataset features</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Orange Data Mining Workflow -->
+  <h3 class="sh">Big Data Analytics with Orange Data Mining — Practical Workflow</h3>
+  <div class="s-intro" style="border-left-color:var(--accent2);">
+    <strong>Orange Data Mining</strong> is a visual, widget-based tool that makes Big Data analytics accessible without heavy coding. The following workflow demonstrates all four steps using the <strong>Heart Disease dataset</strong>.
+  </div>
+
+  <h4 class="ssh">Step 1 — Gather Data in Orange</h4>
+  <p class="bd">Use the <strong>File widget</strong> to load data into Orange. Load the built-in <strong>Heart Disease dataset</strong>. Study the features carefully:</p>
+  <div class="ig">
+    <div class="ic">
+      <h4>Features (Input Variables)</h4>
+      <ul>
+        <li>age — patient's age in years</li>
+        <li>gender — male or female</li>
+        <li>chest pain type — 4 categories</li>
+        <li>rest_sbp — resting systolic blood pressure</li>
+        <li>cholesterol — serum cholesterol (mg/dl)</li>
+        <li>rest_ecg — resting ECG results</li>
+        <li>max_hr — maximum heart rate achieved</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Target Variable</h4>
+      <ul>
+        <li><strong>diameter_narrowing</strong> — the outcome to predict</li>
+        <li>Value <strong>1</strong> = significant narrowing of arteries (risk factor for heart disease)</li>
+        <li>Value <strong>0</strong> = healthier arteries with minimal or no narrowing</li>
+        <li>This is a <strong>binary classification</strong> problem</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4 class="ssh">Step 2 — Process Data (Normalisation)</h4>
+  <p class="bd">Connect the <strong>Preprocess widget</strong> to the File widget. Select "Normalise Features" and choose an interval of <strong>0–1</strong>. Connect a Data Table widget to verify — all numerical values should now be scaled between 0 and 1. This ensures no single feature dominates due to its scale (e.g., age vs. cholesterol).</p>
+
+  <h4 class="ssh">Step 3 — Clean Data (Handle Missing Values)</h4>
+  <p class="bd">Connect the <strong>Impute widget</strong> to handle missing values. Select an imputation strategy (e.g., Average/mean). Connect a Data Table widget to confirm — all missing values should now be filled. In our dataset, some values are missing and must be imputed before any model can be applied.</p>
+
+  <h4 class="ssh">Step 4 — Analyse Data (Build &amp; Evaluate a Model)</h4>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">4a</div>
+      <div class="step-body">
+        <h5>Build a Logistic Regression Model</h5>
+        <p>Drag and drop the <strong>Logistic Regression widget</strong>. Connect it to the cleaned and normalised data output. This creates a model that will learn from the patient features to predict diameter narrowing.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4b</div>
+      <div class="step-body">
+        <h5>Test the Model — Test &amp; Score Widget</h5>
+        <p>Add the <strong>Test and Score widget</strong>. Connect it to both the Logistic Regression widget (learner) and the processed data. Select <strong>Cross-Validation</strong> as the validation method for robust performance estimation.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4c</div>
+      <div class="step-body">
+        <h5>Generate Predictions — Predict Widget</h5>
+        <p>Connect the <strong>Predict widget</strong> to the Test and Score widget to view the actual predictions generated by the Logistic Regression model — comparing predicted vs. actual outcomes for each patient record.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="hl"><strong>🔗 Complete Orange Workflow:</strong> File → Preprocess (Normalise) → Impute (Handle Missing) → Logistic Regression + Test &amp; Score → Predict. This pipeline represents the complete 4-step Big Data Analytics process — from raw data to validated model predictions — all within Orange's visual interface.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     5.7 — MINING DATA STREAMS
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="streams">
+<div class="container">
+  <div class="s-tag">Section 5.7</div>
+  <div class="s-title">Mining Data Streams</div>
+  <div class="s-intro">
+    A <strong>data stream</strong> is a continuous, real-time flow of data generated by various sources — sensors, satellite images, Internet and web traffic, financial markets, and more. Unlike traditional stored datasets, data streams are potentially infinite and must be processed as they arrive.
+  </div>
+
+  <h3 class="sh">What is Data Stream Mining?</h3>
+  <p class="bd"><strong>Mining data streams</strong> refers to the process of extracting meaningful patterns, trends, and knowledge from a continuous flow of real-time data. Unlike traditional data mining which analyses stored, static datasets, stream mining processes data <strong>as it arrives</strong> — without storing the entire dataset. This has several important implications:</p>
+
+  <div class="ig">
+    <div class="ic">
+      <h4>Key Characteristics</h4>
+      <ul>
+        <li>Data arrives continuously and potentially without end</li>
+        <li>Cannot store the entire stream — must process on the fly</li>
+        <li>Each data item is processed once (or a limited number of times)</li>
+        <li>Decisions must be made quickly with incomplete information</li>
+        <li>Patterns may change over time (concept drift)</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Sources of Data Streams</h4>
+      <ul>
+        <li>IoT sensors — temperature, pressure, motion</li>
+        <li>Satellite imagery — weather, vegetation, disaster monitoring</li>
+        <li>Internet traffic — clickstreams, web access logs</li>
+        <li>Financial markets — stock prices, currency exchange rates</li>
+        <li>Social media — Twitter trending topics, live event reactions</li>
+        <li>Network monitoring — server logs, intrusion detection</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Traditional vs. Stream Mining</h4>
+      <ul>
+        <li><strong>Traditional:</strong> Entire dataset available upfront</li>
+        <li><strong>Stream:</strong> Data arrives one item or batch at a time</li>
+        <li><strong>Traditional:</strong> Multiple passes through data allowed</li>
+        <li><strong>Stream:</strong> One pass only — limited memory</li>
+        <li><strong>Traditional:</strong> Batch algorithms (Hadoop)</li>
+        <li><strong>Stream:</strong> Incremental algorithms (Spark Streaming)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="sh">Real-World Example — Website Data Streams</h3>
+  <p class="bd">Websites typically receive continuous streams of data daily. For instance, a sudden spike in searches for <strong>"election results"</strong> on a search engine on a particular day might indicate that elections were recently held in a region — or highlight the level of public interest. This kind of real-time pattern detection, impossible with traditional batch analytics, is the power of data stream mining.</p>
+
+  <div class="warn"><strong>⚠️ Challenge — Concept Drift:</strong> One of the most significant challenges in data stream mining is <strong>concept drift</strong> — the statistical properties of the data change over time. For example, a fraud detection model trained on last year's transaction patterns may fail on this year's data as fraudsters adapt their methods. Stream mining algorithms must detect and adapt to these changes automatically.</div>
+
+  <h3 class="sh">Applications of Data Stream Mining</h3>
+  <div class="cards">
+    <div class="card">
+      <div class="icon">💳</div>
+      <h4>Fraud Detection</h4>
+      <p>Banks analyse each credit card transaction in real time as it occurs — flagging suspicious patterns instantly, before fraudulent transactions are completed.</p>
+    </div>
+    <div class="card">
+      <div class="icon">📡</div>
+      <h4>Network Monitoring</h4>
+      <p>IT systems monitor network traffic streams to detect unusual patterns that could indicate a cyberattack, denial-of-service attack, or security breach in real time.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🌡️</div>
+      <h4>IoT Monitoring</h4>
+      <p>Industrial equipment sensors stream data continuously. Anomaly detection on these streams enables <strong>predictive maintenance</strong> — fixing equipment before it fails.</p>
+    </div>
+    <div class="card">
+      <div class="icon">📊</div>
+      <h4>Stock Market Analysis</h4>
+      <p>Financial algorithms process millions of trades per second to detect arbitrage opportunities, monitor volatility, and execute algorithmic trades in microseconds.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     5.8 — FUTURE OF BIG DATA ANALYTICS
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="future">
+<div class="container">
+  <div class="s-tag">Section 5.8</div>
+  <div class="s-title">Future of Big Data Analytics</div>
+  <div class="s-intro">
+    The future of Big Data Analytics is highly influenced by several key technological advancements that will shape how data is processed and analysed. These trends are not distant possibilities — many are already emerging and will become mainstream in the coming decade.
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="icon">⚡</div>
+      <h4>Real-Time Analytics</h4>
+      <p>Real-time analytics will allow businesses to <strong>process data instantaneously</strong>, providing immediate insights for decision-making. This enables actions based on live data — monitoring customer behaviour, tracking supply chain activities, and responding to events as they unfold.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🧠</div>
+      <h4>Advanced Predictive Models</h4>
+      <p>Predictive analytics will evolve with the integration of <strong>more sophisticated machine learning and AI algorithms</strong>, enabling organisations to forecast trends and behaviours with far greater precision and accuracy than current models allow.</p>
+    </div>
+    <div class="card">
+      <div class="icon">⚛️</div>
+      <h4>Quantum Computing</h4>
+      <p>Quantum computing promises to <strong>revolutionise Big Data analytics</strong> by offering unprecedented processing power. Quantum computers will solve complex optimisation and simulation problems much faster than classical computers — enabling analyses currently considered computationally impossible.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🌐</div>
+      <h4>Edge Computing &amp; IoT</h4>
+      <p>Rather than sending all data to the cloud, <strong>edge computing</strong> processes data at the source — near sensors and devices. This reduces latency and bandwidth costs, making real-time IoT analytics feasible at massive scale.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🤖</div>
+      <h4>Automated ML (AutoML)</h4>
+      <p><strong>AutoML</strong> tools will automate the selection, tuning, and deployment of machine learning models — democratising Big Data analytics and making it accessible to organisations without large teams of data scientists.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔐</div>
+      <h4>Privacy-Preserving Analytics</h4>
+      <p>Techniques like <strong>federated learning</strong> and <strong>differential privacy</strong> will enable organisations to extract insights from sensitive data without ever accessing the raw data — resolving the tension between analytics and privacy.</p>
+    </div>
+  </div>
+
+  <h3 class="sh">Big Data in Society — Applications Across Fields</h3>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Field</th><th>Current Applications</th><th>Future Potential</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Healthcare</strong></td><td>Electronic health records, drug discovery, epidemic tracking</td><td>Personalised medicine based on genomic Big Data; AI diagnosis matching specialist accuracy</td></tr>
+        <tr><td><strong>Education</strong></td><td>Learning analytics, adaptive e-learning platforms, dropout prediction</td><td>Fully personalised learning paths for every student based on real-time performance data</td></tr>
+        <tr><td><strong>Environmental Science</strong></td><td>Climate modelling, deforestation tracking via satellite imagery, pollution monitoring</td><td>Global real-time environmental monitoring networks for immediate disaster response</td></tr>
+        <tr><td><strong>Media &amp; Entertainment</strong></td><td>Content recommendations, audience measurement, targeted advertising</td><td>AI-generated personalised content experiences; real-time sentiment-driven narrative adaptation</td></tr>
+        <tr><td><strong>Smart Cities</strong></td><td>Traffic management, energy grid optimisation, public safety monitoring</td><td>Fully integrated urban data fabric connecting transport, utilities, health, and governance</td></tr>
+        <tr><td><strong>Agriculture</strong></td><td>Precision farming, crop yield prediction, soil analytics</td><td>Autonomous farms guided entirely by Big Data analytics and drone swarms</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note"><strong>💡 Think About It:</strong> As Big Data Analytics becomes more powerful, the ethical questions become more pressing. Who owns your data? How is it used? Who benefits from the insights — individuals or corporations? As you use and build Big Data systems in the future, these questions will be as important to answer as the technical ones.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     ASSESSMENT
+════════════════════════════════════════════════════════ -->
+<section id="assessment">
+<div class="container">
+  <div class="aw">
+    <div class="a-title">Unit 5 Assessment</div>
+    <div class="a-sub">Introduction to Big Data &amp; Data Analytics — test your understanding across all topics covered in this unit</div>
+
+    <!-- MCQ -->
+    <div class="qlabel">Section A — Multiple Choice Questions</div>
+
+    <div class="mcq" id="q1">
+      <div class="mcq-q"><em>Q1.</em> What does "Volume" refer to in the context of Big Data?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q1','a','c')"><div class="ltr">A</div> The variety of data types</div>
+        <div class="opt" onclick="chk('q1','b','c')"><div class="ltr">B</div> The speed at which data is generated</div>
+        <div class="opt" onclick="chk('q1','c','c')"><div class="ltr">C</div> The amount of data generated</div>
+        <div class="opt" onclick="chk('q1','d','c')"><div class="ltr">D</div> The veracity of the data</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q2">
+      <div class="mcq-q"><em>Q2.</em> Which of the following is NOT one of the V's of Big Data?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q2','a','c')"><div class="ltr">A</div> Velocity</div>
+        <div class="opt" onclick="chk('q2','b','c')"><div class="ltr">B</div> Volume</div>
+        <div class="opt" onclick="chk('q2','c','c')"><div class="ltr">C</div> Verification</div>
+        <div class="opt" onclick="chk('q2','d','c')"><div class="ltr">D</div> Variety</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q3">
+      <div class="mcq-q"><em>Q3.</em> Which of the following is an example of Unstructured Data?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q3','a','d')"><div class="ltr">A</div> Customer database with Name, Email, Phone</div>
+        <div class="opt" onclick="chk('q3','b','d')"><div class="ltr">B</div> A CSV file with daily temperature readings</div>
+        <div class="opt" onclick="chk('q3','c','d')"><div class="ltr">C</div> JSON file with product information</div>
+        <div class="opt" onclick="chk('q3','d','d')"><div class="ltr">D</div> Audio recordings of customer service calls</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q4">
+      <div class="mcq-q"><em>Q4.</em> What is the primary purpose of data pre-processing in Big Data analytics?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q4','a','c')"><div class="ltr">A</div> To increase data volume</div>
+        <div class="opt" onclick="chk('q4','b','c')"><div class="ltr">B</div> To reduce data variety</div>
+        <div class="opt" onclick="chk('q4','c','c')"><div class="ltr">C</div> To improve data quality</div>
+        <div class="opt" onclick="chk('q4','d','c')"><div class="ltr">D</div> To speed up data processing</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q5">
+      <div class="mcq-q"><em>Q5.</em> Which type of Big Data analytics answers the question "What will happen?"</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q5','a','c')"><div class="ltr">A</div> Descriptive Analytics</div>
+        <div class="opt" onclick="chk('q5','b','c')"><div class="ltr">B</div> Diagnostic Analytics</div>
+        <div class="opt" onclick="chk('q5','c','c')"><div class="ltr">C</div> Predictive Analytics</div>
+        <div class="opt" onclick="chk('q5','d','c')"><div class="ltr">D</div> Prescriptive Analytics</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q6">
+      <div class="mcq-q"><em>Q6.</em> What role does Hadoop play in Big Data processing?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q6','a','b')"><div class="ltr">A</div> Hadoop is a programming language for Big Data analytics</div>
+        <div class="opt" onclick="chk('q6','b','b')"><div class="ltr">B</div> Hadoop is a distributed file system for storing and processing Big Data</div>
+        <div class="opt" onclick="chk('q6','c','b')"><div class="ltr">C</div> Hadoop is a data visualisation tool</div>
+        <div class="opt" onclick="chk('q6','d','b')"><div class="ltr">D</div> Hadoop is a NoSQL database management system</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q7">
+      <div class="mcq-q"><em>Q7.</em> What is the primary challenge associated with the Veracity aspect of Big Data?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q7','a','b')"><div class="ltr">A</div> Handling large volumes of data</div>
+        <div class="opt" onclick="chk('q7','b','b')"><div class="ltr">B</div> Ensuring data quality and reliability</div>
+        <div class="opt" onclick="chk('q7','c','b')"><div class="ltr">C</div> Dealing with diverse data types</div>
+        <div class="opt" onclick="chk('q7','d','b')"><div class="ltr">D</div> Managing data processing speed</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q8">
+      <div class="mcq-q"><em>Q8.</em> In Orange Data Mining, which widget is used to handle missing values?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q8','a','c')"><div class="ltr">A</div> File Widget</div>
+        <div class="opt" onclick="chk('q8','b','c')"><div class="ltr">B</div> Preprocess Widget</div>
+        <div class="opt" onclick="chk('q8','c','c')"><div class="ltr">C</div> Impute Widget</div>
+        <div class="opt" onclick="chk('q8','d','c')"><div class="ltr">D</div> Data Table Widget</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q9">
+      <div class="mcq-q"><em>Q9.</em> A data stream is best described as:</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q9','a','b')"><div class="ltr">A</div> A large static database stored in a data warehouse</div>
+        <div class="opt" onclick="chk('q9','b','b')"><div class="ltr">B</div> A continuous, real-time flow of data from various sources</div>
+        <div class="opt" onclick="chk('q9','c','b')"><div class="ltr">C</div> A compressed archive of historical data records</div>
+        <div class="opt" onclick="chk('q9','d','b')"><div class="ltr">D</div> A batch of structured data loaded periodically</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q10">
+      <div class="mcq-q"><em>Q10.</em> Which characteristic of Big Data refers to the business benefits derived from analysing the data?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q10','a','c')"><div class="ltr">A</div> Veracity</div>
+        <div class="opt" onclick="chk('q10','b','c')"><div class="ltr">B</div> Variability</div>
+        <div class="opt" onclick="chk('q10','c','c')"><div class="ltr">C</div> Value</div>
+        <div class="opt" onclick="chk('q10','d','c')"><div class="ltr">D</div> Velocity</div>
+      </div>
+    </div>
+
+    <button class="sbtn" onclick="submitQ()">Submit &amp; See Score</button>
+    <div class="spanel" id="spanel" style="display:none;">
+      <div><div class="snum" id="sval">—</div><div class="stxt" id="smsg"></div></div>
+    </div>
+
+    <!-- TRUE / FALSE -->
+    <div class="qlabel">Section B — True or False</div>
+
+    <div class="qa"><div class="qa-q"><em>TF 1.</em> Big Data refers to datasets that are too large to be processed by traditional database systems. <strong>(True / False)</strong></div>
+    <button class="rbtn" onclick="tog('tf1')">Show Answer</button>
+    <div class="ans" id="tf1"><strong>True.</strong> Big Data is specifically defined by the fact that it cannot be effectively managed, processed, or analysed by traditional database tools like standard relational databases (RDBMS). This is exactly what makes it "Big" — necessitating special frameworks like Hadoop, Spark, and distributed computing architectures.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>TF 2.</em> Structured data is the primary type of data in Big Data analytics, making up the majority of datasets. <strong>(True / False)</strong></div>
+    <button class="rbtn" onclick="tog('tf2')">Show Answer</button>
+    <div class="ans" id="tf2"><strong>False.</strong> Unstructured data makes up approximately 80% of all data generated globally. Structured data, while the easiest to process, represents only a small fraction of total data. The majority of Big Data consists of unstructured data — images, videos, audio files, social media posts, emails — which requires special tools like NLP and Computer Vision to process.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>TF 3.</em> Veracity in Big Data refers to the trustworthiness and reliability of data. <strong>(True / False)</strong></div>
+    <button class="rbtn" onclick="tog('tf3')">Show Answer</button>
+    <div class="ans" id="tf3"><strong>True.</strong> Veracity is the V of the 6Vs framework that addresses the quality, accuracy, consistency, and trustworthiness of data. Not all data collected is reliable — data may be incomplete, inconsistent, or inaccurate. Veracity emphasises the importance of data cleaning and validation before analytics to ensure insights are based on trustworthy information.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>TF 4.</em> Real-time analytics involves processing and analysing data as it is generated, without any delay. <strong>(True / False)</strong></div>
+    <button class="rbtn" onclick="tog('tf4')">Show Answer</button>
+    <div class="ans" id="tf4"><strong>True.</strong> Real-time analytics (also called stream processing) processes data immediately as it is generated — with near-zero latency. This is in contrast to batch processing, which accumulates data over a period and analyses it at a scheduled time. Real-time analytics is used for fraud detection, live monitoring, and instant recommendations.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>TF 5.</em> A CSV file is an example of structured data. <strong>(True / False)</strong></div>
+    <button class="rbtn" onclick="tog('tf5')">Show Answer</button>
+    <div class="ans" id="tf5"><strong>True.</strong> A CSV (Comma-Separated Values) file is an example of structured data — it organises data in rows and columns with a consistent format. Each row represents one record and each column represents one field. CSV files can be directly imported into spreadsheets and relational databases for easy querying and analysis.</div></div>
+
+    <!-- SHORT ANSWER -->
+    <div class="qlabel">Section C — Short Answer Questions</div>
+
+    <div class="qa"><div class="qa-q"><em>SQ 1.</em> Define Big Data. What makes it different from traditional data?</div>
+    <button class="rbtn" onclick="tog('s1')">Show Answer</button>
+    <div class="ans" id="s1">
+      <strong>Definition:</strong> Big Data refers to extremely large and complex datasets that cannot be effectively managed, processed, or analysed by traditional database systems and software tools.<br><br>
+      <strong>What makes it different from traditional data:</strong><br><br>
+      1. <strong>Scale:</strong> Big Data operates at scales of petabytes, terabytes, and exabytes — far beyond what traditional databases can handle. An estimated 328.77 million terabytes are created globally every day.<br><br>
+      2. <strong>Variety:</strong> Big Data includes structured, semi-structured, and unstructured formats — not just neatly organised rows and columns. Traditional databases primarily handle structured data.<br><br>
+      3. <strong>Velocity:</strong> Big Data often arrives in real-time or near-real-time streams (e.g., 40,000+ Google searches per second), whereas traditional data is typically collected in batches.<br><br>
+      4. <strong>Tools required:</strong> Traditional tools like Excel or standard RDBMS cannot handle Big Data. Special distributed computing frameworks like Apache Hadoop and Spark, along with NoSQL databases, are needed.<br><br>
+      In summary, Big Data is not just "a lot of data" — it is data characterised by the 6Vs (Volume, Velocity, Variety, Veracity, Value, Variability) that fundamentally changes how we must approach storage, processing, and analysis.
+    </div></div>
+
+    <div class="qa"><div class="qa-q"><em>SQ 2.</em> Explain the 6Vs of Big Data with examples for each V.</div>
+    <button class="rbtn" onclick="tog('s2')">Show Answer</button>
+    <div class="ans" id="s2">
+      <strong>1. Volume</strong> — The massive amount of data generated. Example: ~328.77 million terabytes created globally each day. Facebook stores over 100 petabytes of user data.<br><br>
+      <strong>2. Velocity</strong> — The speed of data generation and the need for rapid processing. Example: Google processes 40,000+ search queries per second; Twitter generates 6,000+ tweets per second. Financial markets require microsecond-level transaction processing.<br><br>
+      <strong>3. Variety</strong> — The diversity of data formats: structured (spreadsheets, transaction records), semi-structured (JSON, XML files), and unstructured (images, videos, emails, social media posts). A single hospital generates all three types simultaneously.<br><br>
+      <strong>4. Veracity</strong> — The trustworthiness and quality of data. Example: Social media data contains fake accounts, bots, and spam that must be filtered before analysis. In healthcare, incorrect patient data could lead to dangerous medical decisions.<br><br>
+      <strong>5. Value</strong> — The business benefit extracted from analysis. Example: Netflix's recommendation engine (built on Big Data analytics) is estimated to save $1 billion per year by reducing subscriber churn. Without extracting this value, the other Vs are meaningless.<br><br>
+      <strong>6. Variability</strong> — Inconsistencies and changing patterns in data streams. Example: The meaning of the word "python" in social media posts varies — it could refer to the programming language, the snake, or the comedy group Monty Python. Context changes over time and must be accounted for.
+    </div></div>
+
+    <div class="qa"><div class="qa-q"><em>SQ 3.</em> Explain the four-step working process of Big Data Analytics.</div>
+    <button class="rbtn" onclick="tog('s3')">Show Answer</button>
+    <div class="ans" id="s3">
+      Big Data Analytics follows a four-step systematic process:<br><br>
+      <strong>Step 1 — Gather Data:</strong> Collect structured and unstructured data from various sources including cloud storage, mobile apps, IoT sensors, social media platforms, and transactional systems. Each organisation develops a unique data collection strategy based on its business requirements. The challenge here is identifying which data sources are relevant and ensuring the data collected is comprehensive enough to support meaningful analysis.<br><br>
+      <strong>Step 2 — Process Data:</strong> Raw collected data must be prepared for analysis through either Batch Processing (large data blocks processed over time — suitable for non-time-sensitive analysis) or Stream Processing (small batches in near-real time — for faster decision-making). Normalisation is also applied at this stage to scale numerical values to a standard range (e.g., 0–1), ensuring no feature dominates the model due to scale differences.<br><br>
+      <strong>Step 3 — Clean Data:</strong> Data quality issues must be addressed before analysis. This involves: correcting formatting errors, eliminating duplicate records, and handling missing values using methods such as mean imputation (replace missing with average), mode imputation (replace with most frequent value), or fixed value replacement. Without cleaning, erroneous data propagates into analysis and produces misleading insights.<br><br>
+      <strong>Step 4 — Analyse Data:</strong> Apply advanced analytics techniques to the prepared data — including K-Means clustering for segmentation, Logistic Regression or Decision Trees for prediction, and visualisation tools (Scatter Plots, Heat Maps, Box Plots) for pattern discovery. Tools like Tableau, Apache Hadoop, Cassandra, MongoDB, and Orange Data Mining are commonly used at this stage to extract actionable insights.
+    </div></div>
+
+    <div class="qa"><div class="qa-q"><em>SQ 4.</em> Differentiate between Structured, Semi-Structured, and Unstructured data with two examples of each.</div>
+    <button class="rbtn" onclick="tog('s4')">Show Answer</button>
+    <div class="ans" id="s4">
+      <strong>Structured Data:</strong><br>
+      Data that is highly organised into a predefined format — stored in rows and columns in a relational database. It has a fixed schema that all records conform to, making it easily searchable using SQL.<br>
+      Examples: (1) A customer database with fields: CustomerID, Name, Email, Phone, City — every record follows the same structure. (2) A bank's transaction records with fields: Date, AccountNumber, Amount, TransactionType — uniform and queryable.<br><br>
+      <strong>Semi-Structured Data:</strong><br>
+      Data that has some organisational properties (like tags or markers) but does not conform fully to a relational model. It has a self-describing structure that may vary between records, making it flexible but harder to query than structured data.<br>
+      Examples: (1) A JSON file containing product information where different products may have different attribute fields. (2) An XML configuration file where elements follow a hierarchical but variable structure.<br><br>
+      <strong>Unstructured Data:</strong><br>
+      Data that has no predefined format, schema, or organisation. It cannot be directly stored in traditional relational databases and requires special tools (NLP for text, Computer Vision for images) to extract meaning.<br>
+      Examples: (1) Audio recordings of customer service phone calls — no schema, raw audio waveform. (2) Social media posts including text, images, hashtags, and mentions — highly variable, contextual, and human-generated.
+    </div></div>
+
+    <!-- LONG ANSWER -->
+    <div class="qlabel">Section D — Long Answer Questions</div>
+
+    <div class="qa"><div class="qa-q"><em>LQ 1.</em> A healthcare company is using Big Data analytics to manage patient records, predict disease outbreaks, and personalise treatments. However, the company is facing challenges regarding data privacy. What are the potential risks to patient privacy, and how can they be mitigated?</div>
+    <button class="rbtn" onclick="tog('l1')">Show Answer</button>
+    <div class="ans" id="l1">
+      <strong>Context:</strong> Healthcare Big Data — including electronic health records, genomic data, medical imaging, and wearable device data — is among the most sensitive personal information that exists. Its misuse can cause irreversible harm to individuals.<br><br>
+      <strong>Potential Privacy Risks:</strong><br><br>
+      1. <strong>Unauthorised Access &amp; Data Breaches:</strong> Large centralised healthcare databases are prime targets for cyberattacks. A breach can expose millions of patient records — including diagnoses, medications, and personal details — to criminal misuse, discrimination, or public exposure.<br><br>
+      2. <strong>Re-identification from Anonymised Data:</strong> Even when patient data is "anonymised" (names removed), combining it with other available data (location, age, rare conditions) can re-identify individuals. Studies have shown that 87% of Americans can be uniquely identified using just zip code, birth date, and gender.<br><br>
+      3. <strong>Secondary Use Without Consent:</strong> Patient data collected for one purpose (treatment) may be shared with or sold to pharmaceutical companies, insurance companies, or researchers without patients' knowledge or consent — violating the principle of informed consent.<br><br>
+      4. <strong>Discriminatory Use by Insurers &amp; Employers:</strong> If health data reaches insurers or employers, individuals with pre-existing conditions could face higher premiums, denial of coverage, or employment discrimination.<br><br>
+      5. <strong>Regulatory Non-Compliance:</strong> Failing to comply with India's Digital Personal Data Protection Act (DPDP) 2023 or GDPR (for international data) can result in heavy financial penalties and reputational damage.<br><br>
+      <strong>Mitigation Strategies:</strong><br><br>
+      1. <strong>Data Encryption:</strong> Encrypt all patient data both at rest and in transit using strong encryption standards. This ensures data is unreadable even if accessed without authorisation.<br><br>
+      2. <strong>Role-Based Access Control (RBAC):</strong> Ensure only authorised personnel can access specific data — a radiologist needs imaging data but not billing records. Apply the principle of least privilege.<br><br>
+      3. <strong>Differential Privacy:</strong> Add mathematical noise to datasets before analysis — enabling patterns to be discovered without revealing any individual's exact data.<br><br>
+      4. <strong>Federated Learning:</strong> Train AI models on patient data at each hospital locally — never moving raw data to a central server. Only model updates (gradients) are shared, not the underlying data.<br><br>
+      5. <strong>Explicit Informed Consent:</strong> Obtain clear, specific consent from patients before using their data for any purpose beyond direct care — with the right to withdraw consent at any time.<br><br>
+      6. <strong>Regular Audits:</strong> Conduct regular security audits, penetration testing, and data governance reviews to proactively identify and address vulnerabilities.<br><br>
+      <strong>Conclusion:</strong> The benefits of Big Data in healthcare — earlier disease detection, personalised treatments, better resource allocation — are enormous. However, these must be balanced with robust privacy protection. Privacy should be designed into the system from the start (Privacy by Design), not bolted on as an afterthought.
+    </div></div>
+
+  </div>
+</div>
+</section>
+
+<footer>
+  <p>Class XII · Artificial Intelligence · Subject Code 843 · CBSE</p>
+  <p style="margin-top:.4rem;">Unit 5 — Introduction to Big Data &amp; Data Analytics &nbsp;·&nbsp; <span>Big Data · 6Vs Framework · Data Analytics · Data Streams · Future Trends</span></p>
+</footer>
+
+<script>
+/* STARS */
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 180; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const sz = Math.random() * 2.4 + 0.5;
+  s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*4}s;--dl:${Math.random()*5}s;`;
+  starsEl.appendChild(s);
+}
+
+/* THEME */
+let isDay = true;
+function toggleTheme() {
+  isDay = !isDay;
+  document.documentElement.setAttribute('data-theme', isDay ? 'day' : 'night');
+  document.getElementById('tlbl').textContent = isDay ? 'Day' : 'Night';
+  document.getElementById('tico').textContent = isDay ? '☀️' : '🌙';
+}
+
+/* MCQ */
+const answered = {};
+const correctMap = {q1:'c',q2:'c',q3:'d',q4:'c',q5:'c',q6:'b',q7:'b',q8:'c',q9:'b',q10:'c'};
+function chk(qid, chosen, right) {
+  if (answered[qid]) return;
+  answered[qid] = chosen;
+  const c = document.getElementById(qid);
+  const opts = c.querySelectorAll('.opt');
+  ['a','b','c','d'].forEach((l,i) => {
+    opts[i].style.pointerEvents = 'none';
+    if (l === right) opts[i].classList.add('correct');
+    else if (l === chosen && chosen !== right) opts[i].classList.add('wrong');
+  });
+}
+function submitQ() {
+  let score = 0;
+  Object.keys(correctMap).forEach(qid => {
+    if (!answered[qid]) {
+      chk(qid, '?', correctMap[qid]);
+      answered[qid] = '?';
+    }
+    if (answered[qid] === correctMap[qid]) score++;
+  });
+  const p = document.getElementById('spanel');
+  p.style.display = 'flex';
+  document.getElementById('sval').textContent = score+'/10';
+  const msgs = ['Keep practising — review the notes! 💪','Getting there, a bit more revision 📖','Good effort, almost there 👍','Great job, well done! 🎉','Perfect score — outstanding! 🏆'];
+  document.getElementById('smsg').textContent = msgs[Math.min(Math.floor(score/2.5),4)];
+  p.scrollIntoView({behavior:'smooth'});
+}
+function tog(id) {
+  const b = document.getElementById(id);
+  const btn = b.previousElementSibling;
+  b.classList.toggle('show');
+  btn.textContent = b.classList.contains('show') ? 'Hide Answer' : 'Show Answer';
+}
+
+/* NAV highlight */
+const secs = document.querySelectorAll('section[id]');
+const nls = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  secs.forEach(s => { if (window.scrollY >= s.offsetTop - 90) cur = s.id; });
+  nls.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#'+cur));
+});
+</script>
+</body>
+</html>

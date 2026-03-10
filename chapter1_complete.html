@@ -1,0 +1,1629 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="day">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 1 — Python Programming-II | Class XII AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── THEMES ───────────────────────────────── */
+:root { --tr: 1.2s cubic-bezier(.4,0,.2,1); }
+
+[data-theme="day"] {
+  --sky-top:#74b9d8; --sky-mid:#b8dcf0; --sky-bot:#fde8c8;
+  --bg:#fdf6ec; --surface:#fffbf5; --surface2:#fef3e2;
+  --border:#e8d5b7; --text:#2c1810; --text-muted:#7a5c42;
+  --accent:#d97b34; --accent2:#2d8a4e; --accent3:#c94f27;
+  --accent4:#8b5cf6; --code-bg:#1a1410; --code-text:#f0e0c8;
+  --nav-bg:rgba(253,246,236,0.94); --sun-bg:#fff176;
+  --sun-shadow:rgba(255,200,50,.7); --star-op:0; --cloud-op:1;
+}
+[data-theme="night"] {
+  --sky-top:#020818; --sky-mid:#0a1628; --sky-bot:#1a2a4a;
+  --bg:#080e1f; --surface:#0e1828; --surface2:#141f35;
+  --border:#1e2d4a; --text:#e8edf8; --text-muted:#7a90b8;
+  --accent:#5b8cff; --accent2:#00d4aa; --accent3:#ff6b9d;
+  --accent4:#a78bfa; --code-bg:#030810; --code-text:#c9d8f0;
+  --nav-bg:rgba(8,14,31,0.95); --sun-bg:#e8eeff;
+  --sun-shadow:rgba(180,200,255,.55); --star-op:1; --cloud-op:0;
+}
+
+/* ── RESET ────────────────────────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.78;transition:background var(--tr),color var(--tr);overflow-x:hidden;}
+
+/* ── SKY ──────────────────────────────────── */
+.sky{position:fixed;inset:0;z-index:-2;pointer-events:none;}
+.sky-grad{position:absolute;inset:0;background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 55%,var(--sky-bot) 100%);opacity:.16;transition:background var(--tr),opacity var(--tr);}
+[data-theme="night"] .sky-grad{opacity:.38;}
+.celestial{position:absolute;top:55px;right:130px;width:66px;height:66px;border-radius:50%;background:var(--sun-bg);box-shadow:0 0 40px var(--sun-shadow),0 0 90px var(--sun-shadow);transition:all var(--tr);}
+[data-theme="night"] .celestial{width:54px;height:54px;top:75px;right:105px;}
+.crater{position:absolute;border-radius:50%;background:rgba(0,0,0,.08);opacity:0;transition:opacity var(--tr);}
+[data-theme="night"] .crater{opacity:1;}
+.cr1{width:13px;height:13px;top:17px;left:15px;}
+.cr2{width:8px;height:8px;top:31px;left:33px;}
+.cr3{width:10px;height:10px;top:11px;left:35px;}
+.stars{position:absolute;inset:0;opacity:var(--star-op);transition:opacity var(--tr);}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite var(--dl,0s);}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}
+.clouds{position:absolute;inset:0;opacity:var(--cloud-op);transition:opacity var(--tr);pointer-events:none;}
+.cloud{position:absolute;border-radius:60px;background:rgba(255,255,255,.8);}
+.cloud::before,.cloud::after{content:'';position:absolute;background:inherit;border-radius:50%;}
+.cl1{width:110px;height:34px;top:110px;left:7%;animation:drift 30s linear infinite;}
+.cl1::before{width:55px;height:46px;top:-20px;left:14px;}
+.cl1::after{width:42px;height:36px;top:-14px;left:50px;}
+.cl2{width:85px;height:28px;top:170px;left:54%;animation:drift 42s linear infinite 6s;}
+.cl2::before{width:46px;height:38px;top:-16px;left:11px;}
+.cl2::after{width:32px;height:26px;top:-10px;left:36px;}
+.cl3{width:65px;height:22px;top:85px;left:34%;animation:drift 55s linear infinite 14s;}
+.cl3::before{width:34px;height:28px;top:-12px;left:9px;}
+@keyframes drift{from{transform:translateX(-250px)}to{transform:translateX(110vw)}}
+
+/* ── TOGGLE ───────────────────────────────── */
+.toggle-wrap{position:fixed;top:16px;right:20px;z-index:999;display:flex;align-items:center;gap:9px;}
+.tlabel{font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);transition:color var(--tr);user-select:none;}
+.tbtn{width:62px;height:30px;background:var(--surface2);border:2px solid var(--border);border-radius:99px;cursor:pointer;position:relative;transition:background var(--tr),border-color var(--tr);}
+.tbtn::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--sun-bg);box-shadow:0 0 8px var(--sun-shadow);transition:transform .5s cubic-bezier(.4,0,.2,1),background .5s,box-shadow .5s;}
+[data-theme="night"] .tbtn::after{transform:translateX(32px);}
+
+/* ── NAV ──────────────────────────────────── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--nav-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.4rem;height:56px;gap:.4rem;transition:background var(--tr),border-color var(--tr);overflow-x:auto;}
+.nav-logo{font-family:'Playfair Display',serif;font-weight:900;font-size:1rem;color:var(--accent);white-space:nowrap;margin-right:.6rem;flex-shrink:0;transition:color var(--tr);}
+.nav-links{display:flex;gap:.2rem;flex-shrink:0;}
+.nav-links a{font-size:.67rem;padding:.25rem .7rem;border-radius:20px;color:var(--text-muted);text-decoration:none;font-weight:600;transition:all .2s;white-space:nowrap;}
+.nav-links a:hover,.nav-links a.active{background:var(--accent);color:#fff;}
+
+/* ── HERO ─────────────────────────────────── */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:7rem 2rem 5rem;text-align:center;}
+.hero-inner{max-width:700px;}
+.badge{display:inline-block;background:color-mix(in srgb,var(--accent) 13%,transparent);border:1px solid color-mix(in srgb,var(--accent) 38%,transparent);color:var(--accent);font-size:.68rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:.38rem 1.3rem;border-radius:30px;margin-bottom:1.4rem;transition:all var(--tr);}
+.hero h1{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2.6rem,7vw,5.2rem);letter-spacing:-1px;line-height:1.05;margin-bottom:1.1rem;color:var(--text);transition:color var(--tr);}
+.hero h1 span{color:var(--accent);}
+.hero p{font-size:1rem;color:var(--text-muted);max-width:540px;margin:0 auto 2.2rem;transition:color var(--tr);}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:.55rem;}
+.chip{background:var(--surface);border:1.5px solid var(--border);border-radius:9px;padding:.4rem 1rem;font-size:.76rem;font-weight:600;color:var(--text-muted);text-decoration:none;transition:all .22s;}
+.chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-3px);box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 18%,transparent);}
+
+/* ── SECTION WRAPPER ──────────────────────── */
+.container{max-width:1080px;margin:0 auto;padding:0 2rem;}
+section.topic{padding:5rem 0;border-top:1px solid var(--border);transition:border-color var(--tr);}
+
+/* section labels */
+.s-tag{font-size:.68rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:.45rem;transition:color var(--tr);}
+.s-title{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(1.7rem,3.8vw,2.5rem);line-height:1.08;margin-bottom:1.1rem;color:var(--text);transition:color var(--tr);}
+.s-intro{color:var(--text-muted);font-size:.96rem;max-width:820px;border-left:3px solid var(--accent);padding:.95rem 1.4rem;background:var(--surface);border-radius:0 12px 12px 0;margin-bottom:2.2rem;line-height:1.86;transition:all var(--tr);}
+.s-intro strong{color:var(--text);}
+
+/* sub-headings */
+h3.sh{font-family:'Playfair Display',serif;font-weight:700;font-size:1.1rem;color:var(--accent2);margin:2rem 0 .8rem;display:flex;align-items:center;gap:.6rem;transition:color var(--tr);}
+h3.sh::before{content:'';width:22px;height:3px;background:var(--accent2);border-radius:2px;flex-shrink:0;transition:background var(--tr);}
+h4.ssh{font-family:'Outfit',sans-serif;font-weight:700;font-size:.95rem;color:var(--accent4);margin:1.5rem 0 .6rem;transition:color var(--tr);}
+p.bd{color:var(--text-muted);font-size:.94rem;margin-bottom:.85rem;transition:color var(--tr);}
+p.bd strong{color:var(--text);}
+
+/* ── CARDS ────────────────────────────────── */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin:1.4rem 0 2.2rem;}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1.3rem;transition:all .25s;}
+.card:hover{transform:translateY(-5px);border-color:var(--accent);box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 16%,transparent);}
+.card .icon{font-size:1.75rem;margin-bottom:.7rem;}
+.card h4{font-family:'Playfair Display',serif;font-weight:700;font-size:.97rem;margin-bottom:.4rem;color:var(--text);transition:color var(--tr);}
+.card p{font-size:.84rem;color:var(--text-muted);line-height:1.62;transition:color var(--tr);}
+
+/* ── INFO GRID ────────────────────────────── */
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1.4rem 0;}
+.ic{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.4rem;transition:all var(--tr);}
+.ic h4{font-size:.72rem;color:var(--accent2);margin-bottom:.65rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;}
+.ic ul{list-style:none;}
+.ic ul li{font-size:.86rem;color:var(--text-muted);padding:.2rem 0 .2rem 1.2rem;position:relative;transition:color var(--tr);}
+.ic ul li::before{content:'▸';position:absolute;left:0;color:var(--accent2);font-size:.76rem;}
+
+/* ── CODE BLOCKS ──────────────────────────── */
+.cb{background:var(--code-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:1.4rem 0;box-shadow:0 4px 22px rgba(0,0,0,.18);transition:border-color var(--tr);}
+.cb-head{background:color-mix(in srgb,var(--code-bg) 85%,white 6%);padding:.6rem 1.1rem;display:flex;align-items:center;gap:.45rem;border-bottom:1px solid rgba(255,255,255,.05);}
+.cb-head .fn{font-size:.72rem;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace;margin-left:auto;}
+.d{width:10px;height:10px;border-radius:50%;}
+.d.r{background:#ff5f56;}.d.y{background:#ffbd2e;}.d.g{background:#27c93f;}
+pre{font-family:'DM Mono',monospace;font-size:.81rem;line-height:1.82;padding:1.4rem;overflow-x:auto;color:var(--code-text);}
+.kw{color:#ff9d6c;}.fn2{color:#82aaff;}.st{color:#c3e88d;}.cm{color:#4a5568;font-style:italic;}.nm{color:#f78c6c;}.cl{color:#ffcb6b;}.bi{color:#89ddff;}
+
+/* ── TABLE ────────────────────────────────── */
+.tw{overflow-x:auto;margin:1.4rem 0;border-radius:12px;border:1px solid var(--border);transition:border-color var(--tr);}
+table{width:100%;border-collapse:collapse;font-size:.86rem;}
+th{background:var(--surface2);color:var(--accent);font-weight:700;padding:.8rem 1.1rem;text-align:left;border-bottom:2px solid var(--border);font-family:'Playfair Display',serif;transition:all var(--tr);}
+td{padding:.72rem 1.1rem;border-bottom:1px solid var(--border);color:var(--text-muted);transition:all var(--tr);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface2);color:var(--text);}
+
+/* ── HIGHLIGHT BOXES ──────────────────────── */
+.hl{background:color-mix(in srgb,var(--accent2) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent2) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);line-height:1.82;transition:all var(--tr);}
+.hl strong{color:var(--accent2);}
+.warn{background:color-mix(in srgb,var(--accent3) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent3) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);transition:all var(--tr);}
+.warn strong{color:var(--accent3);}
+.note{background:color-mix(in srgb,var(--accent4) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent4) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);transition:all var(--tr);}
+.note strong{color:var(--accent4);}
+
+/* ── STEP BOX ─────────────────────────────── */
+.steps{display:flex;flex-direction:column;gap:.7rem;margin:1.2rem 0;}
+.step{display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:1rem 1.3rem;transition:all var(--tr);}
+.step-num{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;font-family:'Playfair Display',serif;}
+.step-body h5{font-weight:600;font-size:.92rem;margin-bottom:.25rem;color:var(--text);transition:color var(--tr);}
+.step-body p{font-size:.85rem;color:var(--text-muted);transition:color var(--tr);}
+
+/* ── COMPARISON TABLE WRAPPER ─────────────── */
+.comp{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.4rem 0;}
+.comp-col{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:1.2rem;}
+.comp-col h4{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;margin-bottom:.8rem;color:var(--accent);}
+.comp-col ul{list-style:none;}
+.comp-col ul li{font-size:.87rem;color:var(--text-muted);padding:.22rem 0 .22rem 1.2rem;position:relative;transition:color var(--tr);}
+.comp-col ul li::before{content:'•';position:absolute;left:0;color:var(--accent2);}
+
+/* ── ASSESSMENT ───────────────────────────── */
+#assessment{padding:5rem 0 4rem;border-top:1px solid var(--border);}
+.aw{background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--accent) 7%,var(--surface)));border:1.5px solid color-mix(in srgb,var(--accent) 28%,var(--border));border-radius:22px;padding:2.8rem;transition:all var(--tr);}
+.a-title{font-family:'Playfair Display',serif;font-weight:900;font-size:2.1rem;letter-spacing:-.5px;margin-bottom:.35rem;color:var(--text);transition:color var(--tr);}
+.a-sub{color:var(--text-muted);font-size:.88rem;margin-bottom:2.2rem;}
+.qlabel{font-weight:700;font-size:.67rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent2);padding-bottom:.55rem;border-bottom:1px solid var(--border);margin:2.2rem 0 1.3rem;transition:all var(--tr);}
+
+/* MCQ */
+.mcq{margin-bottom:1.8rem;}
+.mcq-q{font-size:.95rem;font-weight:500;margin-bottom:.85rem;color:var(--text);transition:color var(--tr);}
+.mcq-q em{color:var(--accent);font-style:normal;font-weight:700;font-family:'Playfair Display',serif;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;}
+.opt{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:.6rem .95rem;cursor:pointer;transition:all .2s;font-size:.86rem;color:var(--text-muted);display:flex;align-items:center;gap:.65rem;user-select:none;}
+.opt:hover{border-color:var(--accent);color:var(--text);background:color-mix(in srgb,var(--accent) 7%,var(--surface2));}
+.opt.correct{background:color-mix(in srgb,var(--accent2) 12%,transparent);border-color:var(--accent2);color:var(--accent2);}
+.opt.wrong{background:color-mix(in srgb,var(--accent3) 9%,transparent);border-color:var(--accent3);color:var(--accent3);}
+.opt .ltr{width:21px;height:21px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;transition:background var(--tr);}
+
+/* Q&A */
+.qa{margin-bottom:1.4rem;}
+.qa-q{font-size:.94rem;margin-bottom:.45rem;color:var(--text);transition:color var(--tr);}
+.qa-q em{color:var(--accent);font-style:normal;font-weight:700;font-family:'Playfair Display',serif;}
+.ans{background:var(--code-bg);border-left:3px solid var(--accent2);border-radius:0 9px 9px 0;padding:.95rem 1.2rem;font-size:.87rem;color:var(--code-text);line-height:1.82;display:none;margin-top:.45rem;transition:all var(--tr);}
+.ans.show{display:block;}
+.rbtn{background:transparent;border:1.5px solid var(--border);border-radius:7px;padding:.3rem .9rem;font-size:.74rem;color:var(--text-muted);cursor:pointer;font-weight:600;transition:all .2s;margin-top:.38rem;}
+.rbtn:hover{border-color:var(--accent2);color:var(--accent2);}
+
+/* Score */
+.spanel{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:1.3rem 1.7rem;display:flex;align-items:center;justify-content:space-between;margin-top:1.8rem;flex-wrap:wrap;gap:1rem;transition:all var(--tr);}
+.snum{font-family:'Playfair Display',serif;font-weight:900;font-size:2.4rem;color:var(--accent);transition:color var(--tr);}
+.stxt{font-size:.84rem;color:var(--text-muted);}
+.sbtn{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 68%,var(--accent2)));border:none;border-radius:11px;padding:.85rem 2.4rem;font-weight:700;font-size:.88rem;color:#fff;cursor:pointer;transition:all .22s;letter-spacing:.4px;font-family:'Outfit',sans-serif;margin-top:1.4rem;}
+.sbtn:hover{transform:translateY(-3px);box-shadow:0 12px 28px color-mix(in srgb,var(--accent) 38%,transparent);}
+
+footer{text-align:center;padding:3rem 2rem;color:var(--text-muted);font-size:.82rem;border-top:1px solid var(--border);transition:all var(--tr);}
+footer span{color:var(--accent);}
+
+/* divider */
+.divider{height:1px;background:var(--border);margin:2rem 0;transition:background var(--tr);}
+
+@media(max-width:640px){
+  .opts{grid-template-columns:1fr;}
+  .nav-links{display:none;}
+  .aw{padding:1.4rem;}
+  .tlabel{display:none;}
+  .comp{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- SKY -->
+<div class="sky">
+  <div class="sky-grad"></div>
+  <div class="celestial">
+    <div class="crater cr1"></div><div class="crater cr2"></div><div class="crater cr3"></div>
+  </div>
+  <div class="stars" id="stars"></div>
+  <div class="clouds">
+    <div class="cloud cl1"></div><div class="cloud cl2"></div><div class="cloud cl3"></div>
+  </div>
+</div>
+
+<!-- TOGGLE -->
+<div class="toggle-wrap">
+  <span class="tlabel" id="tlbl">Day</span>
+  <div class="tbtn" id="tbtn" onclick="toggleTheme()" title="Day / Night"></div>
+  <span id="tico">☀️</span>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" style="display:flex;align-items:center;gap:.4rem;text-decoration:none;color:var(--text-muted);font-size:.72rem;font-weight:700;letter-spacing:.5px;flex-shrink:0;transition:color .2s;border:1.5px solid var(--border);border-radius:20px;padding:.25rem .8rem;margin-right:.6rem;" onmouseover="this.style.color='var(--accent)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--text-muted)';this.style.borderColor='var(--border)'">← Home</a>
+  <div class="nav-logo">Unit 1 · Python II</div>
+  <div class="nav-links">
+    <a href="#overview">Overview</a>
+    <a href="#numpy">NumPy</a>
+    <a href="#pandas">Pandas</a>
+    <a href="#csv">CSV Files</a>
+    <a href="#missing">Missing Values</a>
+    <a href="#casestudy">Case Study</a>
+    <a href="#linreg">Linear Regression</a>
+    <a href="#exercises">Exercises</a>
+    <a href="#assessment">Assessment</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="badge">Unit 01 · Class XII AI · Subject Code 843</div>
+    <h1>Python<br><span>Programming</span>-II</h1>
+    <p>A complete, in-depth guide to every topic — NumPy, Pandas, CSV handling, missing values, case study, linear regression, and exercises — straight from the CBSE handbook.</p>
+    <div class="chips">
+      <a href="#overview" class="chip">📋 Overview</a>
+      <a href="#numpy" class="chip">📐 NumPy</a>
+      <a href="#pandas" class="chip">🐼 Pandas</a>
+      <a href="#csv" class="chip">📄 CSV Files</a>
+      <a href="#missing" class="chip">🔍 Missing Values</a>
+      <a href="#casestudy" class="chip">🎯 Case Study</a>
+      <a href="#linreg" class="chip">📈 Linear Regression</a>
+      <a href="#exercises" class="chip">📝 Exercises</a>
+      <a href="#assessment" class="chip">✅ Assessment</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION: OVERVIEW
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="overview">
+<div class="container">
+  <div class="s-tag">Unit 1 — Overview</div>
+  <div class="s-title">Chapter Summary & Learning Objectives</div>
+  <div class="s-intro">
+    This chapter provides a comprehensive review of fundamental Python programming techniques. Students will gain hands-on experience with essential Python libraries — <strong>NumPy</strong> and <strong>Pandas</strong> — preparing them for more advanced data analysis and machine learning tasks in their capstone project.
+  </div>
+
+  <div class="ig">
+    <div class="ic">
+      <h4>Learning Objectives</h4>
+      <ul>
+        <li>Review the basics of NumPy and Pandas library, including arrays and essential functions</li>
+        <li>Efficiently import and export data between CSV files and Pandas DataFrames</li>
+        <li>Implement the Linear Regression algorithm, including data preparation and model training</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Key Concepts</h4>
+      <ul>
+        <li>Recap of NumPy library</li>
+        <li>Recap of Pandas library</li>
+        <li>Importing and Exporting Data between CSV Files and DataFrames</li>
+        <li>Handling missing values</li>
+        <li>Linear Regression algorithm</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Learning Outcomes</h4>
+      <ul>
+        <li>Apply NumPy and Pandas concepts for data manipulation and analysis</li>
+        <li>Import and export data between CSV files and DataFrames ensuring data integrity</li>
+        <li>Implement Linear Regression with data preparation and model training</li>
+      </ul>
+    </div>
+    <div class="ic">
+      <h4>Approach & Prerequisites</h4>
+      <ul>
+        <li>Hands-on programming practice</li>
+        <li>Team discussion and web search</li>
+        <li>Case studies and real datasets</li>
+        <li>Prerequisite: Python basics from Class XI</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="hl"><strong>📌 Why these libraries?</strong> Python libraries are collections of pre-written code that we can use to perform common tasks, making programming easier. They are like toolkits that provide functions and methods to help us avoid writing code from scratch. NumPy and Pandas form the backbone of data manipulation and analysis in Python.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 1.1 — PYTHON LIBRARIES (NumPy)
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="numpy">
+<div class="container">
+  <div class="s-tag">Section 1.1.1</div>
+  <div class="s-title">NumPy Library</div>
+  <div class="s-intro">
+    <strong>NumPy</strong>, short for Numerical Python, is a powerful library used for numerical computing in Python. It is a general-purpose array-processing package. In NumPy, the number of dimensions of the array is called the <strong>rank</strong> of the array. NumPy arrays are faster and more memory-efficient than regular Python lists because they are stored in contiguous memory blocks.
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="icon">📦</div><h4>General-Purpose</h4><p>NumPy is a general-purpose array-processing package. It forms the foundation of almost every scientific library in Python.</p></div>
+    <div class="card"><div class="icon">⚡</div><h4>Speed</h4><p>NumPy arrays are 10–100× faster than Python lists for numerical tasks because of vectorized operations and contiguous memory storage.</p></div>
+    <div class="card"><div class="icon">📏</div><h4>Rank = Dimensions</h4><p>The number of dimensions of a NumPy array is called its <strong>rank</strong>. A 1D array has rank 1, a 2D matrix has rank 2.</p></div>
+    <div class="card"><div class="icon">🔢</div><h4>Homogeneous</h4><p>All elements in a NumPy array must be the <strong>same data type</strong>. This constraint is what enables fast computation.</p></div>
+  </div>
+
+  <h3 class="sh">Creating NumPy Arrays</h3>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">numpy_basics.py</span></div>
+    <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── 1D Array (Rank = 1) ──</span>
+arr1 = np.array([<span class="nm">10</span>, <span class="nm">20</span>, <span class="nm">30</span>, <span class="nm">40</span>, <span class="nm">50</span>])
+<span class="fn2">print</span>(<span class="st">"1D Array:"</span>, arr1)        <span class="cm"># [10 20 30 40 50]</span>
+<span class="fn2">print</span>(<span class="st">"Rank (ndim):"</span>, arr1.ndim)  <span class="cm"># 1</span>
+<span class="fn2">print</span>(<span class="st">"Shape:"</span>, arr1.shape)       <span class="cm"># (5,)</span>
+<span class="fn2">print</span>(<span class="st">"Data type:"</span>, arr1.dtype)   <span class="cm"># int64</span>
+<span class="fn2">print</span>(<span class="st">"Size:"</span>, arr1.size)         <span class="cm"># 5</span>
+
+<span class="cm"># ── 2D Array / Matrix (Rank = 2) ──</span>
+arr2 = np.array([[<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span>],
+                  [<span class="nm">4</span>, <span class="nm">5</span>, <span class="nm">6</span>]])
+<span class="fn2">print</span>(<span class="st">"\n2D Array:\n"</span>, arr2)
+<span class="fn2">print</span>(<span class="st">"Rank:"</span>, arr2.ndim)         <span class="cm"># 2</span>
+<span class="fn2">print</span>(<span class="st">"Shape:"</span>, arr2.shape)       <span class="cm"># (2, 3) — 2 rows, 3 cols</span>
+
+<span class="cm"># ── Special Array Creators ──</span>
+zeros  = np.zeros((<span class="nm">3</span>, <span class="nm">3</span>))         <span class="cm"># 3×3 matrix of zeros</span>
+ones   = np.ones((<span class="nm">2</span>, <span class="nm">4</span>))          <span class="cm"># 2×4 matrix of ones</span>
+eye    = np.eye(<span class="nm">3</span>)                 <span class="cm"># 3×3 Identity matrix</span>
+rng    = np.arange(<span class="nm">0</span>, <span class="nm">20</span>, <span class="nm">2</span>)      <span class="cm"># [0,2,4,6,8,10,12,14,16,18]</span>
+lin    = np.linspace(<span class="nm">0</span>, <span class="nm">1</span>, <span class="nm">5</span>)     <span class="cm"># 5 evenly spaced pts 0→1</span>
+rand   = np.random.rand(<span class="nm">3</span>, <span class="nm">3</span>)     <span class="cm"># 3×3 random floats [0,1)</span></pre>
+  </div>
+
+  <h3 class="sh">NumPy Operations</h3>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">numpy_operations.py</span></div>
+    <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+a = np.array([<span class="nm">1</span>, <span class="nm">2</span>, <span class="nm">3</span>, <span class="nm">4</span>, <span class="nm">5</span>])
+b = np.array([<span class="nm">10</span>, <span class="nm">20</span>, <span class="nm">30</span>, <span class="nm">40</span>, <span class="nm">50</span>])
+
+<span class="cm"># Vectorized arithmetic — element-wise, no loop needed</span>
+<span class="fn2">print</span>(a + b)         <span class="cm"># [11 22 33 44 55]</span>
+<span class="fn2">print</span>(a - b)         <span class="cm"># [-9 -18 -27 -36 -45]</span>
+<span class="fn2">print</span>(a * b)         <span class="cm"># [10 40 90 160 250]</span>
+<span class="fn2">print</span>(b / a)         <span class="cm"># [10. 10. 10. 10. 10.]</span>
+<span class="fn2">print</span>(a ** <span class="nm">2</span>)        <span class="cm"># [1 4 9 16 25]</span>
+
+<span class="cm"># Statistical functions</span>
+<span class="fn2">print</span>(np.sum(a))     <span class="cm"># 15</span>
+<span class="fn2">print</span>(np.mean(a))    <span class="cm"># 3.0</span>
+<span class="fn2">print</span>(np.median(a))  <span class="cm"># 3.0</span>
+<span class="fn2">print</span>(np.min(a))     <span class="cm"># 1</span>
+<span class="fn2">print</span>(np.max(a))     <span class="cm"># 5</span>
+<span class="fn2">print</span>(np.std(a))     <span class="cm"># standard deviation ≈ 1.41</span>
+<span class="fn2">print</span>(np.var(a))     <span class="cm"># variance = 2.0</span>
+
+<span class="cm"># Slicing (same as Python lists)</span>
+<span class="fn2">print</span>(a[<span class="nm">1</span>:<span class="nm">4</span>])        <span class="cm"># [2 3 4]</span>
+<span class="fn2">print</span>(a[::<span class="nm">-1</span>])       <span class="cm"># [5 4 3 2 1] — reversed</span>
+<span class="fn2">print</span>(a[a > <span class="nm">3</span>])      <span class="cm"># [4 5] — boolean indexing</span>
+
+<span class="cm"># Reshape — change shape without changing data</span>
+m = np.arange(<span class="nm">12</span>).reshape(<span class="nm">3</span>, <span class="nm">4</span>)
+<span class="fn2">print</span>(m)
+<span class="cm"># [[ 0  1  2  3]
+#  [ 4  5  6  7]
+#  [ 8  9 10 11]]</span>
+
+<span class="cm"># Dot product / Matrix multiplication</span>
+A = np.array([[<span class="nm">1</span>,<span class="nm">2</span>],[<span class="nm">3</span>,<span class="nm">4</span>]])
+B = np.array([[<span class="nm">5</span>,<span class="nm">6</span>],[<span class="nm">7</span>,<span class="nm">8</span>]])
+<span class="fn2">print</span>(np.dot(A, B))  <span class="cm"># [[19 22] [43 50]]</span></pre>
+  </div>
+
+  <h3 class="sh">NumPy Attributes Quick Reference</h3>
+  <div class="tw">
+    <table>
+      <tr><th>Attribute / Function</th><th>Description</th><th>Example Output</th></tr>
+      <tr><td><code>arr.ndim</code></td><td>Number of dimensions (rank)</td><td><code>2</code></td></tr>
+      <tr><td><code>arr.shape</code></td><td>Tuple of size of each dimension</td><td><code>(3, 4)</code></td></tr>
+      <tr><td><code>arr.size</code></td><td>Total number of elements</td><td><code>12</code></td></tr>
+      <tr><td><code>arr.dtype</code></td><td>Data type of elements</td><td><code>int64</code></td></tr>
+      <tr><td><code>arr.reshape(r,c)</code></td><td>Change shape without changing data</td><td><code>shape (3,4)</code></td></tr>
+      <tr><td><code>np.zeros((r,c))</code></td><td>Array filled with zeros</td><td><code>[[0. 0.] …]</code></td></tr>
+      <tr><td><code>np.ones((r,c))</code></td><td>Array filled with ones</td><td><code>[[1. 1.] …]</code></td></tr>
+      <tr><td><code>np.eye(n)</code></td><td>Identity matrix of size n×n</td><td><code>[[1,0],[0,1]]</code></td></tr>
+      <tr><td><code>np.arange(s,e,step)</code></td><td>Evenly spaced values like range()</td><td><code>[0,2,4,6,8]</code></td></tr>
+      <tr><td><code>np.linspace(s,e,n)</code></td><td>n evenly spaced points from s to e</td><td><code>[0,.25,.5,.75,1]</code></td></tr>
+      <tr><td><code>np.sum(arr)</code></td><td>Sum of all elements</td><td><code>15</code></td></tr>
+      <tr><td><code>np.mean(arr)</code></td><td>Mean (average) of elements</td><td><code>3.0</code></td></tr>
+      <tr><td><code>np.std(arr)</code></td><td>Standard deviation</td><td><code>1.41</code></td></tr>
+      <tr><td><code>np.dot(A, B)</code></td><td>Matrix / dot product</td><td><code>2D array</code></td></tr>
+    </table>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 1.1.2 — PANDAS
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="pandas">
+<div class="container">
+  <div class="s-tag">Section 1.1.2</div>
+  <div class="s-title">Pandas Library</div>
+  <div class="s-intro">
+    <strong>Where and why do we use Pandas in Artificial Intelligence?</strong> Suppose we have a dataset containing information about various marketing campaigns — campaign type, budget, duration, reach, engagement metrics, and sales performance. Pandas is used to load the dataset, display summary statistics, and perform group-wise analysis. This capability is invaluable in AI and data-driven decision-making, allowing businesses to gain actionable insights from their data.
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="icon">📋</div><h4>Series</h4><p>A one-dimensional labelled array. Like a single column in a spreadsheet. Each element has an index (label).</p></div>
+    <div class="card"><div class="icon">📊</div><h4>DataFrame</h4><p>A two-dimensional labelled table with rows and columns — the most important Pandas structure. Like an Excel sheet.</p></div>
+    <div class="card"><div class="icon">🔗</div><h4>Built on NumPy</h4><p>Each column of a DataFrame is a NumPy array internally, so all NumPy performance benefits apply.</p></div>
+    <div class="card"><div class="icon">🤖</div><h4>AI Pipeline</h4><p>Pandas loads raw CSV data, cleans it, groups it, visualises it with Matplotlib, and feeds it to ML models.</p></div>
+  </div>
+
+  <!-- 1.1.2.1 Data Structures -->
+  <h3 class="sh">1.1.2.1 — Pandas Data Structures</h3>
+  <p class="bd">Pandas generally provides <strong>two data structures</strong> for manipulating data: <strong>Series</strong> and <strong>DataFrame</strong>.</p>
+
+  <h4 class="ssh">i) Creation of a Series from Scalar Values</h4>
+  <p class="bd">A Series can be created using scalar values, lists, dictionaries, or NumPy arrays. Each element has an associated label called its <strong>index</strong>.</p>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">series_creation.py</span></div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># From a list (default integer index 0,1,2…)</span>
+s1 = pd.Series([<span class="nm">10</span>, <span class="nm">20</span>, <span class="nm">30</span>, <span class="nm">40</span>])
+<span class="fn2">print</span>(s1)
+<span class="cm"># 0    10
+# 1    20
+# 2    30
+# 3    40
+# dtype: int64</span>
+
+<span class="cm"># From scalar values with custom index</span>
+s2 = pd.Series(<span class="nm">5</span>, index=[<span class="st">'a'</span>, <span class="st">'b'</span>, <span class="st">'c'</span>])
+<span class="fn2">print</span>(s2)      <span class="cm"># a    5 / b    5 / c    5</span>
+
+<span class="cm"># From dictionary (keys become index)</span>
+d = {<span class="st">'Maths'</span>:<span class="nm">85</span>, <span class="st">'Science'</span>:<span class="nm">92</span>, <span class="st">'English'</span>:<span class="nm">78</span>}
+s3 = pd.Series(d)
+<span class="fn2">print</span>(s3[<span class="st">'Science'</span>])   <span class="cm"># 92</span>
+
+<span class="cm"># From NumPy array</span>
+arr = np.array([<span class="nm">100</span>, <span class="nm">200</span>, <span class="nm">300</span>])
+s4 = pd.Series(arr, index=[<span class="st">'x'</span>, <span class="st">'y'</span>, <span class="st">'z'</span>])
+<span class="fn2">print</span>(s4)</pre>
+  </div>
+
+  <h4 class="ssh">ii) Creation of a DataFrame from NumPy Arrays</h4>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">df_from_numpy.py</span></div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+array1 = np.array([<span class="nm">90</span>, <span class="nm">100</span>, <span class="nm">110</span>, <span class="nm">120</span>])
+array2 = np.array([<span class="nm">50</span>, <span class="nm">60</span>, <span class="nm">70</span>, <span class="nm">80</span>])
+array3 = np.array([<span class="nm">10</span>, <span class="nm">20</span>, <span class="nm">30</span>, <span class="nm">40</span>])
+
+marksDF = pd.DataFrame([array1, array2, array3],
+                        columns=[<span class="st">'A'</span>, <span class="st">'B'</span>, <span class="st">'C'</span>, <span class="st">'D'</span>])
+<span class="fn2">print</span>(marksDF)
+<span class="cm">#      A    B    C    D
+# 0   90  100  110  120
+# 1   50   60   70   80
+# 2   10   20   30   40</span></pre>
+  </div>
+
+  <h4 class="ssh">iii) Creation of a DataFrame from Dictionary of Array/Lists</h4>
+  <p class="bd">The dictionary keys become column labels by default in a DataFrame, and the lists become the columns of data.</p>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">df_from_dict.py</span></div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># Dictionary keys → column names</span>
+data = {<span class="st">'Name'</span>: [<span class="st">'Varun'</span>, <span class="st">'Ganesh'</span>, <span class="st">'Joseph'</span>, <span class="st">'Abdul'</span>, <span class="st">'Reena'</span>],
+        <span class="st">'Age'</span>:  [<span class="nm">37</span>, <span class="nm">30</span>, <span class="nm">38</span>, <span class="nm">39</span>, <span class="nm">40</span>]}
+
+df = pd.DataFrame(data)
+<span class="fn2">print</span>(df)
+<span class="cm">#      Name  Age
+# 0   Varun   37
+# 1  Ganesh   30
+# 2  Joseph   38
+# 3   Abdul   39
+# 4   Reena   40</span></pre>
+  </div>
+
+  <h4 class="ssh">iv) Creation of a DataFrame from List of Dictionaries</h4>
+  <p class="bd">There will be as many rows as the number of dictionaries present in the list. Missing keys produce <code>NaN</code>.</p>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">df_from_list_of_dicts.py</span></div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># List of dictionaries — note second dict has extra key 'c'</span>
+listDict = [{<span class="st">'a'</span>:<span class="nm">10</span>, <span class="st">'b'</span>:<span class="nm">20</span>},
+            {<span class="st">'a'</span>:<span class="nm">5</span>,  <span class="st">'b'</span>:<span class="nm">10</span>, <span class="st">'c'</span>:<span class="nm">20</span>}]
+
+df = pd.DataFrame(listDict)
+<span class="fn2">print</span>(df)
+<span class="cm">#     a   b     c
+# 0  10  20   NaN
+# 1   5  10  20.0
+# NaN appears where a key is absent</span></pre>
+  </div>
+
+  <!-- 1.1.2.2 Rows and Columns -->
+  <h3 class="sh">1.1.2.2 — Dealing with Rows and Columns</h3>
+
+  <h4 class="ssh">i) Adding a New Column to a DataFrame</h4>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">add_column.py</span></div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+ResultSheet = {
+  <span class="st">'Rajat'</span>:    pd.Series([<span class="nm">90</span>, <span class="nm">91</span>, <span class="nm">97</span>], index=[<span class="st">'Maths'</span>,<span class="st">'Science'</span>,<span class="st">'Hindi'</span>]),
+  <span class="st">'Amrita'</span>:   pd.Series([<span class="nm">92</span>, <span class="nm">81</span>, <span class="nm">96</span>], index=[<span class="st">'Maths'</span>,<span class="st">'Science'</span>,<span class="st">'Hindi'</span>]),
+  <span class="st">'Meenakshi'</span>:pd.Series([<span class="nm">89</span>, <span class="nm">91</span>, <span class="nm">88</span>], index=[<span class="st">'Maths'</span>,<span class="st">'Science'</span>,<span class="st">'Hindi'</span>]),
+  <span class="st">'Rose'</span>:     pd.Series([<span class="nm">81</span>, <span class="nm">71</span>, <span class="nm">67</span>], index=[<span class="st">'Maths'</span>,<span class="st">'Science'</span>,<span class="st">'Hindi'</span>]),
+  <span class="st">'Karthika'</span>: pd.Series([<span class="nm">94</span>, <span class="nm">95</span>, <span class="nm">99</span>], index=[<span class="st">'Maths'</span>,<span class="st">'Science'</span>,<span class="st">'Hindi'</span>])
+}
+Result = pd.DataFrame(ResultSheet)
+<span class="fn2">print</span>(Result)
+
+<span class="cm"># Add new column 'Fathima'</span>
+Result[<span class="st">'Fathima'</span>] = [<span class="nm">89</span>, <span class="nm">78</span>, <span class="nm">76</span>]
+<span class="fn2">print</span>(Result)</pre>
+  </div>
+
+  <h4 class="ssh">ii) Adding a New Row to a DataFrame</h4>
+  <p class="bd">The <code>DataFrame.loc[]</code> method is used to add a new row by specifying a new index label.</p>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">add_row.py</span></div>
+    <pre><span class="cm"># Add row for 'English' subject</span>
+Result.loc[<span class="st">'English'</span>] = [<span class="nm">90</span>, <span class="nm">92</span>, <span class="nm">89</span>, <span class="nm">80</span>, <span class="nm">90</span>, <span class="nm">88</span>]
+<span class="fn2">print</span>(Result)
+
+<span class="cm"># Modify an existing row value using .loc[]</span>
+<span class="cm"># For example, change the marks of Science</span>
+Result.loc[<span class="st">'Science'</span>] = [<span class="nm">92</span>, <span class="nm">84</span>, <span class="nm">90</span>, <span class="nm">72</span>, <span class="nm">96</span>, <span class="nm">88</span>]
+<span class="fn2">print</span>(Result)</pre>
+  </div>
+
+  <!-- 1.1.2.3 Deleting -->
+  <h3 class="sh">1.1.2.3 — Deleting Rows or Columns from a DataFrame</h3>
+  <p class="bd">To delete a row, the parameter <code>axis</code> is assigned the value <code>0</code>. For deleting a column, <code>axis</code> is assigned the value <code>1</code>.</p>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">delete_rows_cols.py</span></div>
+    <pre><span class="cm"># Delete a single row (axis=0)</span>
+Result = Result.drop(<span class="st">'Hindi'</span>, axis=<span class="nm">0</span>)
+<span class="fn2">print</span>(Result)
+
+<span class="cm"># Delete multiple columns at once (axis=1)</span>
+Result = Result.drop([<span class="st">'Rajat'</span>, <span class="st">'Meenakshi'</span>, <span class="st">'Karthika'</span>], axis=<span class="nm">1</span>)
+<span class="fn2">print</span>(Result)
+
+<span class="cm"># Delete single column</span>
+Result = Result.drop(<span class="st">'Rose'</span>, axis=<span class="nm">1</span>)
+<span class="fn2">print</span>(Result)</pre>
+  </div>
+  <div class="note"><strong>💡 Remember:</strong> <code>axis=0</code> → operates on <strong>rows</strong> (up-down). <code>axis=1</code> → operates on <strong>columns</strong> (left-right). The <code>drop()</code> method returns a <em>new</em> DataFrame and does not modify the original unless you add <code>inplace=True</code>.</div>
+
+  <!-- 1.1.2.4 Attributes -->
+  <h3 class="sh">1.1.2.4 — Attributes of DataFrames</h3>
+  <p class="bd">Let's use the following sample data to understand DataFrame attributes:</p>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">df_attributes.py</span></div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># Creating a 2D dictionary to build the DataFrame</span>
+d = {
+  <span class="st">"Student"</span>: pd.Series([<span class="st">"Arnav"</span>,<span class="st">"Neha"</span>,<span class="st">"Priya"</span>,<span class="st">"Rahul"</span>],
+              index=[<span class="st">"Data 1"</span>,<span class="st">"Data 2"</span>,<span class="st">"Data 3"</span>,<span class="st">"Data 4"</span>]),
+  <span class="st">"Marks"</span>:   pd.Series([<span class="nm">85</span>, <span class="nm">92</span>, <span class="nm">78</span>, <span class="nm">83</span>],
+              index=[<span class="st">"Data 1"</span>,<span class="st">"Data 2"</span>,<span class="st">"Data 3"</span>,<span class="st">"Data 4"</span>]),
+  <span class="st">"Sports"</span>:  pd.Series([<span class="st">"Cricket"</span>,<span class="st">"Volleyball"</span>,<span class="st">"Hockey"</span>,<span class="st">"Badminton"</span>],
+              index=[<span class="st">"Data 1"</span>,<span class="st">"Data 2"</span>,<span class="st">"Data 3"</span>,<span class="st">"Data 4"</span>])
+}
+df = pd.DataFrame(d)
+<span class="fn2">print</span>(df)
+
+<span class="cm"># i)  DataFrame.index — returns the row index</span>
+<span class="fn2">print</span>(df.index)
+<span class="cm"># Index(['Data 1','Data 2','Data 3','Data 4'], dtype='object')</span>
+
+<span class="cm"># ii) DataFrame.columns — returns column names</span>
+<span class="fn2">print</span>(df.columns)
+<span class="cm"># Index(['Student', 'Marks', 'Sports'], dtype='object')</span>
+
+<span class="cm"># iii) DataFrame.shape — returns (rows, columns)</span>
+<span class="fn2">print</span>(df.shape)
+<span class="cm"># (4, 3)</span>
+
+<span class="cm"># iv) DataFrame.head(n) — returns first n rows (default 5)</span>
+<span class="fn2">print</span>(df.head(<span class="nm">2</span>))
+
+<span class="cm"># v) DataFrame.tail(n) — returns last n rows (default 5)</span>
+<span class="fn2">print</span>(df.tail(<span class="nm">2</span>))
+
+<span class="cm"># Additional useful attributes</span>
+<span class="fn2">print</span>(df.dtypes)      <span class="cm"># data type of each column</span>
+<span class="fn2">print</span>(df.describe())  <span class="cm"># count, mean, std, min, max</span>
+<span class="fn2">print</span>(df.info())      <span class="cm"># memory, non-null counts</span></pre>
+  </div>
+
+  <div class="tw">
+    <table>
+      <tr><th>Attribute / Method</th><th>What It Returns</th><th>Example Output</th></tr>
+      <tr><td><code>df.index</code></td><td>Row index labels</td><td><code>Index(['Data 1','Data 2'…])</code></td></tr>
+      <tr><td><code>df.columns</code></td><td>Column names</td><td><code>Index(['Student','Marks','Sports'])</code></td></tr>
+      <tr><td><code>df.shape</code></td><td>Tuple (rows, columns)</td><td><code>(4, 3)</code></td></tr>
+      <tr><td><code>df.head(n)</code></td><td>First n rows (default 5)</td><td>First 2 rows of data</td></tr>
+      <tr><td><code>df.tail(n)</code></td><td>Last n rows (default 5)</td><td>Last 2 rows of data</td></tr>
+      <tr><td><code>df.dtypes</code></td><td>Data type of each column</td><td><code>object, int64, object</code></td></tr>
+      <tr><td><code>df.describe()</code></td><td>Statistical summary for numeric columns</td><td>count, mean, std, min, max…</td></tr>
+      <tr><td><code>df.info()</code></td><td>Column types, non-null counts, memory</td><td>Full column summary</td></tr>
+    </table>
+  </div>
+
+  <!-- NumPy vs Pandas Comparison -->
+  <h3 class="sh">NumPy Arrays vs Pandas DataFrames — Comparison</h3>
+  <div class="comp">
+    <div class="comp-col">
+      <h4>📐 NumPy Arrays</h4>
+      <ul>
+        <li>Homogeneous — all elements same data type</li>
+        <li>Fast numerical computation and math</li>
+        <li>Indexed by integers only</li>
+        <li>No built-in column/row labels</li>
+        <li>Best for: matrices, linear algebra, raw math</li>
+        <li>Lower memory overhead</li>
+        <li>Operations: vectorized element-wise math</li>
+      </ul>
+    </div>
+    <div class="comp-col">
+      <h4>🐼 Pandas DataFrames</h4>
+      <ul>
+        <li>Heterogeneous — columns can have different types</li>
+        <li>Built for data manipulation and analysis</li>
+        <li>Supports custom row and column labels</li>
+        <li>Has built-in CSV, Excel, SQL I/O</li>
+        <li>Best for: datasets, CSV files, data cleaning</li>
+        <li>More memory than NumPy (stores labels)</li>
+        <li>Operations: groupby, merge, pivot, fillna</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 1.2 — CSV FILES
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="csv">
+<div class="container">
+  <div class="s-tag">Section 1.2</div>
+  <div class="s-title">Import and Export Data — CSV Files and DataFrames</div>
+  <div class="s-intro">
+    <strong>CSV files</strong> (Comma-Separated Values) are simple text files used to store tabular data. Each line in a CSV file represents a row in the table, and each value in the row is separated by a comma. This format is widely used because it is easy to read and write, both for humans and computers. In Python, CSV files are incredibly important for data analysis — Pandas provides powerful tools to read CSV files into DataFrames and write DataFrames back to CSV.
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="icon">📥</div><h4>read_csv()</h4><p>Reads a CSV file from disk into a Pandas DataFrame. Accepts dozens of parameters for separators, headers, encodings, and more.</p></div>
+    <div class="card"><div class="icon">📤</div><h4>to_csv()</h4><p>Exports a Pandas DataFrame to a CSV file on disk. Control separator character, index column, and output path.</p></div>
+    <div class="card"><div class="icon">☁️</div><h4>Google Colab Steps</h4><p>Click folder icon → upload button (↑) → select CSV file → then run <code>pd.read_csv("file.csv")</code>.</p></div>
+  </div>
+
+  <h3 class="sh">1.2.1 — Importing a CSV File to a DataFrame</h3>
+  <p class="bd">Using the <code>read_csv()</code> function, we can import tabular data from CSV files into a pandas DataFrame by specifying a parameter value for the file name.</p>
+
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><h5>Open Google Colab</h5><p>Go to <code>colab.research.google.com</code> and create a new notebook from the File menu.</p></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><h5>Click the Folder Icon</h5><p>In the left sidebar, click the folder (Files) icon to open the file browser panel.</p></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><h5>Upload the CSV</h5><p>Click the upload button (↑) and select your CSV file from your computer.</p></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-body"><h5>Load with read_csv()</h5><p>Once uploaded, run the code below to load it into a DataFrame.</p></div></div>
+  </div>
+
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">import_csv.py</span></div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># ── On Google Colab (after uploading the file) ──</span>
+df = pd.read_csv(<span class="st">"studentsmarks.csv"</span>)
+<span class="fn2">print</span>(df)
+
+<span class="cm"># ── On Python IDE (local machine — give full path) ──</span>
+<span class="kw">import</span> io
+df = pd.read_csv(<span class="st">'C:/PANDAS/studentsmarks.csv'</span>,
+                  sep=<span class="st">","</span>,       <span class="cm"># comma separator</span>
+                  header=<span class="nm">0</span>)      <span class="cm"># row 0 = column headers</span>
+<span class="fn2">print</span>(df)
+
+<span class="cm"># ── Common Optional Parameters ──</span>
+df = pd.read_csv(<span class="st">'data.csv'</span>,
+                  sep=<span class="st">';'</span>,             <span class="cm"># semicolon separator</span>
+                  index_col=<span class="st">'Name'</span>,    <span class="cm"># set a column as index</span>
+                  nrows=<span class="nm">100</span>,            <span class="cm"># read only first 100 rows</span>
+                  skiprows=<span class="nm">2</span>,           <span class="cm"># skip first 2 rows</span>
+                  na_values=<span class="st">'N/A'</span>)      <span class="cm"># treat 'N/A' as NaN</span></pre>
+  </div>
+
+  <h3 class="sh">1.2.2 — Exporting a DataFrame to a CSV File</h3>
+  <p class="bd">We can use the <code>to_csv()</code> function to save a DataFrame to a text or CSV file. This creates a file on the hard disk which can be opened in any text editor or spreadsheet application and will contain the data along with row labels and column headers, separated by commas.</p>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">export_csv.py</span></div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+data = {<span class="st">'Name'</span>: [<span class="st">'Amit'</span>, <span class="st">'Priya'</span>, <span class="st">'Rahul'</span>],
+        <span class="st">'Score'</span>:[<span class="nm">88</span>, <span class="nm">95</span>, <span class="nm">76</span>]}
+df = pd.DataFrame(data)
+<span class="fn2">print</span>(df)
+
+<span class="cm"># ── Python IDE (local) ──</span>
+df.to_csv(path_or_buf=<span class="st">'C:/PANDAS/resultout.csv'</span>, sep=<span class="st">','</span>)
+<span class="cm"># Creates resultout.csv on disk with data + row numbers</span>
+
+<span class="cm"># ── Google Colab ──</span>
+df.to_csv(<span class="st">"resultout.csv"</span>, index=<span class="nm">False</span>)
+<span class="cm"># index=False → don't write row numbers (0,1,2…) as a column
+# The file appears in Colab's file panel; right-click to download</span></pre>
+  </div>
+  <div class="hl"><strong>💡 Tip — Always use index=False:</strong> Unless you specifically want the row numbers (0,1,2…) saved as a separate column in the CSV, always pass <code>index=False</code>. Without it, when you re-import the file, you'll get an unwanted extra column named "Unnamed: 0".</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 1.3 — HANDLING MISSING VALUES
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="missing">
+<div class="container">
+  <div class="s-tag">Section 1.3</div>
+  <div class="s-title">Handling Missing Values</div>
+  <div class="s-intro">
+    The two most common strategies for handling missing values are: <strong>(i) Drop the row having missing values</strong> OR <strong>(ii) Estimate the missing value</strong>. Real-world datasets are almost always incomplete — students miss exams, sensors fail, forms are left blank. Pandas represents missing values as <strong>NaN</strong> (Not a Number — from NumPy).
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="icon">🔎</div><h4>isnull()</h4><p>Returns a boolean DataFrame — <strong>True</strong> where data is missing, <strong>False</strong> where data is present. Used to detect missing values.</p></div>
+    <div class="card"><div class="icon">🗑️</div><h4>dropna()</h4><p>Removes entire rows that contain at least one NaN. Reduces dataset size — use only when few rows are affected.</p></div>
+    <div class="card"><div class="icon">✏️</div><h4>fillna(num)</h4><p>Replaces all NaN values with a specified number. <code>fillna(0)</code> replaces with 0, <code>fillna(1)</code> replaces with 1.</p></div>
+    <div class="card"><div class="icon">📐</div><h4>Estimate with Mean</h4><p><code>fillna(df.mean())</code> replaces NaN with the column average — the most statistically sound strategy.</p></div>
+  </div>
+
+  <h3 class="sh">Checking Missing Values — isnull()</h3>
+  <p class="bd">Pandas provides the <code>isnull()</code> function to check whether any value is missing in the DataFrame. This function checks all attributes and returns <code>True</code> in case that attribute has a missing value, otherwise returns <code>False</code>.</p>
+
+  <h3 class="sh">Drop Missing Values — dropna()</h3>
+  <p class="bd">Dropping will remove the entire row (object) having the missing value(s). This strategy reduces the size of the dataset, hence should be used only in cases where missing values exist in very few objects.</p>
+
+  <h3 class="sh">Estimate the Missing Value — fillna()</h3>
+  <p class="bd">Missing values can be filled by using estimations or approximations — e.g., a value just before or after the missing value, the average/minimum/maximum of the column, etc. In some cases, missing values are simply replaced by zeros or ones.</p>
+
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">missing_values_full.py</span></div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ── Detecting ──</span>
+<span class="cm"># isnull() returns True where data is NaN</span>
+<span class="fn2">print</span>(marks.isnull())
+<span class="cm"># Result: DataFrame of True/False for every cell</span>
+
+<span class="cm"># Check a specific column</span>
+<span class="fn2">print</span>(marks[<span class="st">'Science'</span>].isnull().any())   <span class="cm"># True</span>
+<span class="fn2">print</span>(marks[<span class="st">'Maths'</span>].isnull().any())     <span class="cm"># False</span>
+
+<span class="cm"># Total number of NaN in the entire dataset</span>
+<span class="fn2">print</span>(marks.isnull().sum().sum())          <span class="cm"># 3</span>
+
+<span class="cm"># NaN count per column</span>
+<span class="fn2">print</span>(marks.isnull().sum())
+<span class="cm"># Maths      0
+# Science    1
+# English    0
+# Hindi      1
+# AI         1</span>
+
+<span class="cm"># ── Strategy 1: Drop rows with any NaN ──</span>
+drop = marks.dropna()
+<span class="fn2">print</span>(drop)
+<span class="cm"># Only rows with zero NaN remain (Heena, Shefali, Bismeet)</span>
+
+<span class="cm"># ── Strategy 2a: Fill with Zero ──</span>
+FillZero = marks.fillna(<span class="nm">0</span>)
+<span class="fn2">print</span>(FillZero)
+
+<span class="cm"># ── Strategy 2b: Fill with One ──</span>
+FillOne = marks.fillna(<span class="nm">1</span>)
+
+<span class="cm"># ── Strategy 2c: Fill with column MEAN (best practice) ──</span>
+FillMean = marks.fillna(marks.mean())
+<span class="fn2">print</span>(FillMean)
+
+<span class="cm"># ── Strategy 2d: Forward fill (use previous value) ──</span>
+FillFFill = marks.fillna(method=<span class="st">'ffill'</span>)
+
+<span class="cm"># ── Strategy 2e: Fill per-column with specific values ──</span>
+FillCustom = marks.fillna({
+  <span class="st">'Science'</span>: marks[<span class="st">'Science'</span>].mean(),
+  <span class="st">'Hindi'</span>: marks[<span class="st">'Hindi'</span>].mean(),
+  <span class="st">'AI'</span>: marks[<span class="st">'AI'</span>].mean()
+})</pre>
+  </div>
+  <div class="warn"><strong>⚠️ When to drop vs fill?</strong> Use <code>dropna()</code> only when very few rows have missing data (less than 5%). Use <code>fillna(mean)</code> when missing data is spread across many rows — losing those records would distort results. Always document which strategy you used and why.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 1.4 — CASE STUDY
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="casestudy">
+<div class="container">
+  <div class="s-tag">Section 1.4</div>
+  <div class="s-title">Case Study — Student Marks with Missing Data</div>
+  <div class="s-intro">
+    Let's examine a scenario where we have the marks of certain students, but some data is missing due to specific circumstances. <strong>Meera and Suhana</strong> couldn't attend the Science and Hindi exams respectively due to fever. <strong>Joseph</strong> participated in a national-level science exhibition on the day of the AI exam. Their marks are therefore missing from the dataset.
+  </div>
+
+  <h3 class="sh">Step 1 — Feed the Data in Python</h3>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">case_study.py</span></div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+ResultSheet = {
+  <span class="st">'Maths'</span>:   pd.Series([<span class="nm">90</span>,<span class="nm">91</span>,<span class="nm">97</span>,<span class="nm">89</span>,<span class="nm">65</span>,<span class="nm">93</span>],
+              index=[<span class="st">'Heena'</span>,<span class="st">'Shefali'</span>,<span class="st">'Meera'</span>,<span class="st">'Joseph'</span>,<span class="st">'Suhana'</span>,<span class="st">'Bismeet'</span>]),
+  <span class="st">'Science'</span>: pd.Series([<span class="nm">92</span>,<span class="nm">81</span>,np.NaN,<span class="nm">87</span>,<span class="nm">50</span>,<span class="nm">88</span>],
+              index=[<span class="st">'Heena'</span>,<span class="st">'Shefali'</span>,<span class="st">'Meera'</span>,<span class="st">'Joseph'</span>,<span class="st">'Suhana'</span>,<span class="st">'Bismeet'</span>]),
+  <span class="st">'English'</span>: pd.Series([<span class="nm">89</span>,<span class="nm">91</span>,<span class="nm">88</span>,<span class="nm">78</span>,<span class="nm">77</span>,<span class="nm">82</span>],
+              index=[<span class="st">'Heena'</span>,<span class="st">'Shefali'</span>,<span class="st">'Meera'</span>,<span class="st">'Joseph'</span>,<span class="st">'Suhana'</span>,<span class="st">'Bismeet'</span>]),
+  <span class="st">'Hindi'</span>:   pd.Series([<span class="nm">81</span>,<span class="nm">71</span>,<span class="nm">67</span>,<span class="nm">82</span>,np.NaN,<span class="nm">89</span>],
+              index=[<span class="st">'Heena'</span>,<span class="st">'Shefali'</span>,<span class="st">'Meera'</span>,<span class="st">'Joseph'</span>,<span class="st">'Suhana'</span>,<span class="st">'Bismeet'</span>]),
+  <span class="st">'AI'</span>:      pd.Series([<span class="nm">94</span>,<span class="nm">95</span>,<span class="nm">99</span>,np.NaN,<span class="nm">96</span>,<span class="nm">99</span>],
+              index=[<span class="st">'Heena'</span>,<span class="st">'Shefali'</span>,<span class="st">'Meera'</span>,<span class="st">'Joseph'</span>,<span class="st">'Suhana'</span>,<span class="st">'Bismeet'</span>])
+}
+marks = pd.DataFrame(ResultSheet)
+<span class="fn2">print</span>(marks)
+<span class="cm">#          Maths  Science  English  Hindi    AI
+# Heena       90     92.0       89   81.0  94.0
+# Shefali     91     81.0       91   71.0  95.0
+# Meera       97      NaN       88   67.0  99.0   ← NaN in Science
+# Joseph      89     87.0       78   82.0   NaN   ← NaN in AI
+# Suhana      65     50.0       77    NaN  96.0   ← NaN in Hindi
+# Bismeet     93     88.0       82   89.0  99.0</span></pre>
+  </div>
+
+  <h3 class="sh">Step 2 — Check for Missing Values</h3>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">check_missing.py</span></div>
+    <pre><span class="cm"># Check all cells — True = missing</span>
+<span class="fn2">print</span>(marks.isnull())
+<span class="cm"># We can see there are three "True" values.
+# So three pieces of data are missing.</span>
+
+<span class="fn2">print</span>(marks[<span class="st">'Science'</span>].isnull().any())  <span class="cm"># True</span>
+<span class="fn2">print</span>(marks[<span class="st">'Maths'</span>].isnull().any())    <span class="cm"># False</span>
+
+<span class="cm"># Total number of NaN in the whole dataset</span>
+<span class="fn2">print</span>(marks.isnull().sum().sum())        <span class="cm"># 3</span></pre>
+  </div>
+
+  <h3 class="sh">Step 3a — Apply dropna()</h3>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">dropna_example.py</span></div>
+    <pre><span class="cm"># Drop rows containing any NaN</span>
+drop = marks.dropna()
+<span class="fn2">print</span>(drop)
+<span class="cm">#          Maths  Science  English  Hindi    AI
+# Heena       90     92.0       89   81.0  94.0
+# Shefali     91     81.0       91   71.0  95.0
+# Bismeet     93     88.0       82   89.0  99.0
+# Only 3 students remain — Meera, Joseph, Suhana removed</span></pre>
+  </div>
+
+  <h3 class="sh">Step 3b — Estimate the Missing Value using fillna()</h3>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">fillna_example.py</span></div>
+    <pre><span class="cm"># Fill all NaN with zero</span>
+FillZero = marks.fillna(<span class="nm">0</span>)
+<span class="fn2">print</span>(FillZero)
+<span class="cm"># Meera's Science becomes 0, Suhana's Hindi becomes 0, etc.</span>
+
+<span class="cm"># Fill all NaN with the mean of each column</span>
+FillMean = marks.fillna(marks.mean())
+<span class="fn2">print</span>(FillMean)
+<span class="cm"># Science mean = (92+81+87+50+88)/5 = 79.6
+# Meera's Science filled with 79.6</span></pre>
+  </div>
+
+  <div class="hl"><strong>📊 Analysis:</strong> After checking with <code>isnull()</code>, we found 3 missing values — one each in Science (Meera), Hindi (Suhana), and AI (Joseph). Using <code>dropna()</code> reduces our dataset from 6 to 3 students. Using <code>fillna(mean)</code> keeps all 6 students and estimates missing marks using the average of the subject.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION 1.5 — LINEAR REGRESSION
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="linreg">
+<div class="container">
+  <div class="s-tag">Section 1.5 — Practical Activity (Advanced Learners)</div>
+  <div class="s-title">Linear Regression Algorithm</div>
+  <div class="s-intro">
+    <strong>Activity:</strong> To implement the Linear Regression algorithm using scikit-learn's <strong>built-in datasets</strong> — no external file needed! We use two datasets: the <strong>Diabetes dataset</strong> (predict disease progression) and the <strong>California Housing dataset</strong> (predict house prices). Both are loaded directly from <code>sklearn.datasets</code>, making the code instantly runnable on any machine.
+    <br><br>Linear Regression models the relationship between features (X) and a target (Y) by fitting a straight line: <strong>Y = mX + c</strong>, where m = slope and c = intercept. There is always a difference between actual and predicted values — this is the <strong>residual/error</strong>.
+  </div>
+
+  <div class="cards">
+    <div class="card"><div class="icon">📦</div><h4>Built-in Datasets</h4><p>Scikit-learn ships with ready-to-use datasets inside <code>sklearn.datasets</code> — no CSV downloads needed. Just import and go.</p></div>
+    <div class="card"><div class="icon">📐</div><h4>Y = mX + c</h4><p>m is the slope (how much Y changes per unit of X) and c is the y-intercept. Linear Regression finds the best m and c.</p></div>
+    <div class="card"><div class="icon">🧠</div><h4>80 / 20 Split</h4><p>80% of data trains the model, 20% tests it on unseen data. Testing on training data gives falsely perfect results.</p></div>
+    <div class="card"><div class="icon">📉</div><h4>Evaluate with Metrics</h4><p>MAE, MSE, RMSE tell you the average error size. R² tells you how much of the variance is explained (closer to 1 = better).</p></div>
+  </div>
+
+  <!-- AVAILABLE BUILT-IN DATASETS TABLE -->
+  <h3 class="sh">Scikit-learn Built-in Datasets for Regression</h3>
+  <div class="tw">
+    <table>
+      <tr><th>Dataset</th><th>Import Function</th><th>Rows</th><th>Features</th><th>Target</th></tr>
+      <tr><td><strong>Diabetes</strong></td><td><code>load_diabetes()</code></td><td>442</td><td>10 (age, sex, BMI, bp…)</td><td>Disease progression score</td></tr>
+      <tr><td><strong>California Housing</strong></td><td><code>fetch_california_housing()</code></td><td>20,640</td><td>8 (income, age, rooms…)</td><td>House price (median $100k)</td></tr>
+      <tr><td><strong>Boston Housing</strong></td><td><code>load_boston()</code></td><td>506</td><td>13 (crime, rooms, tax…)</td><td>Median house value</td></tr>
+      <tr><td><strong>Iris (Classification)</strong></td><td><code>load_iris()</code></td><td>150</td><td>4 (sepal/petal)</td><td>Flower species (0/1/2)</td></tr>
+    </table>
+  </div>
+  <div class="note"><strong>📌 Note:</strong> <code>load_boston()</code> has been deprecated due to ethical concerns about one of its features. Use <code>fetch_california_housing()</code> instead for house price prediction tasks.</div>
+
+  <!-- EXAMPLE 1: DIABETES -->
+  <h3 class="sh">Example 1 — Diabetes Dataset (Simple, Beginner-Friendly)</h3>
+  <p class="bd">The Diabetes dataset has 442 patients, 10 features (age, sex, BMI, blood pressure, etc.), and a target = disease progression score one year after baseline. Perfect for learning Linear Regression from scratch.</p>
+
+  <h4 class="ssh">Step 1 — Load Built-in Dataset & Explore (EDA)</h4>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">diabetes_step1_load.py</span></div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> sklearn.datasets <span class="kw">import</span> load_diabetes
+
+<span class="cm"># ── Load the built-in Diabetes dataset ──</span>
+diabetes = load_diabetes()
+
+<span class="cm"># Convert to Pandas DataFrame for easy analysis</span>
+df = pd.DataFrame(diabetes.data, columns=diabetes.feature_names)
+df[<span class="st">'target'</span>] = diabetes.target
+
+<span class="fn2">print</span>(<span class="st">"Dataset shape:"</span>, df.shape)
+<span class="cm"># (442, 11)  — 442 rows, 10 features + 1 target</span>
+
+<span class="fn2">print</span>(<span class="st">"\nFirst 5 rows:"</span>)
+<span class="fn2">print</span>(df.head())
+
+<span class="fn2">print</span>(<span class="st">"\nColumn names:"</span>, list(df.columns))
+<span class="cm"># ['age','sex','bmi','bp','s1','s2','s3','s4','s5','s6','target']</span>
+
+<span class="fn2">print</span>(<span class="st">"\nStatistical summary:"</span>)
+<span class="fn2">print</span>(df.describe())
+
+<span class="fn2">print</span>(<span class="st">"\nMissing values:"</span>, df.isnull().sum().sum())
+<span class="cm"># 0 — No missing values in this built-in dataset</span>
+
+<span class="fn2">print</span>(<span class="st">"\nDataset description:"</span>)
+<span class="fn2">print</span>(diabetes.DESCR[:400])  <span class="cm"># print first part of description</span></pre>
+  </div>
+
+  <h4 class="ssh">Step 2 — Define Features (X) and Target (y), Split Data</h4>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">diabetes_step2_split.py</span></div>
+    <pre><span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
+
+<span class="cm"># Define X (all 10 features) and y (disease progression target)</span>
+X = df.drop(<span class="st">'target'</span>, axis=<span class="nm">1</span>)   <span class="cm"># all columns except target</span>
+y = df[<span class="st">'target'</span>]                 <span class="cm"># disease progression score</span>
+
+<span class="fn2">print</span>(<span class="st">"X shape:"</span>, X.shape)   <span class="cm"># (442, 10)</span>
+<span class="fn2">print</span>(<span class="st">"y shape:"</span>, y.shape)   <span class="cm"># (442,)</span>
+
+<span class="cm"># ── 80% Train, 20% Test split ──</span>
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=<span class="nm">0.2</span>,       <span class="cm"># 20% for testing</span>
+    random_state=<span class="nm">42</span>     <span class="cm"># fixed seed = reproducible results</span>
+)
+
+<span class="fn2">print</span>(<span class="st">"Training samples:"</span>, X_train.shape[<span class="nm">0</span>])  <span class="cm"># ~354 (80%)</span>
+<span class="fn2">print</span>(<span class="st">"Testing samples:"</span>,  X_test.shape[<span class="nm">0</span>])   <span class="cm"># ~88  (20%)</span></pre>
+  </div>
+
+  <h4 class="ssh">Step 3 — Train the Linear Regression Model</h4>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">diabetes_step3_train.py</span></div>
+    <pre><span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> <span class="cl">LinearRegression</span>
+
+<span class="cm"># ── Create and train the model ──</span>
+model = <span class="cl">LinearRegression</span>()
+model.fit(X_train, y_train)
+
+<span class="cm"># View the learned parameters</span>
+<span class="fn2">print</span>(<span class="st">"Coefficients (m) for each feature:"</span>)
+<span class="kw">for</span> name, coef <span class="kw">in</span> zip(X.columns, model.coef_):
+    <span class="fn2">print</span>(<span class="st">f"  {name:>5}: {coef:.2f}"</span>)
+
+<span class="fn2">print</span>(<span class="st">f"\nIntercept (c): {model.intercept_:.2f}"</span>)
+
+<span class="cm"># ── Predict on test data ──</span>
+y_pred = model.predict(X_test)
+
+<span class="cm"># Compare actual vs predicted — there is always a difference!</span>
+<span class="fn2">print</span>(<span class="st">"\nActual vs Predicted (first 8):"</span>)
+<span class="kw">for</span> actual, pred <span class="kw">in</span> list(zip(y_test, y_pred))[:<span class="nm">8</span>]:
+    <span class="fn2">print</span>(<span class="st">f"  Actual: {actual:.1f}  |  Predicted: {pred:.1f}  |  Error: {abs(actual-pred):.1f}"</span>)</pre>
+  </div>
+
+  <h4 class="ssh">Step 4 — Evaluate the Model (Error Metrics)</h4>
+  <p class="bd">Further, we need to calculate the error, evaluate the model and test the accuracy of the model.</p>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">diabetes_step4_evaluate.py</span></div>
+    <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> sklearn <span class="kw">import</span> metrics
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+<span class="cm"># ── Calculate error metrics ──</span>
+mae  = metrics.mean_absolute_error(y_test, y_pred)
+mse  = metrics.mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
+r2   = metrics.r2_score(y_test, y_pred)
+
+<span class="fn2">print</span>(<span class="st">f"MAE  (Mean Absolute Error)      = {mae:.2f}"</span>)
+<span class="fn2">print</span>(<span class="st">f"MSE  (Mean Squared Error)       = {mse:.2f}"</span>)
+<span class="fn2">print</span>(<span class="st">f"RMSE (Root Mean Squared Error)  = {rmse:.2f}"</span>)
+<span class="fn2">print</span>(<span class="st">f"R²   (Coefficient of Determination) = {r2:.4f}"</span>)
+<span class="cm"># Typical output:
+# MAE  = 42.79
+# RMSE = 53.47
+# R²   = 0.4526  ← model explains ~45% of variance</span>
+
+<span class="cm"># ── Visualise: Actual vs Predicted ──</span>
+plt.figure(figsize=(<span class="nm">8</span>, <span class="nm">5</span>))
+plt.scatter(y_test, y_pred, alpha=<span class="nm">0.5</span>, color=<span class="st">'steelblue'</span>, s=<span class="nm">40</span>)
+plt.plot([y_test.min(), y_test.max()],
+         [y_test.min(), y_test.max()],
+         <span class="st">'r--'</span>, lw=<span class="nm">2</span>, label=<span class="st">'Perfect prediction'</span>)
+plt.xlabel(<span class="st">"Actual Disease Progression"</span>)
+plt.ylabel(<span class="st">"Predicted Disease Progression"</span>)
+plt.title(<span class="st">"Diabetes: Actual vs Predicted"</span>)
+plt.legend()
+plt.tight_layout()
+plt.show()</pre>
+  </div>
+
+  <!-- EXAMPLE 2: CALIFORNIA HOUSING -->
+  <h3 class="sh">Example 2 — California Housing Dataset (Advanced)</h3>
+  <p class="bd">The California Housing dataset has 20,640 rows and 8 features. Target = median house value (in $100,000s). This mirrors the USA_Housing.csv activity from the textbook — but uses a built-in dataset so no download is needed.</p>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">california_housing_linreg.py</span></div>
+    <pre><span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> sklearn.datasets <span class="kw">import</span> fetch_california_housing
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> <span class="cl">LinearRegression</span>
+<span class="kw">from</span> sklearn <span class="kw">import</span> metrics
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+<span class="cm"># ── STEP 1: Load built-in dataset ──</span>
+housing = fetch_california_housing()
+df = pd.DataFrame(housing.data, columns=housing.feature_names)
+df[<span class="st">'Price'</span>] = housing.target
+
+<span class="fn2">print</span>(df.shape)      <span class="cm"># (20640, 9)</span>
+<span class="fn2">print</span>(df.head())
+<span class="fn2">print</span>(df.describe())
+<span class="cm"># All 20640 values present — no missing values</span>
+
+<span class="fn2">print</span>(<span class="st">"\nFeatures:"</span>, list(housing.feature_names))
+<span class="cm"># ['MedInc','HouseAge','AveRooms','AveBedrms',
+#  'Population','AveOccup','Latitude','Longitude']</span>
+
+<span class="cm"># ── STEP 2: Define X and y ──</span>
+X = df.drop(<span class="st">'Price'</span>, axis=<span class="nm">1</span>)
+y = df[<span class="st">'Price'</span>]
+
+<span class="cm"># ── STEP 3: 80/20 split ──</span>
+<span class="cm"># 80% of 20640 = 16512 rows for training</span>
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=<span class="nm">0.2</span>, random_state=<span class="nm">42</span>)
+<span class="fn2">print</span>(<span class="st">"Train rows:"</span>, X_train.shape[<span class="nm">0</span>])  <span class="cm"># 16512</span>
+<span class="fn2">print</span>(<span class="st">"Test rows:"</span>,  X_test.shape[<span class="nm">0</span>])   <span class="cm"># 4128</span>
+
+<span class="cm"># ── STEP 4: Train Linear Regression ──</span>
+model = <span class="cl">LinearRegression</span>()
+model.fit(X_train, y_train)
+
+<span class="cm"># ── STEP 5: Predict ──</span>
+y_pred = model.predict(X_test)
+
+<span class="cm"># ── STEP 6: Evaluate ──</span>
+mae  = metrics.mean_absolute_error(y_test, y_pred)
+rmse = np.sqrt(metrics.mean_squared_error(y_test, y_pred))
+r2   = metrics.r2_score(y_test, y_pred)
+
+<span class="fn2">print</span>(<span class="st">f"MAE  = {mae:.4f}"</span>)   <span class="cm"># ≈ 0.5332 ($53,320 avg error)</span>
+<span class="fn2">print</span>(<span class="st">f"RMSE = {rmse:.4f}"</span>)  <span class="cm"># ≈ 0.7278</span>
+<span class="fn2">print</span>(<span class="st">f"R²   = {r2:.4f}"</span>)    <span class="cm"># ≈ 0.5757</span>
+
+<span class="cm"># ── STEP 7: Visualise ──</span>
+plt.figure(figsize=(<span class="nm">8</span>,<span class="nm">5</span>))
+plt.scatter(y_test, y_pred, alpha=<span class="nm">0.3</span>, color=<span class="st">'darkorange'</span>, s=<span class="nm">20</span>)
+plt.plot([<span class="nm">0</span>, <span class="nm">5</span>], [<span class="nm">0</span>, <span class="nm">5</span>], <span class="st">'r--'</span>, lw=<span class="nm">2</span>, label=<span class="st">'Perfect prediction'</span>)
+plt.xlabel(<span class="st">"Actual House Price ($100k)"</span>)
+plt.ylabel(<span class="st">"Predicted House Price ($100k)"</span>)
+plt.title(<span class="st">"California Housing: Actual vs Predicted"</span>)
+plt.legend()
+plt.tight_layout()
+plt.show()</pre>
+  </div>
+
+  <!-- SINGLE FEATURE EXAMPLE -->
+  <h3 class="sh">Bonus — Single Feature Linear Regression (Simplest Form)</h3>
+  <p class="bd">The simplest Linear Regression uses just <strong>one feature</strong> to predict the target. This makes the Y = mX + c equation directly visible. We use only <strong>BMI</strong> from the Diabetes dataset.</p>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">single_feature_linreg.py</span></div>
+    <pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+<span class="kw">from</span> sklearn.datasets <span class="kw">import</span> load_diabetes
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> <span class="cl">LinearRegression</span>
+<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> train_test_split
+<span class="kw">from</span> sklearn <span class="kw">import</span> metrics
+
+<span class="cm"># Load and use only BMI (feature index 2)</span>
+diabetes = load_diabetes()
+X = diabetes.data[:, np.newaxis, <span class="nm">2</span>]  <span class="cm"># BMI column only</span>
+y = diabetes.target
+
+<span class="cm"># Split</span>
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=<span class="nm">0.2</span>, random_state=<span class="nm">42</span>)
+
+<span class="cm"># Train</span>
+model = <span class="cl">LinearRegression</span>()
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+<span class="fn2">print</span>(<span class="st">f"Slope (m)     = {model.coef_[0]:.2f}"</span>)
+<span class="fn2">print</span>(<span class="st">f"Intercept (c) = {model.intercept_:.2f}"</span>)
+<span class="fn2">print</span>(<span class="st">f"R²            = {metrics.r2_score(y_test, y_pred):.4f}"</span>)
+
+<span class="cm"># Visualise the regression line</span>
+plt.figure(figsize=(<span class="nm">7</span>, <span class="nm">4</span>))
+plt.scatter(X_test, y_test, color=<span class="st">'steelblue'</span>, alpha=<span class="nm">0.6</span>, label=<span class="st">'Actual'</span>)
+plt.plot(X_test, y_pred, color=<span class="st">'red'</span>, linewidth=<span class="nm">2</span>, label=<span class="st">'Regression line'</span>)
+plt.xlabel(<span class="st">"BMI (normalized)"</span>)
+plt.ylabel(<span class="st">"Disease Progression"</span>)
+plt.title(<span class="st">"Y = mX + c  |  Single Feature Linear Regression"</span>)
+plt.legend()
+plt.tight_layout()
+plt.show()</pre>
+  </div>
+
+  <h3 class="sh">Evaluation Metrics — Full Reference</h3>
+  <div class="tw">
+    <table>
+      <tr><th>Metric</th><th>Full Name</th><th>Formula</th><th>Meaning</th><th>Ideal</th></tr>
+      <tr><td><strong>MAE</strong></td><td>Mean Absolute Error</td><td>Σ|y − ŷ| / n</td><td>Average magnitude of error — easy to interpret, same units as target</td><td>→ 0</td></tr>
+      <tr><td><strong>MSE</strong></td><td>Mean Squared Error</td><td>Σ(y − ŷ)² / n</td><td>Penalizes large errors more heavily — sensitive to outliers</td><td>→ 0</td></tr>
+      <tr><td><strong>RMSE</strong></td><td>Root Mean Squared Error</td><td>√MSE</td><td>Same units as target variable — most commonly reported metric</td><td>→ 0</td></tr>
+      <tr><td><strong>R²</strong></td><td>Coefficient of Determination</td><td>1 − SS_res/SS_tot</td><td>Proportion of variance in Y explained by the model (0 to 1)</td><td>→ 1.0</td></tr>
+    </table>
+  </div>
+  <div class="hl"><strong>💡 Key Insight:</strong> We always observe a difference between actual and predicted values — this is called the <strong>residual</strong> or error. Linear Regression minimises the sum of all squared residuals (OLS — Ordinary Least Squares). R² closer to 1.0 means the model explains the data variance well. Using built-in datasets from <code>sklearn.datasets</code> means the code runs immediately without any file downloads — perfect for practice and exams.</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     SECTION — EXERCISES (FROM THE BOOK)
+════════════════════════════════════════════════════════ -->
+<section class="topic" id="exercises">
+<div class="container">
+  <div class="s-tag">Exercises — From the Textbook</div>
+  <div class="s-title">All Practice Questions</div>
+  <div class="s-intro">Every question from Section A (Objective), Section B (Short Answer), Section C (Long Answer), and Section D (Case Studies) — directly from the CBSE Class XII AI handbook.</div>
+
+  <h3 class="sh">Section A — Objective Type Questions (MCQs)</h3>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">answers_shown.txt</span></div>
+    <pre><span class="cm">1. Which of the following is a primary data structure in Pandas?</span>
+   a) List   b) Tuple   <span class="st">c) Series ✓</span>   d) Matrix
+
+<span class="cm">2. What does the fillna(0) function do in Pandas?</span>
+   a) Removes rows with missing values
+   <span class="st">b) Fills missing values with zeros ✓</span>
+   c) Estimates missing values based on averages
+   d) Converts all data to zero
+
+<span class="cm">3. In Linear Regression, which library is used for importing and managing data?</span>
+   a) NumPy   <span class="st">b) Pandas ✓</span>   c) Matplotlib   d) Scikit-learn
+
+<span class="cm">4. What is the correct syntax to read a CSV file into a Pandas DataFrame?</span>
+   a) pd.DataFrame("filename.csv")
+   <span class="st">b) pd.read_csv("filename.csv") ✓</span>
+   c) pandas.read_file("filename.csv")
+   d) pd.file_read("filename.csv")
+
+<span class="cm">5. What is the result of the df.shape function?</span>
+   a) Data type of the DataFrame
+   <span class="st">b) Number of rows and columns in the DataFrame ✓</span>
+   c) Memory usage of the DataFrame
+   d) Column names of the DataFrame
+
+<span class="cm">6. Which function can be used to export a DataFrame to a CSV file?</span>
+   a) export_csv()   b) to_file()   <span class="st">c) to_csv() ✓</span>   d) save_csv()</pre>
+  </div>
+
+  <h3 class="sh">Section B — Short Answer Questions</h3>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">short_answers.txt</span></div>
+    <pre><span class="cm">Q1. What is a DataFrame in Pandas?</span>
+<span class="st">A DataFrame is a two-dimensional, labelled data structure in Pandas —</span>
+<span class="st">like a spreadsheet or SQL table. It has rows and columns where each</span>
+<span class="st">column can hold a different data type.</span>
+
+<span class="cm">Q2. How do you create a Pandas Series from a dictionary?</span>
+<span class="st">s = pd.Series({'Maths': 85, 'Science': 92, 'English': 78})</span>
+<span class="st">The dictionary keys become the index labels of the Series.</span>
+
+<span class="cm">Q3. Name two strategies to handle missing values in a DataFrame.</span>
+<span class="st">1. Drop: marks.dropna() — removes rows containing NaN</span>
+<span class="st">2. Fill: marks.fillna(0) or marks.fillna(marks.mean())</span>
+
+<span class="cm">Q4. What does the head(n) function do in a DataFrame?</span>
+<span class="st">df.head(n) returns the first n rows of the DataFrame.</span>
+<span class="st">Default is 5 rows if no argument is given.</span>
+
+<span class="cm">Q5. What is the role of NumPy in Python programming?</span>
+<span class="st">NumPy provides fast, efficient multi-dimensional array objects</span>
+<span class="st">and mathematical functions. It is the backbone of data science</span>
+<span class="st">libraries. The rank of an array = its number of dimensions.</span>
+
+<span class="cm">Q6. Explain the use of the isnull() function in Pandas.</span>
+<span class="st">isnull() returns a boolean DataFrame — True where data is missing</span>
+<span class="st">(NaN) and False where data is present. Used to detect missing values.</span>
+<span class="st">marks.isnull().sum().sum() gives the total count of NaNs.</span></pre>
+  </div>
+
+  <h3 class="sh">Section C — Long Answer Questions</h3>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">long_answers.txt</span></div>
+    <pre><span class="cm">Q1. Describe the steps to import and export data using Pandas.</span>
+<span class="st">Import: df = pd.read_csv('file.csv', sep=',', header=0)</span>
+<span class="st">Export: df.to_csv('result.csv', index=False)</span>
+<span class="st">On Colab: upload via Files panel → read_csv → to_csv to download</span>
+
+<span class="cm">Q2. Explain handling missing values in a DataFrame with examples.</span>
+<span class="st">Check:  marks.isnull()          → boolean map</span>
+<span class="st">Count:  marks.isnull().sum()    → per column NaN count</span>
+<span class="st">Drop:   marks.dropna()          → remove rows with NaN</span>
+<span class="st">Fill 0: marks.fillna(0)         → replace NaN with zero</span>
+<span class="st">Mean:   marks.fillna(marks.mean()) → replace with mean</span>
+
+<span class="cm">Q3. What is Linear Regression and how is it implemented in Python?</span>
+<span class="st">LR models the linear relationship Y = mX + c between features X</span>
+<span class="st">and target Y. Implementation steps:</span>
+<span class="st">1. Load data: pd.read_csv()</span>
+<span class="st">2. EDA: df.head(), df.describe()</span>
+<span class="st">3. Split: train_test_split(X, y, test_size=0.2)</span>
+<span class="st">4. Train: LinearRegression().fit(X_train, y_train)</span>
+<span class="st">5. Predict: model.predict(X_test)</span>
+<span class="st">6. Evaluate: MAE, RMSE, R²</span>
+
+<span class="cm">Q4. Compare NumPy arrays and Pandas DataFrames.</span>
+<span class="st">NumPy: homogeneous, integer-indexed, fast math, no labels</span>
+<span class="st">Pandas: heterogeneous columns, custom labels, CSV I/O, groupby</span>
+<span class="st">Pandas is built ON TOP of NumPy — each column IS a NumPy array</span>
+
+<span class="cm">Q5. How can we add new rows and columns to an existing DataFrame?</span>
+<span class="st">Add column: df['NewCol'] = [v1, v2, v3]</span>
+<span class="st">Add row:    df.loc['NewRow'] = [v1, v2, v3]</span>
+<span class="st">Modify row: df.loc['ExistingRow'] = [new_v1, new_v2, ...]</span>
+
+<span class="cm">Q6. What are the attributes of a DataFrame? Provide examples.</span>
+<span class="st">df.index   → row labels     df.columns → column names</span>
+<span class="st">df.shape   → (rows, cols)   df.dtypes  → type per column</span>
+<span class="st">df.head(2) → first 2 rows   df.tail(2) → last 2 rows</span>
+<span class="st">df.describe() → stat summary  df.info() → full summary</span></pre>
+  </div>
+
+  <h3 class="sh">Section D — Case Study Questions</h3>
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">case_study_solutions.py</span></div>
+    <pre><span class="cm"># ── Case Study D1 ──
+# A dataset of student marks contains missing values.
+# Replace them with the mean of the respective columns.</span>
+
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+marks = pd.DataFrame({
+  <span class="st">'Maths'</span>:   [<span class="nm">90</span>, <span class="nm">91</span>, <span class="nm">97</span>, <span class="nm">89</span>, np.NaN, <span class="nm">93</span>],
+  <span class="st">'Science'</span>: [<span class="nm">92</span>, <span class="nm">81</span>, np.NaN, <span class="nm">87</span>, <span class="nm">50</span>, <span class="nm">88</span>],
+  <span class="st">'English'</span>: [<span class="nm">89</span>, <span class="nm">91</span>, <span class="nm">88</span>, <span class="nm">78</span>, <span class="nm">77</span>, <span class="nm">82</span>]
+})
+<span class="cm"># Fill each column's NaN with that column's mean</span>
+filled = marks.fillna(marks.mean())
+<span class="fn2">print</span>(filled)
+
+<span class="cm"># ── Case Study D2 ──
+# Load sales.csv, calculate total sales per product,
+# save results to a new CSV file.</span>
+
+df_sales = pd.read_csv(<span class="st">'sales.csv'</span>)
+total_sales = df_sales.groupby(<span class="st">'Product'</span>)[<span class="st">'Sales'</span>].sum().reset_index()
+total_sales.columns = [<span class="st">'Product'</span>, <span class="st">'Total Sales'</span>]
+<span class="fn2">print</span>(total_sales)
+total_sales.to_csv(<span class="st">'total_sales_result.csv'</span>, index=<span class="nm">False</span>)
+
+<span class="cm"># ── Case Study D3 ──
+# Marketing dataset — group by campaign type,
+# calculate average sales and engagement metrics.</span>
+
+df_mkt = pd.read_csv(<span class="st">'marketing.csv'</span>)
+result = df_mkt.groupby(<span class="st">'Campaign_Type'</span>).agg({
+  <span class="st">'Sales'</span>:      <span class="st">'mean'</span>,
+  <span class="st">'Engagement'</span>: <span class="st">'mean'</span>
+}).reset_index()
+<span class="fn2">print</span>(result)
+
+<span class="cm"># ── Case Study D4 ──
+# Employee dataset — clean missing values, drop irrelevant columns.</span>
+
+df_emp = pd.read_csv(<span class="st">'employee_performance.csv'</span>)
+<span class="fn2">print</span>(df_emp.isnull().sum())      <span class="cm"># find missing counts per column</span>
+df_emp = df_emp.fillna(df_emp.mean(numeric_only=<span class="bi">True</span>))  <span class="cm"># fill numeric NaNs</span>
+df_emp = df_emp.drop([<span class="st">'Address'</span>, <span class="st">'EmpID'</span>], axis=<span class="nm">1</span>)    <span class="cm"># drop irrelevant cols</span>
+<span class="fn2">print</span>(df_emp.head())</pre>
+  </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     INTERACTIVE ASSESSMENT
+════════════════════════════════════════════════════════ -->
+<section id="assessment">
+<div class="container">
+  <div class="aw">
+    <div class="a-title">📝 Interactive Assessment</div>
+    <div class="a-sub">Unit 1 — Python Programming-II &nbsp;·&nbsp; Full test from the CBSE handbook</div>
+
+    <div class="qlabel">Section A — MCQs (10 questions · 1 mark each)</div>
+
+    <div class="mcq" id="q1">
+      <div class="mcq-q"><em>Q1.</em> Which of the following is a primary data structure in Pandas?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q1','a','c')"><div class="ltr">A</div>List</div>
+        <div class="opt" onclick="chk('q1','b','c')"><div class="ltr">B</div>Tuple</div>
+        <div class="opt" onclick="chk('q1','c','c')"><div class="ltr">C</div>Series</div>
+        <div class="opt" onclick="chk('q1','d','c')"><div class="ltr">D</div>Matrix</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q2">
+      <div class="mcq-q"><em>Q2.</em> What does <code>fillna(0)</code> do in Pandas?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q2','a','b')"><div class="ltr">A</div>Removes rows with missing values</div>
+        <div class="opt" onclick="chk('q2','b','b')"><div class="ltr">B</div>Fills missing values with zeros</div>
+        <div class="opt" onclick="chk('q2','c','b')"><div class="ltr">C</div>Estimates missing values via average</div>
+        <div class="opt" onclick="chk('q2','d','b')"><div class="ltr">D</div>Converts all data to zero</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q3">
+      <div class="mcq-q"><em>Q3.</em> In Linear Regression, which library is typically used for importing and managing data?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q3','a','b')"><div class="ltr">A</div>NumPy</div>
+        <div class="opt" onclick="chk('q3','b','b')"><div class="ltr">B</div>Pandas</div>
+        <div class="opt" onclick="chk('q3','c','b')"><div class="ltr">C</div>Matplotlib</div>
+        <div class="opt" onclick="chk('q3','d','b')"><div class="ltr">D</div>Scikit-learn</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q4">
+      <div class="mcq-q"><em>Q4.</em> What is the correct syntax to read a CSV file into a Pandas DataFrame?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q4','a','b')"><div class="ltr">A</div>pd.DataFrame("filename.csv")</div>
+        <div class="opt" onclick="chk('q4','b','b')"><div class="ltr">B</div>pd.read_csv("filename.csv")</div>
+        <div class="opt" onclick="chk('q4','c','b')"><div class="ltr">C</div>pandas.read_file("filename.csv")</div>
+        <div class="opt" onclick="chk('q4','d','b')"><div class="ltr">D</div>pd.file_read("filename.csv")</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q5">
+      <div class="mcq-q"><em>Q5.</em> What is the result of <code>df.shape</code>?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q5','a','b')"><div class="ltr">A</div>Data type of the DataFrame</div>
+        <div class="opt" onclick="chk('q5','b','b')"><div class="ltr">B</div>Number of rows and columns in the DataFrame</div>
+        <div class="opt" onclick="chk('q5','c','b')"><div class="ltr">C</div>Memory usage of the DataFrame</div>
+        <div class="opt" onclick="chk('q5','d','b')"><div class="ltr">D</div>Column names of the DataFrame</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q6">
+      <div class="mcq-q"><em>Q6.</em> Which function exports a DataFrame to a CSV file?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q6','a','c')"><div class="ltr">A</div>export_csv()</div>
+        <div class="opt" onclick="chk('q6','b','c')"><div class="ltr">B</div>to_file()</div>
+        <div class="opt" onclick="chk('q6','c','c')"><div class="ltr">C</div>to_csv()</div>
+        <div class="opt" onclick="chk('q6','d','c')"><div class="ltr">D</div>save_csv()</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q7">
+      <div class="mcq-q"><em>Q7.</em> In NumPy, the number of dimensions of an array is called its:</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q7','a','b')"><div class="ltr">A</div>Size</div>
+        <div class="opt" onclick="chk('q7','b','b')"><div class="ltr">B</div>Rank</div>
+        <div class="opt" onclick="chk('q7','c','b')"><div class="ltr">C</div>Shape</div>
+        <div class="opt" onclick="chk('q7','d','b')"><div class="ltr">D</div>Type</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q8">
+      <div class="mcq-q"><em>Q8.</em> The <code>dropna()</code> function in Pandas:</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q8','a','c')"><div class="ltr">A</div>Fills NaN with zeros</div>
+        <div class="opt" onclick="chk('q8','b','c')"><div class="ltr">B</div>Counts total missing values</div>
+        <div class="opt" onclick="chk('q8','c','c')"><div class="ltr">C</div>Removes rows containing NaN values</div>
+        <div class="opt" onclick="chk('q8','d','c')"><div class="ltr">D</div>Renames columns with missing data</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q9">
+      <div class="mcq-q"><em>Q9.</em> To delete a column using <code>drop()</code>, the axis parameter is set to:</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q9','a','b')"><div class="ltr">A</div>0</div>
+        <div class="opt" onclick="chk('q9','b','b')"><div class="ltr">B</div>1</div>
+        <div class="opt" onclick="chk('q9','c','b')"><div class="ltr">C</div>2</div>
+        <div class="opt" onclick="chk('q9','d','b')"><div class="ltr">D</div>-1</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q10">
+      <div class="mcq-q"><em>Q10.</em> In the Linear Regression practical, 80% of 5000 rows means how many rows are used for training?</div>
+      <div class="opts">
+        <div class="opt" onclick="chk('q10','a','b')"><div class="ltr">A</div>1000</div>
+        <div class="opt" onclick="chk('q10','b','b')"><div class="ltr">B</div>4000</div>
+        <div class="opt" onclick="chk('q10','c','b')"><div class="ltr">C</div>2500</div>
+        <div class="opt" onclick="chk('q10','d','b')"><div class="ltr">D</div>500</div>
+      </div>
+    </div>
+
+    <button class="sbtn" onclick="submitQ()">Submit MCQs &amp; See Score ✓</button>
+    <div class="spanel" id="spanel" style="display:none;">
+      <div><div class="snum" id="sval">0/10</div><div class="stxt">Your MCQ Score</div></div>
+      <div style="font-size:.9rem;color:var(--text-muted);max-width:300px;" id="smsg"></div>
+    </div>
+
+    <!-- VERY SHORT QUESTIONS (4) -->
+    <div class="qlabel">Section B — Very Short Answer Questions (4 · 1–2 marks)</div>
+
+    <div class="qa"><div class="qa-q"><em>VSQ 1.</em> What is a DataFrame in Pandas?</div>
+    <button class="rbtn" onclick="tog('v1')">Show Answer</button>
+    <div class="ans" id="v1">A DataFrame is a <strong>two-dimensional labelled data structure</strong> in Pandas — like a spreadsheet or SQL table. It has rows and columns where each column can hold a different data type. It is the most widely used Pandas object for storing and manipulating tabular data.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>VSQ 2.</em> How do you create a Pandas Series from a dictionary?</div>
+    <button class="rbtn" onclick="tog('v2')">Show Answer</button>
+    <div class="ans" id="v2">You pass a dictionary to <code>pd.Series()</code>. The dictionary keys become the index labels of the Series and the values become the data.<br><br><code>s = pd.Series({'Maths': 85, 'Science': 92, 'English': 78})</code><br><br>This creates a Series with index labels 'Maths', 'Science', 'English'.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>VSQ 3.</em> What does the <code>isnull()</code> function return?</div>
+    <button class="rbtn" onclick="tog('v3')">Show Answer</button>
+    <div class="ans" id="v3">The <code>isnull()</code> function returns a <strong>boolean DataFrame</strong> of the same shape as the original. It returns <strong>True</strong> for every cell that contains a missing value (NaN) and <strong>False</strong> for every cell with actual data. It is used to detect the presence and location of missing values.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>VSQ 4.</em> What is the role of NumPy in Python programming?</div>
+    <button class="rbtn" onclick="tog('v4')">Show Answer</button>
+    <div class="ans" id="v4">NumPy (Numerical Python) is a powerful general-purpose array-processing package used for numerical computing. It provides fast, efficient multi-dimensional array objects (<strong>ndarray</strong>). The number of dimensions of a NumPy array is called its <strong>rank</strong>. NumPy forms the backbone of almost all scientific Python libraries including Pandas, Scikit-learn, and TensorFlow.</div></div>
+
+    <!-- SHORT QUESTIONS (3) -->
+    <div class="qlabel">Section C — Short Answer Questions (3 · 3–4 marks)</div>
+
+    <div class="qa"><div class="qa-q"><em>SQ 1.</em> Describe the steps to import and export data using Pandas. Include both Google Colab and IDE approaches.</div>
+    <button class="rbtn" onclick="tog('s1')">Show Answer</button>
+    <div class="ans" id="s1">
+      <strong>Importing a CSV file:</strong><br>
+      Using <code>read_csv()</code> function: <code>df = pd.read_csv("filename.csv")</code><br>
+      — On Google Colab: Upload file via Files icon → upload button → then run read_csv()<br>
+      — On Python IDE: Provide full path: <code>pd.read_csv('C:/PANDAS/file.csv', sep=",", header=0)</code><br><br>
+      <strong>Exporting a DataFrame to CSV:</strong><br>
+      Using <code>to_csv()</code> function:<br>
+      — On IDE: <code>df.to_csv(path_or_buf='C:/PANDAS/result.csv', sep=',')</code><br>
+      — On Colab: <code>df.to_csv("result.csv", index=False)</code><br><br>
+      The <code>index=False</code> parameter prevents the row numbers from being saved as a column. When we open the CSV in any text editor or spreadsheet, we will find the data along with row labels and column headers separated by commas.
+    </div></div>
+
+    <div class="qa"><div class="qa-q"><em>SQ 2.</em> Explain the concept of handling missing values in a DataFrame with examples. When should you drop vs fill?</div>
+    <button class="rbtn" onclick="tog('s2')">Show Answer</button>
+    <div class="ans" id="s2">
+      <strong>Checking:</strong> <code>marks.isnull()</code> returns a boolean map; <code>marks.isnull().sum().sum()</code> gives total NaN count.<br><br>
+      <strong>Strategy 1 — Drop:</strong> <code>dropna()</code> removes entire rows containing NaN. This reduces the dataset size.<br>
+      Example: <code>drop = marks.dropna()</code> — removes Meera, Suhana, Joseph from the marks dataset.<br><br>
+      <strong>Strategy 2 — Estimate/Fill:</strong> <code>fillna(value)</code> replaces NaN with a specified value.<br>
+      — <code>fillna(0)</code> — replace with zero<br>
+      — <code>fillna(marks.mean())</code> — replace with column average (best practice)<br><br>
+      <strong>When to drop:</strong> Only when very few rows (&lt;5%) have missing data and removing them won't distort analysis.<br>
+      <strong>When to fill:</strong> When missing data is spread widely; filling with the mean preserves dataset size and statistical properties.
+    </div></div>
+
+    <div class="qa"><div class="qa-q"><em>SQ 3.</em> What is Linear Regression, and how is it implemented in Python? Explain the significance of the 80/20 split.</div>
+    <button class="rbtn" onclick="tog('s3')">Show Answer</button>
+    <div class="ans" id="s3">
+      <strong>Linear Regression</strong> is a supervised machine learning algorithm that models the linear relationship between input features (X) and a continuous target variable (Y) using the equation: <strong>Y = mX + c</strong>, where m is the slope and c is the y-intercept.<br><br>
+      <strong>Python Implementation:</strong><br>
+      1. Load: <code>df = pd.read_csv('USA_Housing.csv')</code><br>
+      2. EDA: <code>df.head(), df.describe()</code> — found 5000 rows, no missing values<br>
+      3. Define X and y<br>
+      4. Split: <code>train_test_split(X, y, test_size=0.2, random_state=42)</code><br>
+      5. Train: <code>LinearRegression().fit(X_train, y_train)</code><br>
+      6. Predict: <code>y_pred = model.predict(X_test)</code><br>
+      7. Evaluate: MAE, RMSE, R²<br><br>
+      <strong>80/20 Split Significance:</strong> 80% of data (4000 rows) trains the model — it learns the relationship. The remaining 20% (1000 rows) is <em>unseen</em> test data used to check how well the model generalises. We observe that there is always a difference between actual and predicted values — this difference is the error/residual. Testing on training data would give falsely perfect results.
+    </div></div>
+
+  </div>
+</div>
+</section>
+
+<footer>
+  <p>Class XII · Artificial Intelligence · Subject Code 843 · CBSE</p>
+  <p style="margin-top:.4rem;">Unit 1 — Python Programming-II &nbsp;·&nbsp; <span>NumPy · Pandas · CSV Files · Missing Values · Case Study · Linear Regression · All Exercises</span></p>
+</footer>
+
+<script>
+/* STARS */
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 180; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const sz = Math.random() * 2.4 + 0.5;
+  s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*4}s;--dl:${Math.random()*5}s;`;
+  starsEl.appendChild(s);
+}
+
+/* THEME */
+let isDay = true;
+function toggleTheme() {
+  isDay = !isDay;
+  document.documentElement.setAttribute('data-theme', isDay ? 'day' : 'night');
+  document.getElementById('tlbl').textContent = isDay ? 'Day' : 'Night';
+  document.getElementById('tico').textContent = isDay ? '☀️' : '🌙';
+}
+
+/* MCQ */
+const answered = {};
+const correctMap = {q1:'c',q2:'b',q3:'b',q4:'b',q5:'b',q6:'c',q7:'b',q8:'c',q9:'b',q10:'b'};
+function chk(qid, chosen, right) {
+  if (answered[qid]) return;
+  answered[qid] = chosen;
+  const c = document.getElementById(qid);
+  const opts = c.querySelectorAll('.opt');
+  ['a','b','c','d'].forEach((l,i) => {
+    opts[i].style.pointerEvents = 'none';
+    if (l === right) opts[i].classList.add('correct');
+    else if (l === chosen && chosen !== right) opts[i].classList.add('wrong');
+  });
+}
+function submitQ() {
+  let score = 0;
+  Object.keys(correctMap).forEach(qid => {
+    if (!answered[qid]) {
+      chk(qid, '?', correctMap[qid]);
+      answered[qid] = '?';
+    }
+    if (answered[qid] === correctMap[qid]) score++;
+  });
+  const p = document.getElementById('spanel');
+  p.style.display = 'flex';
+  document.getElementById('sval').textContent = score+'/10';
+  const msgs = ['Keep practising — review the notes! 💪','Getting there, a bit more revision 📖','Good effort, almost there 👍','Great job, well done! 🎉','Perfect score — outstanding! 🏆'];
+  document.getElementById('smsg').textContent = msgs[Math.min(Math.floor(score/2.5),4)];
+  p.scrollIntoView({behavior:'smooth'});
+}
+function tog(id) {
+  const b = document.getElementById(id);
+  const btn = b.previousElementSibling;
+  b.classList.toggle('show');
+  btn.textContent = b.classList.contains('show') ? 'Hide Answer' : 'Show Answer';
+}
+
+/* NAV highlight */
+const secs = document.querySelectorAll('section[id]');
+const nls = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  secs.forEach(s => { if (window.scrollY >= s.offsetTop - 90) cur = s.id; });
+  nls.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#'+cur));
+});
+</script>
+</body>
+</html>

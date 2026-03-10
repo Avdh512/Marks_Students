@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="day">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unit 7 — Generative AI | Class XII AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--tr:1.2s cubic-bezier(.4,0,.2,1);}
+[data-theme="day"]{
+  --sky-top:#74b9d8;--sky-mid:#b8dcf0;--sky-bot:#fde8c8;
+  --bg:#fdf6ec;--surface:#fffbf5;--surface2:#fef3e2;
+  --border:#e8d5b7;--text:#2c1810;--text-muted:#7a5c42;
+  --accent:#d97b34;--accent2:#2d8a4e;--accent3:#c94f27;
+  --accent4:#8b5cf6;--code-bg:#1a1410;--code-text:#f0e0c8;
+  --nav-bg:rgba(253,246,236,0.94);--sun-bg:#fff176;
+  --sun-shadow:rgba(255,200,50,.7);--star-op:0;--cloud-op:1;
+}
+[data-theme="night"]{
+  --sky-top:#020818;--sky-mid:#0a1628;--sky-bot:#1a2a4a;
+  --bg:#080e1f;--surface:#0e1828;--surface2:#141f35;
+  --border:#1e2d4a;--text:#e8edf8;--text-muted:#7a90b8;
+  --accent:#5b8cff;--accent2:#00d4aa;--accent3:#ff6b9d;
+  --accent4:#a78bfa;--code-bg:#030810;--code-text:#c9d8f0;
+  --nav-bg:rgba(8,14,31,0.95);--sun-bg:#e8eeff;
+  --sun-shadow:rgba(180,200,255,.55);--star-op:1;--cloud-op:0;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.78;transition:background var(--tr),color var(--tr);overflow-x:hidden;}
+.sky{position:fixed;inset:0;z-index:-2;pointer-events:none;}
+.sky-grad{position:absolute;inset:0;background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 55%,var(--sky-bot) 100%);opacity:.16;transition:background var(--tr),opacity var(--tr);}
+[data-theme="night"] .sky-grad{opacity:.38;}
+.celestial{position:absolute;top:55px;right:130px;width:66px;height:66px;border-radius:50%;background:var(--sun-bg);box-shadow:0 0 40px var(--sun-shadow),0 0 90px var(--sun-shadow);transition:all var(--tr);}
+[data-theme="night"] .celestial{width:54px;height:54px;top:75px;right:105px;}
+.crater{position:absolute;border-radius:50%;background:rgba(0,0,0,.08);opacity:0;transition:opacity var(--tr);}
+[data-theme="night"] .crater{opacity:1;}
+.cr1{width:13px;height:13px;top:17px;left:15px;}.cr2{width:8px;height:8px;top:31px;left:33px;}.cr3{width:10px;height:10px;top:11px;left:35px;}
+.stars-wrap{position:absolute;inset:0;opacity:var(--star-op);transition:opacity var(--tr);}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,3s) ease-in-out infinite var(--dl,0s);}
+@keyframes twinkle{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:1;transform:scale(1.5)}}
+.clouds{position:absolute;inset:0;opacity:var(--cloud-op);transition:opacity var(--tr);pointer-events:none;}
+.cloud{position:absolute;border-radius:60px;background:rgba(255,255,255,.82);}
+.cloud::before,.cloud::after{content:'';position:absolute;background:inherit;border-radius:50%;}
+.cl1{width:110px;height:34px;top:110px;left:7%;animation:drift 30s linear infinite;}
+.cl1::before{width:55px;height:46px;top:-20px;left:14px;}.cl1::after{width:42px;height:36px;top:-14px;left:50px;}
+.cl2{width:85px;height:28px;top:170px;left:54%;animation:drift 42s linear infinite 6s;}
+.cl2::before{width:46px;height:38px;top:-16px;left:11px;}.cl2::after{width:32px;height:26px;top:-10px;left:36px;}
+.cl3{width:65px;height:22px;top:85px;left:34%;animation:drift 55s linear infinite 14s;}
+.cl3::before{width:34px;height:28px;top:-12px;left:9px;}
+@keyframes drift{from{transform:translateX(-250px)}to{transform:translateX(110vw)}}
+.toggle-wrap{display:flex;align-items:center;gap:9px;flex-shrink:0;margin-left:auto;}
+.tlabel{font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);transition:color var(--tr);user-select:none;}
+.tbtn{width:62px;height:30px;background:var(--surface2);border:2px solid var(--border);border-radius:99px;cursor:pointer;position:relative;transition:background var(--tr),border-color var(--tr);flex-shrink:0;}
+.tbtn::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--sun-bg);box-shadow:0 0 8px var(--sun-shadow);transition:transform .5s cubic-bezier(.4,0,.2,1),background .5s;}
+[data-theme="night"] .tbtn::after{transform:translateX(32px);}
+.nav-top{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--nav-bg);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.4rem;height:50px;gap:.8rem;transition:background var(--tr),border-color var(--tr);}
+.nav-logo{font-family:'Playfair Display',serif;font-weight:900;font-size:1rem;color:var(--accent);white-space:nowrap;flex-shrink:0;transition:color var(--tr);}
+.back-btn{display:flex;align-items:center;gap:.4rem;text-decoration:none;color:var(--text-muted);font-size:.72rem;font-weight:700;letter-spacing:.5px;flex-shrink:0;transition:all .2s;border:1.5px solid var(--border);border-radius:20px;padding:.22rem .8rem;white-space:nowrap;}
+.back-btn:hover{color:var(--accent);border-color:var(--accent);}
+nav{position:fixed;top:50px;left:0;right:0;z-index:199;background:var(--nav-bg);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.2rem;height:36px;transition:background var(--tr),border-color var(--tr);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;}
+nav::-webkit-scrollbar{display:none;}
+.nav-links{display:flex;gap:.25rem;flex-shrink:0;align-items:center;}
+.nav-links a{font-size:.65rem;padding:.2rem .72rem;border-radius:20px;color:var(--text-muted);text-decoration:none;font-weight:600;transition:all .2s;white-space:nowrap;flex-shrink:0;}
+.nav-links a:hover,.nav-links a.active{background:var(--accent);color:#fff;}
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:8rem 2rem 5rem;text-align:center;}
+.hero-inner{max-width:720px;}
+.badge{display:inline-block;background:color-mix(in srgb,var(--accent) 13%,transparent);border:1px solid color-mix(in srgb,var(--accent) 38%,transparent);color:var(--accent);font-size:.68rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:.38rem 1.3rem;border-radius:30px;margin-bottom:1.4rem;transition:all var(--tr);}
+.hero h1{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(2.4rem,6.5vw,5rem);letter-spacing:-1.5px;line-height:1.05;margin-bottom:1rem;color:var(--text);transition:color var(--tr);}
+.hero h1 span{color:var(--accent);}
+.hero p{font-size:1rem;color:var(--text-muted);max-width:580px;margin:0 auto 2.2rem;transition:color var(--tr);}
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:.55rem;}
+.chip{background:var(--surface);border:1.5px solid var(--border);border-radius:9px;padding:.4rem 1rem;font-size:.76rem;font-weight:600;color:var(--text-muted);text-decoration:none;transition:all .22s;}
+.chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-3px);box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 18%,transparent);}
+.container{max-width:1080px;margin:0 auto;padding:0 2rem;}
+section.topic{padding:5rem 0;border-top:1px solid var(--border);transition:border-color var(--tr);}
+.s-tag{font-size:.68rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:.45rem;transition:color var(--tr);}
+.s-title{font-family:'Playfair Display',serif;font-weight:900;font-size:clamp(1.7rem,3.8vw,2.5rem);line-height:1.08;margin-bottom:1.1rem;color:var(--text);transition:color var(--tr);}
+.s-intro{color:var(--text-muted);font-size:.96rem;max-width:820px;border-left:3px solid var(--accent);padding:.95rem 1.4rem;background:var(--surface);border-radius:0 12px 12px 0;margin-bottom:2.2rem;line-height:1.86;transition:all var(--tr);}
+.s-intro strong{color:var(--text);}
+h3.sh{font-family:'Playfair Display',serif;font-weight:700;font-size:1.12rem;color:var(--accent2);margin:2rem 0 .8rem;display:flex;align-items:center;gap:.6rem;transition:color var(--tr);}
+h3.sh::before{content:'';width:22px;height:3px;background:var(--accent2);border-radius:2px;flex-shrink:0;transition:background var(--tr);}
+p.bd{color:var(--text-muted);font-size:.94rem;margin-bottom:.85rem;transition:color var(--tr);}
+p.bd strong{color:var(--text);}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin:1.4rem 0 2.2rem;}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1.3rem;transition:all .25s;}
+.card:hover{transform:translateY(-5px);border-color:var(--accent);box-shadow:0 12px 30px color-mix(in srgb,var(--accent) 16%,transparent);}
+.card .icon{font-size:1.75rem;margin-bottom:.7rem;}
+.card h4{font-family:'Playfair Display',serif;font-weight:700;font-size:.97rem;margin-bottom:.4rem;color:var(--text);transition:color var(--tr);}
+.card p{font-size:.84rem;color:var(--text-muted);line-height:1.62;transition:color var(--tr);}
+.hl{background:color-mix(in srgb,var(--accent2) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent2) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);line-height:1.82;transition:all var(--tr);}
+.hl strong{color:var(--accent2);}
+.warn{background:color-mix(in srgb,var(--accent3) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent3) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);transition:all var(--tr);}
+.warn strong{color:var(--accent3);}
+.note{background:color-mix(in srgb,var(--accent4) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent4) 28%,transparent);border-radius:11px;padding:.95rem 1.4rem;margin:1.1rem 0;font-size:.9rem;color:var(--text-muted);transition:all var(--tr);}
+.note strong{color:var(--accent4);}
+.tw{overflow-x:auto;margin:1.4rem 0;border-radius:12px;border:1px solid var(--border);transition:border-color var(--tr);}
+table{width:100%;border-collapse:collapse;font-size:.86rem;}
+th{background:var(--surface2);color:var(--accent);font-weight:700;padding:.8rem 1.1rem;text-align:left;border-bottom:2px solid var(--border);font-family:'Playfair Display',serif;transition:all var(--tr);}
+td{padding:.72rem 1.1rem;border-bottom:1px solid var(--border);color:var(--text-muted);transition:all var(--tr);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface2);color:var(--text);}
+.cb{background:var(--code-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:1.4rem 0;box-shadow:0 4px 22px rgba(0,0,0,.18);transition:border-color var(--tr);}
+.cb-head{background:color-mix(in srgb,var(--code-bg) 85%,white 6%);padding:.6rem 1.1rem;display:flex;align-items:center;gap:.45rem;border-bottom:1px solid rgba(255,255,255,.05);}
+.cb-head .fn{font-size:.72rem;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace;margin-left:auto;}
+.d{width:10px;height:10px;border-radius:50%;}
+.d.r{background:#ff5f56;}.d.y{background:#ffbd2e;}.d.g{background:#27c93f;}
+pre{font-family:'DM Mono',monospace;font-size:.81rem;line-height:1.82;padding:1.4rem;overflow-x:auto;color:var(--code-text);}
+.kw{color:#ff9d6c;}.fn2{color:#82aaff;}.st{color:#c3e88d;}.cm{color:#4a5568;font-style:italic;}.nm{color:#f78c6c;}.cl2{color:#ffcb6b;}.bi{color:#89ddff;}
+.ig{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1.4rem 0;}
+.ic{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.4rem;transition:all var(--tr);}
+.ic h4{font-size:.72rem;color:var(--accent2);margin-bottom:.65rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;}
+.ic ul{list-style:none;}
+.ic ul li{font-size:.86rem;color:var(--text-muted);padding:.2rem 0 .2rem 1.2rem;position:relative;transition:color var(--tr);}
+.ic ul li::before{content:'▸';position:absolute;left:0;color:var(--accent2);font-size:.76rem;}
+.flowchart-wrap{background:var(--surface);border:1.5px solid var(--border);border-radius:18px;padding:2rem;margin:1.5rem 0;overflow-x:auto;transition:all var(--tr);}
+.flowchart-wrap h4{font-family:'Playfair Display',serif;font-weight:700;font-size:1.05rem;color:var(--accent);text-align:center;margin-bottom:1.5rem;}
+svg text{font-family:'Outfit',sans-serif;}
+.steps{display:flex;flex-direction:column;gap:.7rem;margin:1.2rem 0;}
+.step{display:flex;gap:1rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:1rem 1.3rem;transition:all var(--tr);}
+.step-num{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0;font-family:'Playfair Display',serif;}
+.step-body h5{font-weight:600;font-size:.92rem;margin-bottom:.25rem;color:var(--text);transition:color var(--tr);}
+.step-body p{font-size:.85rem;color:var(--text-muted);transition:color var(--tr);}
+.comp{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.4rem 0;}
+.comp-col{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:1.2rem;}
+.comp-col h4{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;margin-bottom:.8rem;color:var(--accent);}
+.comp-col ul{list-style:none;}
+.comp-col ul li{font-size:.87rem;color:var(--text-muted);padding:.22rem 0 .22rem 1.2rem;position:relative;transition:color var(--tr);}
+.comp-col ul li::before{content:'•';position:absolute;left:0;color:var(--accent2);}
+.llm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin:1.5rem 0;}
+.llm-card{border-radius:14px;padding:1.3rem;border:1.5px solid;transition:all .25s;position:relative;overflow:hidden;}
+.llm-card:hover{transform:translateY(-5px);}
+.llm-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.llm-card .lc-icon{font-size:1.6rem;margin-bottom:.5rem;}
+.llm-card .lc-tag{font-size:.6rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:.3rem;}
+.llm-card h4{font-family:'Playfair Display',serif;font-weight:700;font-size:.9rem;margin-bottom:.4rem;}
+.llm-card p{font-size:.8rem;line-height:1.58;}
+.lc-gpt{background:color-mix(in srgb,#10b981 8%,var(--surface));border-color:color-mix(in srgb,#10b981 35%,var(--border));}
+.lc-gpt::before{background:#10b981;}.lc-gpt .lc-tag,.lc-gpt h4{color:#059669;}
+.lc-gem{background:color-mix(in srgb,#3b82f6 8%,var(--surface));border-color:color-mix(in srgb,#3b82f6 35%,var(--border));}
+.lc-gem::before{background:#3b82f6;}.lc-gem .lc-tag,.lc-gem h4{color:#2563eb;}
+.lc-lla{background:color-mix(in srgb,#f59e0b 8%,var(--surface));border-color:color-mix(in srgb,#f59e0b 35%,var(--border));}
+.lc-lla::before{background:#f59e0b;}.lc-lla .lc-tag,.lc-lla h4{color:#d97706;}
+.lc-cla{background:color-mix(in srgb,#8b5cf6 8%,var(--surface));border-color:color-mix(in srgb,#8b5cf6 35%,var(--border));}
+.lc-cla::before{background:#8b5cf6;}.lc-cla .lc-tag,.lc-cla h4{color:#7c3aed;}
+.lc-mix{background:color-mix(in srgb,#ec4899 8%,var(--surface));border-color:color-mix(in srgb,#ec4899 35%,var(--border));}
+.lc-mix::before{background:#ec4899;}.lc-mix .lc-tag,.lc-mix h4{color:#db2777;}
+.activity{background:color-mix(in srgb,var(--accent4) 7%,var(--surface));border:1.5px solid color-mix(in srgb,var(--accent4) 30%,var(--border));border-radius:14px;padding:1.4rem 1.6rem;margin:1.5rem 0;transition:all var(--tr);}
+.activity-hdr{display:flex;align-items:center;gap:.7rem;margin-bottom:1rem;}
+.activity-badge{background:var(--accent4);color:#fff;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:.28rem .75rem;border-radius:20px;}
+.activity-hdr span{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;color:var(--text);transition:color var(--tr);}
+.activity ol{padding-left:1.2rem;}
+.activity ol li{font-size:.88rem;color:var(--text-muted);padding:.35rem 0;transition:color var(--tr);}
+.activity ol li strong{color:var(--text);}
+.case-box{background:color-mix(in srgb,var(--accent) 6%,var(--surface));border:1.5px solid color-mix(in srgb,var(--accent) 28%,var(--border));border-radius:14px;padding:1.5rem 1.8rem;margin:1.5rem 0;transition:all var(--tr);}
+.case-box h4{font-family:'Playfair Display',serif;font-weight:700;font-size:1rem;color:var(--accent);margin-bottom:.8rem;}
+.case-box p{font-size:.9rem;color:var(--text-muted);margin-bottom:.6rem;}
+#assessment{padding:5rem 0 4rem;border-top:1px solid var(--border);}
+.aw{background:linear-gradient(135deg,var(--surface),color-mix(in srgb,var(--accent) 7%,var(--surface)));border:1.5px solid color-mix(in srgb,var(--accent) 28%,var(--border));border-radius:22px;padding:2.8rem;transition:all var(--tr);}
+.a-title{font-family:'Playfair Display',serif;font-weight:900;font-size:2.1rem;letter-spacing:-.5px;margin-bottom:.35rem;color:var(--text);transition:color var(--tr);}
+.a-sub{color:var(--text-muted);font-size:.88rem;margin-bottom:2.2rem;}
+.qlabel{font-weight:700;font-size:.67rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent2);padding-bottom:.55rem;border-bottom:1px solid var(--border);margin:2.2rem 0 1.3rem;transition:all var(--tr);}
+.mcq{margin-bottom:1.8rem;}
+.mcq-q{font-size:.95rem;font-weight:500;margin-bottom:.85rem;color:var(--text);transition:color var(--tr);}
+.mcq-q em{color:var(--accent);font-style:normal;font-weight:700;font-family:'Playfair Display',serif;}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.45rem;}
+.opt{background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:.6rem .95rem;cursor:pointer;transition:all .2s;font-size:.86rem;color:var(--text-muted);display:flex;align-items:center;gap:.65rem;user-select:none;}
+.opt:hover{border-color:var(--accent);color:var(--text);}
+.opt.correct{background:color-mix(in srgb,var(--accent2) 12%,transparent);border-color:var(--accent2);color:var(--accent2);}
+.opt.wrong{background:color-mix(in srgb,var(--accent3) 9%,transparent);border-color:var(--accent3);color:var(--accent3);}
+.opt .ltr{width:21px;height:21px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;}
+.qa{margin-bottom:1.4rem;}
+.qa-q{font-size:.94rem;margin-bottom:.45rem;color:var(--text);transition:color var(--tr);}
+.qa-q em{color:var(--accent);font-style:normal;font-weight:700;font-family:'Playfair Display',serif;}
+.ans{background:var(--code-bg);border-left:3px solid var(--accent2);border-radius:0 9px 9px 0;padding:.95rem 1.2rem;font-size:.87rem;color:var(--code-text);line-height:1.82;display:none;margin-top:.45rem;}
+.ans.show{display:block;}
+.rbtn{background:transparent;border:1.5px solid var(--border);border-radius:7px;padding:.3rem .9rem;font-size:.74rem;color:var(--text-muted);cursor:pointer;font-weight:600;transition:all .2s;margin-top:.38rem;}
+.rbtn:hover{border-color:var(--accent2);color:var(--accent2);}
+.spanel{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:1.3rem 1.7rem;display:flex;align-items:center;justify-content:space-between;margin-top:1.8rem;flex-wrap:wrap;gap:1rem;transition:all var(--tr);}
+.snum{font-family:'Playfair Display',serif;font-weight:900;font-size:2.4rem;color:var(--accent);transition:color var(--tr);}
+.stxt{font-size:.84rem;color:var(--text-muted);}
+.sbtn{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 68%,var(--accent2)));border:none;border-radius:11px;padding:.85rem 2.4rem;font-weight:700;font-size:.88rem;color:#fff;cursor:pointer;transition:all .22s;font-family:'Outfit',sans-serif;margin-top:1.4rem;}
+.sbtn:hover{transform:translateY(-3px);box-shadow:0 12px 28px color-mix(in srgb,var(--accent) 38%,transparent);}
+footer{text-align:center;padding:3rem 2rem;color:var(--text-muted);font-size:.82rem;border-top:1px solid var(--border);transition:all var(--tr);}
+footer span{color:var(--accent);}
+@media(max-width:640px){
+  .opts,.comp,.llm-grid{grid-template-columns:1fr;}
+  .nav-links{display:none;}
+  .aw{padding:1.4rem;}
+  .tlabel{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="sky">
+  <div class="sky-grad"></div>
+  <div class="celestial"><div class="crater cr1"></div><div class="crater cr2"></div><div class="crater cr3"></div></div>
+  <div class="stars-wrap" id="stars"></div>
+  <div class="clouds"><div class="cloud cl1"></div><div class="cloud cl2"></div><div class="cloud cl3"></div></div>
+</div>
+<div class="nav-top">
+  <a href="index.html" class="back-btn">← Home</a>
+  <div class="nav-logo">Unit 7 · Generative AI</div>
+  <div class="toggle-wrap">
+    <span class="tlabel" id="tlbl">Day</span>
+    <div class="tbtn" onclick="toggleTheme()"></div>
+    <span id="tico">☀️</span>
+  </div>
+</div>
+<nav>
+  <div class="nav-links">
+    <a href="#overview">Overview</a>
+    <a href="#intro">Introduction</a>
+    <a href="#working">How it Works</a>
+    <a href="#models">Gen vs Disc</a>
+    <a href="#applications">Applications</a>
+    <a href="#llm">LLMs</a>
+    <a href="#future">Future</a>
+    <a href="#ethics">Ethics</a>
+    <a href="#activities">Activities</a>
+    <a href="#assessment">Assessment</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="badge">Unit 07 · Class XII AI · Subject Code 843</div>
+    <h1>Generative<br><span>Artificial Intelligence</span></h1>
+    <p>Explore the world of Generative AI — from GANs and VAEs to Large Language Models. Understand how machines create new content, the ethical implications, and hands-on tools powering the creative AI revolution.</p>
+    <div class="chips">
+      <a href="#overview" class="chip">📋 Overview</a>
+      <a href="#intro" class="chip">🤖 Introduction</a>
+      <a href="#working" class="chip">⚙️ How it Works</a>
+      <a href="#models" class="chip">🔀 Gen vs Disc</a>
+      <a href="#applications" class="chip">🎨 Applications</a>
+      <a href="#llm" class="chip">🧠 LLMs</a>
+      <a href="#future" class="chip">🚀 Future</a>
+      <a href="#ethics" class="chip">⚖️ Ethics</a>
+      <a href="#activities" class="chip">🛠 Activities</a>
+      <a href="#assessment" class="chip">✅ Assessment</a>
+    </div>
+  </div>
+</section>
+
+<!-- OVERVIEW -->
+<section class="topic" id="overview">
+<div class="container">
+  <div class="s-tag">Unit 7 — Overview</div>
+  <div class="s-title">Chapter Summary & Learning Objectives</div>
+  <div class="s-intro">This unit delves into <strong>Generative AI</strong>, focusing on its ability to create new content resembling training samples across text, images, audio, and video. It covers how these systems learn from data, the difference between generative and discriminative models, and their diverse practical applications. Approach: Hands-on, Team Discussion, Web search, Case studies.</div>
+  <div class="ig">
+    <div class="ic"><h4>Learning Objectives</h4><ul>
+      <li>Understand the foundational principles of Generative AI</li>
+      <li>Differentiate between generative and discriminative models</li>
+      <li>Explore applications: image, text, audio, video generation</li>
+      <li>Examine ethical and social implications</li>
+    </ul></div>
+    <div class="ic"><h4>Key Concepts</h4><ul>
+      <li>Introduction to Generative AI</li>
+      <li>Working of Generative AI (GANs &amp; VAEs)</li>
+      <li>Generative and Discriminative models</li>
+      <li>Applications of Generative AI</li>
+      <li>LLM — Large Language Model</li>
+      <li>Future &amp; Ethical Implications</li>
+    </ul></div>
+    <div class="ic"><h4>Learning Outcomes</h4><ul>
+      <li>Articulate principles behind Generative AI</li>
+      <li>Use Generative AI tools for creative purposes</li>
+      <li>Evaluate ethical and legal implications</li>
+      <li>Create a chatbot using Gemini API</li>
+    </ul></div>
+    <div class="ic"><h4>Prerequisites</h4><ul>
+      <li>Foundational AI concepts from Class XI</li>
+      <li>Basic Python programming knowledge</li>
+      <li>Installation and importing of packages</li>
+    </ul></div>
+  </div>
+  <div class="hl"><strong>📌 Why Generative AI?</strong> Generative AI is transforming how we create — from generating realistic images and composing music to writing code and producing videos. Understanding its principles, capabilities, and ethical boundaries is essential for responsible innovation in the AI era.</div>
+</div>
+</section>
+
+<!-- 7.1 INTRODUCTION -->
+<section class="topic" id="intro">
+<div class="container">
+  <div class="s-tag">Section 7.1</div>
+  <div class="s-title">Introduction to Generative AI</div>
+  <div class="s-intro"><strong>Generative AI</strong>, a facet of artificial intelligence, creates diverse content like audio, text, images, and more, aiming to generate new data resembling its training samples. It utilises machine learning algorithms to learn from existing datasets. Examples include ChatGPT, Gemini, Claude, and DALL-E.</div>
+
+  <div class="cards">
+    <div class="card"><div class="icon">📝</div><h4>Text Generation</h4><p>Creates coherent, contextually relevant text based on prompts. Powers chatbots, content creation, story writing, and code generation tools like ChatGPT and Gemini.</p></div>
+    <div class="card"><div class="icon">🎨</div><h4>Image Generation</h4><p>Produces new images by learning patterns from existing datasets. Creates realistic pictures and artwork using tools like DALL-E, Canva AI, and Stable Diffusion.</p></div>
+    <div class="card"><div class="icon">🎵</div><h4>Audio Generation</h4><p>Generates new sounds, music, and speech from learned audio patterns. Tools like Meta AI's Voicebox and Google's MusicLM compose original audio content.</p></div>
+    <div class="card"><div class="icon">🎬</div><h4>Video Generation</h4><p>Creates new videos by learning from existing ones, including animations and visual effects. Google's Lumiere and deepfake algorithms can generate or modify video content.</p></div>
+  </div>
+
+  <div class="flowchart-wrap">
+    <h4>Where Generative AI Fits — The AI Hierarchy</h4>
+    <svg viewBox="0 0 820 185" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:820px;display:block;margin:0 auto;">
+      <defs><marker id="a0" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#d97b34" opacity=".8"/></marker></defs>
+      <rect x="20" y="52" width="145" height="75" rx="12" fill="none" stroke="#d97b34" stroke-width="2"/>
+      <text x="92" y="88" text-anchor="middle" font-size="13" fill="#d97b34" font-weight="700">Artificial</text>
+      <text x="92" y="107" text-anchor="middle" font-size="13" fill="#d97b34" font-weight="700">Intelligence</text>
+      <line x1="165" y1="90" x2="195" y2="90" stroke="#d97b34" stroke-width="2" marker-end="url(#a0)"/>
+      <rect x="197" y="52" width="145" height="75" rx="12" fill="none" stroke="#2d8a4e" stroke-width="2"/>
+      <text x="270" y="88" text-anchor="middle" font-size="13" fill="#2d8a4e" font-weight="700">Machine</text>
+      <text x="270" y="107" text-anchor="middle" font-size="13" fill="#2d8a4e" font-weight="700">Learning</text>
+      <line x1="342" y1="90" x2="372" y2="90" stroke="#2d8a4e" stroke-width="2" marker-end="url(#a0)"/>
+      <rect x="374" y="52" width="145" height="75" rx="12" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="447" y="88" text-anchor="middle" font-size="13" fill="#8b5cf6" font-weight="700">Deep</text>
+      <text x="447" y="107" text-anchor="middle" font-size="13" fill="#8b5cf6" font-weight="700">Learning</text>
+      <line x1="519" y1="90" x2="549" y2="90" stroke="#8b5cf6" stroke-width="2" marker-end="url(#a0)"/>
+      <rect x="551" y="40" width="250" height="100" rx="14" fill="color-mix(in srgb,#c94f27 10%,transparent)" stroke="#c94f27" stroke-width="2.5"/>
+      <text x="676" y="84" text-anchor="middle" font-size="14" fill="#c94f27" font-weight="700">Generative AI</text>
+      <text x="676" y="105" text-anchor="middle" font-size="10" fill="#c94f27" opacity=".85">Text · Image · Audio · Video</text>
+      <text x="676" y="122" text-anchor="middle" font-size="9" fill="#c94f27" opacity=".7">ChatGPT · DALL-E · Gemini · Claude</text>
+      <text x="92" y="22" text-anchor="middle" font-size="9" fill="#d97b34" opacity=".7">Broadest umbrella</text>
+      <text x="676" y="22" text-anchor="middle" font-size="9" fill="#c94f27" opacity=".7">Creates entirely new content</text>
+    </svg>
+  </div>
+  <div class="note"><strong>📌 Real-World Context:</strong> In recent times, Generative AI has been used to create deepfake videos of celebrities, generate content that misrepresents people, and produce AI-generated work presented as one's own. Understanding Generative AI helps you navigate these challenges responsibly.</div>
+</div>
+</section>
+
+<!-- 7.2 WORKING -->
+<section class="topic" id="working">
+<div class="container">
+  <div class="s-tag">Section 7.2</div>
+  <div class="s-title">Working of Generative AI</div>
+  <div class="s-intro">Generative AI learns patterns from data and autonomously generates similar samples. It operates within <strong>deep learning</strong>, employing neural networks to understand intricate patterns. Models such as <strong>GANs</strong> and <strong>VAEs</strong> facilitate tasks like image and text generation.</div>
+
+  <h3 class="sh">7.2.1 Generative Adversarial Networks (GANs)</h3>
+  <p class="bd">A GAN consists of two competing networks — a <strong>Generator</strong> that creates fake data samples and a <strong>Discriminator</strong> that evaluates whether samples are real or fake. Through adversarial training, both networks improve until the generator produces highly realistic outputs.</p>
+
+  <div class="flowchart-wrap">
+    <h4>GAN Architecture — Generator vs. Discriminator Competition</h4>
+    <svg viewBox="0 0 820 230" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:820px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="a1" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#d97b34" opacity=".8"/></marker>
+        <marker id="a2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#2d8a4e" opacity=".8"/></marker>
+        <marker id="a3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#c94f27" opacity=".8"/></marker>
+      </defs>
+      <!-- Random Noise -->
+      <rect x="10" y="80" width="110" height="55" rx="10" fill="none" stroke="#7a5c42" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <text x="65" y="106" text-anchor="middle" font-size="10" fill="#7a5c42" font-weight="600">Random</text>
+      <text x="65" y="122" text-anchor="middle" font-size="10" fill="#7a5c42">Noise (z)</text>
+      <!-- Generator -->
+      <rect x="165" y="65" width="145" height="85" rx="12" fill="color-mix(in srgb,#d97b34 12%,transparent)" stroke="#d97b34" stroke-width="2"/>
+      <text x="237" y="103" text-anchor="middle" font-size="13" fill="#d97b34" font-weight="700">Generator</text>
+      <text x="237" y="120" text-anchor="middle" font-size="9" fill="#d97b34" opacity=".85">Creates fake samples</text>
+      <text x="237" y="135" text-anchor="middle" font-size="9" fill="#d97b34" opacity=".7">from random noise</text>
+      <!-- Fake + Real -->
+      <rect x="360" y="50" width="110" height="50" rx="10" fill="none" stroke="#c94f27" stroke-width="1.5"/>
+      <text x="415" y="75" text-anchor="middle" font-size="10" fill="#c94f27" font-weight="700">Fake Samples</text>
+      <text x="415" y="92" text-anchor="middle" font-size="9" fill="#c94f27" opacity=".8">from Generator</text>
+      <rect x="360" y="140" width="110" height="50" rx="10" fill="none" stroke="#2d8a4e" stroke-width="1.5"/>
+      <text x="415" y="163" text-anchor="middle" font-size="10" fill="#2d8a4e" font-weight="700">Real Data</text>
+      <text x="415" y="180" text-anchor="middle" font-size="9" fill="#2d8a4e" opacity=".8">from dataset</text>
+      <!-- Discriminator -->
+      <rect x="525" y="60" width="145" height="120" rx="12" fill="color-mix(in srgb,#2d8a4e 12%,transparent)" stroke="#2d8a4e" stroke-width="2"/>
+      <text x="597" y="118" text-anchor="middle" font-size="13" fill="#2d8a4e" font-weight="700">Discriminator</text>
+      <text x="597" y="136" text-anchor="middle" font-size="10" fill="#2d8a4e" opacity=".85">Real or Fake?</text>
+      <!-- Output -->
+      <rect x="720" y="85" width="85" height="70" rx="10" fill="none" stroke="#8b5cf6" stroke-width="1.5"/>
+      <text x="762" y="118" text-anchor="middle" font-size="10" fill="#8b5cf6" font-weight="700">Decision</text>
+      <text x="762" y="134" text-anchor="middle" font-size="9" fill="#8b5cf6">Real/Fake %</text>
+      <!-- Arrows -->
+      <line x1="120" y1="107" x2="163" y2="107" stroke="#7a5c42" stroke-width="1.5" marker-end="url(#a1)"/>
+      <line x1="310" y1="100" x2="358" y2="75" stroke="#d97b34" stroke-width="1.5" marker-end="url(#a1)"/>
+      <line x1="470" y1="75" x2="523" y2="110" stroke="#c94f27" stroke-width="1.5" marker-end="url(#a1)"/>
+      <line x1="470" y1="165" x2="523" y2="140" stroke="#2d8a4e" stroke-width="1.5" marker-end="url(#a2)"/>
+      <line x1="670" y1="120" x2="718" y2="120" stroke="#2d8a4e" stroke-width="1.5" marker-end="url(#a2)"/>
+      <!-- Feedback -->
+      <path d="M762 155 Q762 210 237 210 Q237 182 237 150" fill="none" stroke="#c94f27" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#a3)"/>
+      <text x="500" y="225" text-anchor="middle" font-size="9" fill="#c94f27" opacity=".8">Feedback loop: Generator improves based on Discriminator's judgement</text>
+    </svg>
+  </div>
+
+  <div class="hl"><strong>GAN Applications:</strong> Image generation, style transfer, data augmentation, face synthesis, and video creation. GANs excel at producing visually realistic outputs and are the technology behind most deepfakes.</div>
+
+  <h3 class="sh">7.2.2 Variational Autoencoders (VAEs)</h3>
+  <p class="bd">VAEs consist of an <strong>Encoder</strong> that compresses data into a latent space, and a <strong>Decoder</strong> that reconstructs new data from the latent space. Unlike GANs, VAEs focus on capturing underlying data patterns for structured generation.</p>
+
+  <div class="flowchart-wrap">
+    <h4>VAE Architecture — Encoder → Latent Space → Decoder</h4>
+    <svg viewBox="0 0 780 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:780px;display:block;margin:0 auto;">
+      <defs>
+        <marker id="av" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#8b5cf6" opacity=".8"/></marker>
+        <marker id="ag" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#2d8a4e" opacity=".8"/></marker>
+        <marker id="ao" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#d97b34" opacity=".8"/></marker>
+      </defs>
+      <rect x="10" y="45" width="120" height="60" rx="10" fill="none" stroke="#d97b34" stroke-width="2"/>
+      <text x="70" y="73" text-anchor="middle" font-size="11" fill="#d97b34" font-weight="700">Input Data</text>
+      <text x="70" y="92" text-anchor="middle" font-size="9" fill="#d97b34" opacity=".8">Image / Text / Audio</text>
+      <line x1="130" y1="75" x2="160" y2="75" stroke="#d97b34" stroke-width="1.5" marker-end="url(#ao)"/>
+      <rect x="162" y="38" width="135" height="75" rx="12" fill="color-mix(in srgb,#d97b34 10%,transparent)" stroke="#d97b34" stroke-width="2"/>
+      <text x="230" y="75" text-anchor="middle" font-size="12" fill="#d97b34" font-weight="700">Encoder</text>
+      <text x="230" y="93" text-anchor="middle" font-size="9" fill="#d97b34" opacity=".85">Understands &amp; compresses data</text>
+      <line x1="297" y1="75" x2="327" y2="75" stroke="#d97b34" stroke-width="1.5" marker-end="url(#av)"/>
+      <rect x="329" y="30" width="140" height="90" rx="12" fill="color-mix(in srgb,#8b5cf6 10%,transparent)" stroke="#8b5cf6" stroke-width="2.5"/>
+      <text x="399" y="73" text-anchor="middle" font-size="12" fill="#8b5cf6" font-weight="700">Latent Space</text>
+      <text x="399" y="92" text-anchor="middle" font-size="9" fill="#8b5cf6" opacity=".85">Compressed representation</text>
+      <text x="399" y="108" text-anchor="middle" font-size="9" fill="#8b5cf6" opacity=".7">of data patterns</text>
+      <line x1="469" y1="75" x2="499" y2="75" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#av)"/>
+      <rect x="501" y="38" width="135" height="75" rx="12" fill="color-mix(in srgb,#2d8a4e 10%,transparent)" stroke="#2d8a4e" stroke-width="2"/>
+      <text x="569" y="75" text-anchor="middle" font-size="12" fill="#2d8a4e" font-weight="700">Decoder</text>
+      <text x="569" y="93" text-anchor="middle" font-size="9" fill="#2d8a4e" opacity=".85">Translates back to original form</text>
+      <line x1="636" y1="75" x2="666" y2="75" stroke="#2d8a4e" stroke-width="1.5" marker-end="url(#ag)"/>
+      <rect x="668" y="45" width="100" height="60" rx="10" fill="none" stroke="#2d8a4e" stroke-width="2"/>
+      <text x="718" y="73" text-anchor="middle" font-size="11" fill="#2d8a4e" font-weight="700">New</text>
+      <text x="718" y="90" text-anchor="middle" font-size="11" fill="#2d8a4e" font-weight="700">Output</text>
+    </svg>
+  </div>
+
+  <div class="comp">
+    <div class="comp-col">
+      <h4>GANs — Best For</h4>
+      <ul>
+        <li>Creating visually realistic images and videos</li>
+        <li>Style transfer and face synthesis</li>
+        <li>Deepfake and data augmentation tasks</li>
+        <li>High-quality creative output generation</li>
+      </ul>
+    </div>
+    <div class="comp-col">
+      <h4>VAEs — Best For</h4>
+      <ul>
+        <li>Structured data generation tasks</li>
+        <li>Anomaly detection in datasets</li>
+        <li>Filling in missing information</li>
+        <li>More stable, interpretable latent spaces</li>
+      </ul>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- 7.3 GEN vs DISC -->
+<section class="topic" id="models">
+<div class="container">
+  <div class="s-tag">Section 7.3</div>
+  <div class="s-title">Generative & Discriminative Models</div>
+  <div class="s-intro">Machine learning algorithms can be broadly categorised into two types: <strong>Discriminative models</strong> define class boundaries and excel at classification tasks. <strong>Generative models</strong> comprehend the underlying data distribution and can generate entirely new samples.</div>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>Aspect</th><th>Generative AI</th><th>Discriminative AI</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>Purpose</strong></td>
+          <td>Helps create things like images and stories; finds unusual patterns; learns from data without being told precisely what to do</td>
+          <td>Helps determine what something is by looking at its features; good at telling different things apart and making decisions</td>
+        </tr>
+        <tr>
+          <td><strong>Models</strong></td>
+          <td>Uses competition (GANs) or pattern-based guessing (VAEs) to create new things</td>
+          <td>Learns rules to separate categories and recognise patterns — e.g., dog vs. cat classification</td>
+        </tr>
+        <tr>
+          <td><strong>Training Focus</strong></td>
+          <td>Understands what makes data unique and creates new data that is similar but different</td>
+          <td>Focuses on learning decision boundaries to separate different categories of data</td>
+        </tr>
+        <tr>
+          <td><strong>Applications</strong></td>
+          <td>Helps artists create new artworks, generates new story ideas, finds unusual patterns in data</td>
+          <td>Powers facial and speech recognition; email spam detection; medical diagnosis classification</td>
+        </tr>
+        <tr>
+          <td><strong>Algorithm Examples</strong></td>
+          <td>GAN, VAEs, LLMs, DBMs, Autoregressive models, Gaussian discriminant analysis, Naïve Bayes</td>
+          <td>Logistic Regression, Decision Trees, SVM, Random Forest</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note"><strong>📘 Simple Analogy:</strong> Think of discriminative models as a <em>sorter</em> — they decide if an email is spam or not. Generative models are like an <em>artist</em> — they can create brand new emails or images from scratch by understanding patterns in existing data.</div>
+</div>
+</section>
+
+<!-- 7.4 APPLICATIONS -->
+<section class="topic" id="applications">
+<div class="container">
+  <div class="s-tag">Section 7.4</div>
+  <div class="s-title">Applications of Generative AI</div>
+  <div class="s-intro">Generative AI has diverse applications across multiple modalities — <strong>image, text, video, and audio</strong>. Each domain leverages generative models differently, enabling computers to produce new creative content that closely resembles real-world examples.</div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="icon">🎨</div>
+      <h4>Image Generation</h4>
+      <p>Creates new images based on patterns learned from existing datasets. Like a computer generating fresh cat images from its training data — analysing characteristics and producing visually similar new ones.</p>
+      <p style="margin-top:.6rem;font-size:.79rem;color:var(--accent2);font-weight:600;">Canva AI · DALL-E · Stability AI · Stable Diffusion</p>
+    </div>
+    <div class="card">
+      <div class="icon">✍️</div>
+      <h4>Text Generation</h4>
+      <p>Computers write sentences that sound like humans wrote them. Models learn from vast amounts of written text to create new coherent, contextually relevant content — stories, emails, code, and more.</p>
+      <p style="margin-top:.6rem;font-size:.79rem;color:var(--accent2);font-weight:600;">ChatGPT · Perplexity · Google Gemini (Bard)</p>
+    </div>
+    <div class="card">
+      <div class="icon">🎬</div>
+      <h4>Video Generation</h4>
+      <p>Creates new videos by learning from existing ones, including animations and visual effects. AI can generate movie scenes resembling professional filmmaking or superimpose faces on existing video content.</p>
+      <p style="margin-top:.6rem;font-size:.79rem;color:var(--accent2);font-weight:600;">Google Lumiere · Deepfake algorithms</p>
+    </div>
+    <div class="card">
+      <div class="icon">🎵</div>
+      <h4>Audio Generation</h4>
+      <p>Produces new sounds — music, voices, sound effects — based on patterns learned from existing recordings. AI can compose a song that sounds like a real band performed it, using only text as input.</p>
+      <p style="margin-top:.6rem;font-size:.79rem;color:var(--accent2);font-weight:600;">Meta AI Voicebox · Google MusicLM</p>
+    </div>
+  </div>
+
+  <div class="hl"><strong>🌟 Real Example:</strong> Google's MusicLM generates music from text descriptions — you describe the mood, genre, and instruments, and it creates an entirely new musical piece. Similarly, DALL-E transforms text descriptions like "a surrealist painting of a cat playing chess" into original artwork.</div>
+</div>
+</section>
+
+<!-- 7.5 LLMs -->
+<section class="topic" id="llm">
+<div class="container">
+  <div class="s-tag">Section 7.5</div>
+  <div class="s-title">LLM — Large Language Models</div>
+  <div class="s-intro">A <strong>Large Language Model (LLM)</strong> is a deep learning algorithm that performs a variety of Natural Language Processing (NLP) tasks — generating and classifying text, answering questions conversationally, and translating between languages. LLMs are "large" because they are trained on massive datasets containing trillions of words.</div>
+
+  <h3 class="sh">7.5.1 Transformers in LLMs</h3>
+  <p class="bd"><strong>Transformers</strong> are a revolutionary neural network architecture that enables efficient learning of complex language patterns. The attention mechanism in transformers allows LLMs to understand relationships between words across very long text sequences.</p>
+
+  <div class="flowchart-wrap">
+    <h4>LLM Workflow — From Data to Response</h4>
+    <svg viewBox="0 0 820 155" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:820px;display:block;margin:0 auto;">
+      <defs><marker id="al" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#d97b34" opacity=".8"/></marker></defs>
+      <rect x="10" y="48" width="125" height="60" rx="10" fill="color-mix(in srgb,#d97b34 10%,transparent)" stroke="#d97b34" stroke-width="2"/>
+      <text x="73" y="76" text-anchor="middle" font-size="11" fill="#d97b34" font-weight="700">Massive Data</text>
+      <text x="73" y="94" text-anchor="middle" font-size="9" fill="#d97b34" opacity=".85">Trillions of words</text>
+      <text x="73" y="107" text-anchor="middle" font-size="9" fill="#d97b34" opacity=".7">text &amp; code</text>
+      <line x1="135" y1="78" x2="158" y2="78" stroke="#d97b34" stroke-width="1.5" marker-end="url(#al)"/>
+      <rect x="160" y="45" width="130" height="65" rx="10" fill="color-mix(in srgb,#8b5cf6 10%,transparent)" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="225" y="76" text-anchor="middle" font-size="11" fill="#8b5cf6" font-weight="700">Transformer</text>
+      <text x="225" y="94" text-anchor="middle" font-size="9" fill="#8b5cf6" opacity=".85">Architecture</text>
+      <text x="225" y="107" text-anchor="middle" font-size="9" fill="#8b5cf6" opacity=".7">Attention mechanism</text>
+      <line x1="290" y1="78" x2="313" y2="78" stroke="#8b5cf6" stroke-width="1.5" marker-end="url(#al)"/>
+      <rect x="315" y="45" width="130" height="65" rx="10" fill="color-mix(in srgb,#2d8a4e 10%,transparent)" stroke="#2d8a4e" stroke-width="2"/>
+      <text x="380" y="76" text-anchor="middle" font-size="11" fill="#2d8a4e" font-weight="700">Pre-Training</text>
+      <text x="380" y="94" text-anchor="middle" font-size="9" fill="#2d8a4e" opacity=".85">Learns language</text>
+      <text x="380" y="107" text-anchor="middle" font-size="9" fill="#2d8a4e" opacity=".7">patterns deeply</text>
+      <line x1="445" y1="78" x2="468" y2="78" stroke="#2d8a4e" stroke-width="1.5" marker-end="url(#al)"/>
+      <rect x="470" y="45" width="130" height="65" rx="10" fill="color-mix(in srgb,#c94f27 10%,transparent)" stroke="#c94f27" stroke-width="2"/>
+      <text x="535" y="76" text-anchor="middle" font-size="11" fill="#c94f27" font-weight="700">Fine-Tuning</text>
+      <text x="535" y="94" text-anchor="middle" font-size="9" fill="#c94f27" opacity=".85">Task-specific</text>
+      <text x="535" y="107" text-anchor="middle" font-size="9" fill="#c94f27" opacity=".7">optimisation</text>
+      <line x1="600" y1="78" x2="623" y2="78" stroke="#c94f27" stroke-width="1.5" marker-end="url(#al)"/>
+      <rect x="625" y="38" width="180" height="80" rx="12" fill="color-mix(in srgb,#d97b34 8%,transparent)" stroke="#d97b34" stroke-width="2.5"/>
+      <text x="715" y="74" text-anchor="middle" font-size="12" fill="#d97b34" font-weight="700">Response</text>
+      <text x="715" y="93" text-anchor="middle" font-size="10" fill="#d97b34" font-weight="700">Generated</text>
+      <text x="715" y="110" text-anchor="middle" font-size="9" fill="#d97b34" opacity=".8">Text · Code · Answer</text>
+    </svg>
+  </div>
+
+  <h3 class="sh">7.5.2 Leading Large Language Models</h3>
+  <div class="llm-grid">
+    <div class="llm-card lc-gpt">
+      <div class="lc-icon">🤖</div>
+      <div class="lc-tag">OpenAI</div>
+      <h4>GPT-4o</h4>
+      <p>Multimodal — processes and generates both text and images. Advanced reasoning and instruction-following capabilities.</p>
+    </div>
+    <div class="llm-card lc-gem">
+      <div class="lc-icon">💎</div>
+      <div class="lc-tag">Google</div>
+      <h4>Gemini 1.5 Pro</h4>
+      <p>Advanced multimodal capabilities for seamless text, image, and speech understanding across diverse tasks.</p>
+    </div>
+    <div class="llm-card lc-lla">
+      <div class="lc-icon">🦙</div>
+      <div class="lc-tag">Meta AI</div>
+      <h4>LLaMA 3.1</h4>
+      <p>Open-source model optimised for efficiency in diverse AI tasks. Publicly available for research and deployment.</p>
+    </div>
+    <div class="llm-card lc-cla">
+      <div class="lc-icon">🔮</div>
+      <div class="lc-tag">Anthropic</div>
+      <h4>Claude 3.5</h4>
+      <p>Prioritises safety and interpretability in language model interactions — helpful, harmless, and honest AI.</p>
+    </div>
+    <div class="llm-card lc-mix">
+      <div class="lc-icon">⚡</div>
+      <div class="lc-tag">Mistral AI</div>
+      <h4>Mixtral 8x7B</h4>
+      <p>Sparse mixture of experts architecture — superior performance with smaller, more efficient model sizes.</p>
+    </div>
+  </div>
+
+  <h3 class="sh">7.5.3 Applications of LLMs</h3>
+  <div class="cards">
+    <div class="card"><div class="icon">✍️</div><h4>Text Generation</h4><p>Content creation, dialogue, story writing, poetry, code autocomplete, email auto-completion, and language translation.</p></div>
+    <div class="card"><div class="icon">🎙️</div><h4>Audio via TTS</h4><p>LLMs enable Text-to-Speech systems to synthesize natural-sounding speech by generating scripts and textual descriptions.</p></div>
+    <div class="card"><div class="icon">🖼️</div><h4>Image Captioning</h4><p>Generates textual descriptions of images, enhancing accessibility and helping visually impaired users understand visual content.</p></div>
+    <div class="card"><div class="icon">🎬</div><h4>Video Subtitles</h4><p>Creates subtitles, captions, and scene summaries for videos, improving accessibility and searchability of video content.</p></div>
+  </div>
+
+  <h3 class="sh">7.5.4 Limitations & Risks of LLMs</h3>
+  <div class="comp">
+    <div class="comp-col">
+      <h4>Limitations</h4>
+      <ul>
+        <li>High computational resource requirements — high response time and costs</li>
+        <li>Prioritise natural language fluency over accuracy — may generate factually incorrect information with high confidence (hallucinations)</li>
+        <li>May memorise specific details rather than generalise, leading to poor adaptability on new tasks</li>
+      </ul>
+    </div>
+    <div class="comp-col">
+      <h4>Risks</h4>
+      <ul>
+        <li>Trained on internet text — may exhibit societal biases and raise data privacy concerns</li>
+        <li>Using sensitive data in training can inadvertently reveal confidential information</li>
+        <li>Vulnerability to prompt injection attacks — crafted inputs can lead to harmful or illogical outputs</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 class="sh">7.5.5 Case Study: LLaMA — A Publicly Trained Powerhouse</h3>
+  <div class="case-box">
+    <h4>Demystifying LLaMA — Meta AI's Open Approach to LLMs</h4>
+    <p><strong>Background:</strong> Traditionally, LLMs are trained on massive proprietary datasets, limiting transparency and accessibility. LLaMA, developed by Meta AI, stands out for its approach to training data and architecture design.</p>
+    <p><strong>Disruptive Training Approach:</strong> LLaMA leverages publicly available text and code from the internet. This focus on open data fosters transparency within the research community and allows for wider accessibility. LLaMA's developers also implemented efficient training techniques requiring less computational power than comparable LLMs.</p>
+    <p><strong>Flexible Multi-Model Design:</strong> LLaMA is released in various sizes — from 7 billion to 65 billion parameters — allowing users to choose the model that best suits their computational resources and task requirements. Smaller models work on lower-power devices; larger models handle complex tasks.</p>
+    <p><strong>Impressive Results:</strong> Despite efficient training with publicly available data, LLaMA benchmarks competitively against some larger LLMs — particularly in text summarisation and question answering. Applications span personalised education, content creation, and research assistance.</p>
+  </div>
+</div>
+</section>
+
+<!-- 7.6 FUTURE -->
+<section class="topic" id="future">
+<div class="container">
+  <div class="s-tag">Section 7.6</div>
+  <div class="s-title">Future of Generative AI</div>
+  <div class="s-intro">The future of AI focuses on evolving architectures to surpass current capabilities while prioritising <strong>ethical development</strong> to minimise biases and ensure responsible use. Generative AI will address complex challenges in healthcare and education, enhance multilingual NLP, and deepen human-AI collaboration.</div>
+
+  <div class="cards">
+    <div class="card"><div class="icon">🏥</div><h4>Healthcare</h4><p>Generative AI will tackle complex medical challenges — from generating synthetic patient data for research to assisting drug discovery and creating personalised treatment plans.</p></div>
+    <div class="card"><div class="icon">📚</div><h4>Education</h4><p>Personalised learning materials, intelligent tutoring systems, and AI-powered content generation will transform how students learn and how educators design curricula.</p></div>
+    <div class="card"><div class="icon">🌐</div><h4>Multilingual AI</h4><p>Enhanced NLP capabilities for multilingual translation will break down language barriers globally — enabling seamless communication across cultures and communities.</p></div>
+    <div class="card"><div class="icon">🤝</div><h4>Human-AI Collaboration</h4><p>Collaboration between humans and AI will deepen, emphasising AI as a supportive creative partner across artistic, scientific, and professional domains.</p></div>
+  </div>
+
+  <div class="warn"><strong>⚠️ Important Consideration:</strong> While the future of Generative AI is exciting, it comes with significant responsibility. Ethical development, bias minimisation, transparency, and responsible deployment must remain central to AI advancement to ensure benefits for all of humanity.</div>
+</div>
+</section>
+
+<!-- 7.7 ETHICS -->
+<section class="topic" id="ethics">
+<div class="container">
+  <div class="s-tag">Section 7.7</div>
+  <div class="s-title">Ethical & Social Implications of Generative AI</div>
+  <div class="s-intro">Generative AI, with its ability to create realistic content such as images, videos, and text, brings a multitude of <strong>ethical and social considerations</strong>. Its potential for misuse raises significant concerns about trust, fairness, intellectual property, and transparency in digital society.</div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="icon">🎭</div>
+      <h4>Deepfake Technology</h4>
+      <p>Tools like DeepFaceLab and FaceSwap raise concerns about digital content authenticity. Deepfake algorithms generate compelling fake images, audio, and videos, jeopardising media trust and spreading misinformation. They have been used to superimpose individuals' faces onto content without consent, causing reputational damage.</p>
+    </div>
+    <div class="card">
+      <div class="icon">⚖️</div>
+      <h4>Bias & Discrimination</h4>
+      <p>Generative AI models have demonstrated biases that disproportionately affect certain demographic groups. AI-powered hiring platforms (like HireVue) may inadvertently discriminate against underrepresented groups by relying on historically biased data, perpetuating social inequalities.</p>
+    </div>
+    <div class="card">
+      <div class="icon">📋</div>
+      <h4>Plagiarism</h4>
+      <p>Presenting AI-generated content as one's own raises ethical questions about intellectual property rights and academic integrity. If AI output significantly resembles copyrighted material, it could infringe copyright laws and lead to legal consequences for the user.</p>
+    </div>
+    <div class="card">
+      <div class="icon">🔍</div>
+      <h4>Transparency</h4>
+      <p>Disclosing the use of AI-generated content is essential to uphold ethical standards. Failure to disclose AI use can erode trust and undermine the credibility of research, journalism, and scholarly work. Always be transparent about AI assistance.</p>
+    </div>
+  </div>
+
+  <h3 class="sh">Points to Remember</h3>
+  <div class="hl">
+    <strong>✅ Ethical Guidelines for Using Generative AI:</strong><br>
+    • Be cautious and <strong>transparent</strong> when using Generative AI — always disclose AI involvement in your work.<br>
+    • <strong>Respect copyright</strong> — avoid presenting AI output as entirely your own original creation.<br>
+    • <strong>Verify accuracy</strong> — AI-generated information may be incorrect or biased; always cross-check with reliable sources.<br>
+    • Consult your teacher or institution for specific guidelines on acceptable AI use.
+  </div>
+
+  <h3 class="sh">Citing Sources with Generative AI</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h5>Treat AI as Author</h5>
+        <p>Cite the tool name (e.g., Gemini, ChatGPT) and label it "Generative AI tool" in the author position of your citation.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h5>Date it Correctly</h5>
+        <p>Use the date you received the AI-generated content, not the tool's release date or training cutoff date.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h5>Show Your Prompt (Optional)</h5>
+        <p>Briefly mention the prompt you gave the AI to provide context for readers about what was requested and generated.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">APA Citation Example — Generative AI</span></div>
+    <pre><span class="cm">// APA reference for text generated using Google Gemini</span>
+<span class="cm">// Date received: February 20, 2024</span>
+
+<span class="cm">// Optional prompt disclosure (in parentheses):</span>
+<span class="st">"Prompt: Explain how to cite generative AI in APA style."</span>
+
+<span class="kw">Bard</span> (Generative AI tool). (<span class="nm">2024</span>, <span class="kw">February 20</span>).
+  <span class="fn2">How to cite generative AI in APA style</span>.
+  [Retrieved from Google AI Studio]
+
+<span class="cm">// Note: Generative AI is a weak AI — always verify</span>
+<span class="cm">// outputs with reliable primary sources before citing.</span></pre>
+  </div>
+</div>
+</section>
+
+<!-- ACTIVITIES -->
+<section class="topic" id="activities">
+<div class="container">
+  <div class="s-tag">Hands-on Exploration</div>
+  <div class="s-title">Activities — Generative AI Tools</div>
+  <div class="s-intro">Apply your knowledge of Generative AI through hands-on exploration of real-world tools. These activities give you practical experience generating images, text, video, and audio, and culminate in creating your own AI chatbot using the Gemini API.</div>
+
+  <div class="activity">
+    <div class="activity-hdr"><div class="activity-badge">Activity 1</div><span>Canva for Education — AI Text to Image</span></div>
+    <ol>
+      <li><strong>Visit:</strong> Access the Canva for Education platform (canva.com/education) through your web browser.</li>
+      <li><strong>Sign Up:</strong> Click "Sign Up" or "Create Account" — enter your educational institution's school email address.</li>
+      <li><strong>Verify:</strong> Confirm your email address by following the instructions sent to your school inbox.</li>
+      <li><strong>Access Text to Image:</strong> Open Canva and navigate to the "Text to Image" tool in the design tools menu.</li>
+      <li><strong>Enter Prompt:</strong> Type a descriptive prompt, e.g., <em>"A red balloon floating in a clear blue sky."</em></li>
+      <li><strong>Generate:</strong> Click "Generate Image" — Canva AI creates multiple images based on your prompt. Browse and select your favourite.</li>
+      <li><strong>Customise &amp; Download:</strong> Optionally adjust colours, shapes, and backgrounds using Canva's editing tools, then download the image.</li>
+    </ol>
+  </div>
+
+  <div class="activity">
+    <div class="activity-hdr"><div class="activity-badge">Activity 2</div><span>Google Gemini — AI Text Generation</span></div>
+    <ol>
+      <li><strong>Access:</strong> Log in to your Google account and navigate to the Gemini platform at gemini.google.com.</li>
+      <li><strong>Agree to Terms:</strong> Review and accept the terms of service and privacy policy for Google Gemini.</li>
+      <li><strong>Craft a Prompt:</strong> Create a descriptive, specific text prompt conveying the content you want to generate.</li>
+      <li><strong>Generate Text:</strong> Submit your prompt and wait for Gemini to process and generate the text output.</li>
+      <li><strong>Review &amp; Use:</strong> Evaluate the generated text for accuracy, relevance, and quality — then use or refine for your project.</li>
+    </ol>
+  </div>
+
+  <div class="activity">
+    <div class="activity-hdr"><div class="activity-badge">Activity 3</div><span>Veed AI — AI Video & Text Generation</span></div>
+    <ol>
+      <li><strong>Visit:</strong> Open your web browser and navigate to the Veed website (veed.io).</li>
+      <li><strong>Sign Up:</strong> Click "Sign Up" or "Get Started" and create your account with email and password.</li>
+      <li><strong>Access Text Generator:</strong> Log in and navigate to the Text Generation tool in your dashboard.</li>
+      <li><strong>Enter Prompt:</strong> Input a concise prompt, e.g., <em>"Write a short story about a lost astronaut searching for their way home."</em></li>
+      <li><strong>Generate &amp; Review:</strong> Click "Generate Text" — Veed AI analyses your prompt and produces output. Review and use for your creative projects.</li>
+    </ol>
+  </div>
+
+  <div class="activity">
+    <div class="activity-hdr"><div class="activity-badge">Activity 4</div><span>Animaker — AI Video Generation</span></div>
+    <ol>
+      <li><strong>Visit:</strong> Navigate to animaker.com in your web browser.</li>
+      <li><strong>Sign Up:</strong> Create an account with your email address and required registration details.</li>
+      <li><strong>Access AI Video Tool:</strong> Log in and navigate to the AI Video Generation tool in your Animaker dashboard.</li>
+      <li><strong>Enter Prompt:</strong> Input a detailed prompt, e.g., <em>"Create a promotional video for a new product launch featuring animated characters and dynamic visuals."</em></li>
+      <li><strong>Generate &amp; Customise:</strong> Click "Generate Video" — Animaker AI creates a video based on your prompt. Review and customise for marketing or storytelling projects.</li>
+    </ol>
+  </div>
+
+  <div class="activity">
+    <div class="activity-hdr"><div class="activity-badge">Activity 5</div><span>ChatGPT — Conversational AI Exploration</span></div>
+    <ol>
+      <li><strong>Visit:</strong> Navigate to chat.openai.com in your web browser.</li>
+      <li><strong>Create Account:</strong> Sign up with your email or Google/Microsoft account to access ChatGPT.</li>
+      <li><strong>Start a Conversation:</strong> Type a prompt or question in the chat interface and observe ChatGPT's response.</li>
+      <li><strong>Explore Capabilities:</strong> Try different prompt types — creative writing, coding help, summarising text, answering questions, brainstorming ideas.</li>
+      <li><strong>Critically Evaluate:</strong> Assess the quality, accuracy, and limitations of the AI-generated responses. Identify any errors or biases.</li>
+    </ol>
+  </div>
+
+  <div class="activity">
+    <div class="activity-hdr"><div class="activity-badge">Activity 6</div><span>Creating a Customised Chatbot with Gemini API</span></div>
+    <p style="font-size:.87rem;color:var(--text-muted);margin-bottom:1rem;">Large e-commerce companies like Amazon deploy AI-powered chatbots to handle customer queries — answering questions about order status, return policies, and product information. In education, healthcare, and research, customised chatbots enhance productivity. Let's build one using Python and the Gemini API!</p>
+    <ol>
+      <li><strong>Obtain API Key:</strong> Visit Google AI Studio (aistudio.google.com), click "Get API key," then "Create API key." Copy and save it securely.</li>
+      <li><strong>Set Up Python Environment:</strong> Install the Gemini SDK: <code style="background:var(--code-bg);color:var(--code-text);padding:.1rem .4rem;border-radius:4px;font-family:'DM Mono',monospace;font-size:.82rem;">pip install -q -U google-generativeai</code></li>
+      <li><strong>Import Libraries:</strong> Import the google.generativeai library to interact with the Gemini API.</li>
+      <li><strong>Initialise with API Key:</strong> Configure the library by passing your API key as the value of GOOGLE_API_KEY.</li>
+      <li><strong>Choose Model:</strong> Select the Gemini model — gemini-pro for text-only, gemini-pro-vision for text and images combined.</li>
+      <li><strong>Create Chat Session:</strong> Start a chat session and send messages to receive AI-generated conversational responses.</li>
+    </ol>
+  </div>
+
+  <div class="cb">
+    <div class="cb-head"><div class="d r"></div><div class="d y"></div><div class="d g"></div><span class="fn">chatbot_gemini.py</span></div>
+    <pre><span class="cm"># Step 2: Install the Gemini Python SDK</span>
+<span class="cm"># pip install -q -U google-generativeai</span>
+
+<span class="cm"># Step 3: Import the generative AI library</span>
+<span class="kw">import</span> google.generativeai <span class="kw">as</span> genai
+
+<span class="cm"># Step 4: Initialise with your API key</span>
+genai.<span class="fn2">configure</span>(api_key=<span class="st">"YOUR_GOOGLE_API_KEY"</span>)
+
+<span class="cm"># Step 5: Choose the model</span>
+<span class="cm"># gemini-pro: optimized for text-only prompts</span>
+<span class="cm"># gemini-pro-vision: for text-and-images prompts</span>
+model = genai.<span class="fn2">GenerativeModel</span>(<span class="st">'gemini-pro'</span>)
+
+<span class="cm"># Step 6: Create a chat session</span>
+chat = model.<span class="fn2">start_chat</span>(history=[])
+
+<span class="cm"># Function to send messages and get responses</span>
+<span class="kw">def</span> <span class="fn2">chat_with_gemini</span>(user_message):
+    response = chat.<span class="fn2">send_message</span>(user_message)
+    <span class="kw">return</span> response.text
+
+<span class="cm"># Run an interactive chatbot loop</span>
+<span class="kw">print</span>(<span class="st">"🤖 Gemini Chatbot is ready! Type 'quit' to exit."</span>)
+<span class="kw">while</span> <span class="bi">True</span>:
+    user_input = <span class="kw">input</span>(<span class="st">"\nYou: "</span>)
+    <span class="kw">if</span> user_input.<span class="fn2">lower</span>() == <span class="st">'quit'</span>:
+        <span class="kw">break</span>
+    response = <span class="fn2">chat_with_gemini</span>(user_input)
+    <span class="kw">print</span>(<span class="st">f"\n🤖 Gemini: {response}"</span>)</pre>
+  </div>
+</div>
+</section>
+
+<!-- ASSESSMENT -->
+<section id="assessment">
+<div class="container">
+  <div class="aw">
+    <div class="a-title">Assessment</div>
+    <div class="a-sub">Test your understanding of Generative AI — MCQs, True/False, Fill in the Blanks, and Short Answer questions.</div>
+
+    <div class="qlabel">A. Multiple Choice Questions</div>
+
+    <div class="mcq" id="q1">
+      <div class="mcq-q"><em>Q1.</em> What is the primary objective of Generative AI?</div>
+      <div class="opts">
+        <div class="opt" onclick="pick(this,'q1','b')"><div class="ltr">a</div>To classify data into different categories</div>
+        <div class="opt" onclick="pick(this,'q1','b')"><div class="ltr">b</div>To generate new data resembling its training samples</div>
+        <div class="opt" onclick="pick(this,'q1','b')"><div class="ltr">c</div>To learn from labelled data for decision-making</div>
+        <div class="opt" onclick="pick(this,'q1','b')"><div class="ltr">d</div>To predict outcomes based on input features</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q2">
+      <div class="mcq-q"><em>Q2.</em> Which machine learning algorithms are commonly used in Generative AI?</div>
+      <div class="opts">
+        <div class="opt" onclick="pick(this,'q2','c')"><div class="ltr">a</div>Support Vector Machines (SVM)</div>
+        <div class="opt" onclick="pick(this,'q2','c')"><div class="ltr">b</div>Decision Trees</div>
+        <div class="opt" onclick="pick(this,'q2','c')"><div class="ltr">c</div>GANs and Variational Autoencoders (VAEs)</div>
+        <div class="opt" onclick="pick(this,'q2','c')"><div class="ltr">d</div>Random Forests</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q3">
+      <div class="mcq-q"><em>Q3.</em> What is the purpose of Generative AI in text generation?</div>
+      <div class="opts">
+        <div class="opt" onclick="pick(this,'q3','a')"><div class="ltr">a</div>To create coherent and contextually relevant text based on prompts</div>
+        <div class="opt" onclick="pick(this,'q3','a')"><div class="ltr">b</div>To identify patterns in text data for classification tasks</div>
+        <div class="opt" onclick="pick(this,'q3','a')"><div class="ltr">c</div>To analyse sentiment in social media posts only</div>
+        <div class="opt" onclick="pick(this,'q3','a')"><div class="ltr">d</div>To generate code exclusively from natural language inputs</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q4">
+      <div class="mcq-q"><em>Q4.</em> Which Generative AI model is known for its application in text generation?</div>
+      <div class="opts">
+        <div class="opt" onclick="pick(this,'q4','c')"><div class="ltr">a</div>Meta AI's Voicebox</div>
+        <div class="opt" onclick="pick(this,'q4','c')"><div class="ltr">b</div>Google's Lumiere</div>
+        <div class="opt" onclick="pick(this,'q4','c')"><div class="ltr">c</div>OpenAI's ChatGPT</div>
+        <div class="opt" onclick="pick(this,'q4','c')"><div class="ltr">d</div>Stability AI</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q5">
+      <div class="mcq-q"><em>Q5.</em> Which of the following is NOT an application of Generative AI?</div>
+      <div class="opts">
+        <div class="opt" onclick="pick(this,'q5','c')"><div class="ltr">a</div>Creating original music compositions</div>
+        <div class="opt" onclick="pick(this,'q5','c')"><div class="ltr">b</div>Crafting promotional videos for marketing campaigns</div>
+        <div class="opt" onclick="pick(this,'q5','c')"><div class="ltr">c</div>Analysing sentiment in social media posts</div>
+        <div class="opt" onclick="pick(this,'q5','c')"><div class="ltr">d</div>Generating AI artwork and visual content</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q6">
+      <div class="mcq-q"><em>Q6.</em> What distinguishes generative models from discriminative models in their training focus?</div>
+      <div class="opts">
+        <div class="opt" onclick="pick(this,'q6','a')"><div class="ltr">a</div>Generative models learn to generate new data; discriminative models focus on identifying class boundaries</div>
+        <div class="opt" onclick="pick(this,'q6','a')"><div class="ltr">b</div>Generative models focus on drawing boundaries; discriminative models generate new samples</div>
+        <div class="opt" onclick="pick(this,'q6','a')"><div class="ltr">c</div>Both have identical training objectives and approaches</div>
+        <div class="opt" onclick="pick(this,'q6','a')"><div class="ltr">d</div>Generative models classify; discriminative models create content</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q7">
+      <div class="mcq-q"><em>Q7.</em> Which technology raises concerns about the authenticity of digital content and the spread of misinformation?</div>
+      <div class="opts">
+        <div class="opt" onclick="pick(this,'q7','a')"><div class="ltr">a</div>Deepfake AI</div>
+        <div class="opt" onclick="pick(this,'q7','a')"><div class="ltr">b</div>Convolutional Neural Networks (CNNs)</div>
+        <div class="opt" onclick="pick(this,'q7','a')"><div class="ltr">c</div>Reinforcement Learning agents</div>
+        <div class="opt" onclick="pick(this,'q7','a')"><div class="ltr">d</div>Decision Tree classifiers</div>
+      </div>
+    </div>
+
+    <div class="mcq" id="q8">
+      <div class="mcq-q"><em>Q8.</em> In image generation, what analogy describes how Generative AI models work?</div>
+      <div class="opts">
+        <div class="opt" onclick="pick(this,'q8','b')"><div class="ltr">a</div>Computers analyse sounds to produce new images</div>
+        <div class="opt" onclick="pick(this,'q8','b')"><div class="ltr">b</div>Computers make new pictures based on existing ones, resembling patterns they have learned</div>
+        <div class="opt" onclick="pick(this,'q8','b')"><div class="ltr">c</div>Computers generate images by understanding class boundaries in data</div>
+        <div class="opt" onclick="pick(this,'q8','b')"><div class="ltr">d</div>Computers utilise labelled data to predict visual outcomes only</div>
+      </div>
+    </div>
+
+    <div class="spanel">
+      <div>
+        <div class="snum" id="snum">—</div>
+        <div class="stxt">Score out of 8</div>
+      </div>
+      <button class="sbtn" onclick="calcScore()">Calculate My Score</button>
+    </div>
+
+    <div class="qlabel">B. True / False</div>
+
+    <div class="qa"><div class="qa-q"><em>1.</em> Generative AI can only generate text and images, not audio or video.</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans">🔴 False — Generative AI can generate text, images, audio, AND video. Each modality has dedicated tools: Meta AI's Voicebox for audio, Google's Lumiere for video, etc.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>2.</em> GANs involve competition between a Generator and Discriminator network.</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans">✅ True — GANs consist of two competing networks: the Generator creates fake samples, the Discriminator evaluates real vs. fake. This adversarial training drives both networks to improve.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>3.</em> Discriminative models generate new data samples similar to the training data.</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans">🔴 False — Discriminative models focus on identifying class boundaries and classifying data. Generative models are responsible for creating new data samples.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>4.</em> VAEs are generative models that can be used for tasks such as image generation.</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans">✅ True — Variational Autoencoders are generative models used for image generation, anomaly detection, and filling in missing information through their encoder-latent space-decoder architecture.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>5.</em> Deepfake technology is an application of Generative AI that can create realistic fake videos.</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans">✅ True — Deepfake technology uses Generative AI (specifically GANs) to create highly realistic fake images, audio, and videos, often superimposing one person's likeness onto another's without consent.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>6.</em> Large Language Models like GPT cannot generate human-like text.</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans">🔴 False — LLMs like GPT are specifically designed to generate human-like text. They are trained on massive text datasets to understand and produce coherent, contextually relevant language.</div></div>
+
+    <div class="qlabel">C. Fill in the Blanks</div>
+
+    <div class="qa"><div class="qa-q"><em>1.</em> Generative AI utilises _______ learning algorithms to learn from existing datasets.</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans"><strong>machine</strong> — Generative AI utilises machine learning algorithms to learn from existing datasets and generate new, similar content.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>2.</em> Examples of Generative AI include ChatGPT, DALL-E, Gemini, and _______.</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans"><strong>Claude</strong> (or any other GenAI tool: Stable Diffusion, MidJourney, Bard, etc.)</div></div>
+
+    <div class="qa"><div class="qa-q"><em>3.</em> The full form of GAN is _______.</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans"><strong>Generative Adversarial Network</strong></div></div>
+
+    <div class="qa"><div class="qa-q"><em>4.</em> _______ Generation is a Generative AI application where computers create new images resembling ones they have seen before.</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans"><strong>Image</strong> Generation — tools like DALL-E and Stable Diffusion generate new images by learning patterns from existing datasets.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>5.</em> OpenAI's ChatGPT and Google's Gemini are examples of Generative AI used for _______ Generation.</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans"><strong>Text</strong> Generation — these tools generate coherent, contextually relevant text based on user prompts.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>6.</em> _______ like GPT models are trained on vast amounts of text data to understand and generate human-like text.</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans"><strong>Large Language Models (LLMs)</strong></div></div>
+
+    <div class="qlabel">D. Short Answer Questions</div>
+
+    <div class="qa"><div class="qa-q"><em>1.</em> What is Generative AI?</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans">Generative AI is a facet of artificial intelligence that creates diverse new content — text, images, audio, and video — that resembles its training samples. It uses machine learning algorithms to learn from existing datasets and generate new data autonomously. Examples include ChatGPT (text), DALL-E (images), MusicLM (audio), and Lumiere (video).</div></div>
+
+    <div class="qa"><div class="qa-q"><em>2.</em> How does Generative AI work?</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans">Generative AI learns patterns from data using deep learning and neural networks. GANs use a generator-discriminator competition: the generator creates fake samples from random noise, while the discriminator evaluates real vs. fake. Through adversarial training, both improve until the generator produces realistic outputs. VAEs use an encoder to compress data into a latent space, then a decoder to reconstruct new, similar data.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>3.</em> What distinguishes generative models from discriminative models?</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans">Discriminative models focus on defining class boundaries, making them suitable for classification tasks like spam detection or image recognition. Generative models seek to understand the underlying data distribution and create new samples. Simple analogy: discriminative models are sorters, generative models are creators. Examples — discriminative: SVM, Decision Trees; generative: GANs, VAEs, LLMs.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>4.</em> What are the limitations and risks of Large Language Models?</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans"><strong>Limitations:</strong> High computational resource requirements; tendency to generate factually incorrect information with high confidence (hallucinations); may memorise specific details rather than generalise. <strong>Risks:</strong> Training on internet text leads to biases; data privacy concerns when processing personal information; vulnerability to prompt injection attacks that generate harmful outputs; potential for spreading misinformation at scale.</div></div>
+
+    <div class="qa"><div class="qa-q"><em>5.</em> What ethical considerations surround Generative AI?</div>
+    <button class="rbtn" onclick="toggleAns(this)">Reveal Answer</button>
+    <div class="ans">Key ethical concerns: (1) <strong>Deepfakes</strong> — AI-generated fake media that spreads misinformation and violates privacy; (2) <strong>Bias &amp; Discrimination</strong> — AI models that amplify societal biases in hiring, facial recognition, etc.; (3) <strong>Plagiarism</strong> — presenting AI-generated content as original work; (4) <strong>Transparency</strong> — failing to disclose AI use erodes trust in academic and professional contexts. Always be transparent, verify outputs, and respect intellectual property.</div></div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <p>Unit 7 · <span>Generative Artificial Intelligence</span> · Class XII AI · Subject Code 843</p>
+  <p style="margin-top:.4rem;">Designed for interactive learning · All content from the Class XII AI Student Handbook</p>
+</footer>
+
+<script>
+// Stars
+const sw=document.getElementById('stars');
+for(let i=0;i<90;i++){const s=document.createElement('div');s.className='star';const sz=Math.random()*2.5+.8;s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*4+2).toFixed(1)}s;--dl:${(Math.random()*5).toFixed(1)}s;`;sw.appendChild(s);}
+
+// Theme toggle
+function toggleTheme(){const h=document.documentElement;const night=h.dataset.theme==='night';h.dataset.theme=night?'day':'night';document.getElementById('tlbl').textContent=night?'Day':'Night';document.getElementById('tico').textContent=night?'☀️':'🌙';}
+
+// Active nav
+const sections=[...document.querySelectorAll('section[id]')];
+const links=[...document.querySelectorAll('.nav-links a')];
+window.addEventListener('scroll',()=>{const y=window.scrollY+100;sections.forEach(s=>{if(y>=s.offsetTop&&y<s.offsetTop+s.offsetHeight){links.forEach(l=>l.classList.remove('active'));const a=document.querySelector(`.nav-links a[href="#${s.id}"]`);if(a)a.classList.add('active');}});},{passive:true});
+
+// MCQ
+const correct={q1:'b',q2:'c',q3:'a',q4:'c',q5:'c',q6:'a',q7:'a',q8:'b'};
+const answered={};
+function pick(el,qid,ans){
+  if(answered[qid])return;
+  answered[qid]=true;
+  const opts=el.closest('.opts').querySelectorAll('.opt');
+  const letters=['a','b','c','d'];
+  opts.forEach((o,i)=>{if(letters[i]===correct[qid])o.classList.add('correct');else if(o===el&&letters[i]!==correct[qid])o.classList.add('wrong');});
+}
+function calcScore(){let sc=0;Object.keys(correct).forEach(q=>{if(answered[q])sc++;});document.getElementById('snum').textContent=sc+'/8';}
+
+// Reveal
+function toggleAns(btn){const ans=btn.nextElementSibling;const show=ans.classList.toggle('show');btn.textContent=show?'Hide Answer':'Reveal Answer';}
+</script>
+</body>
+</html>
